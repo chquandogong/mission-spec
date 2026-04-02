@@ -1,6 +1,10 @@
 # Mission Spec
 
+[![GitHub](https://img.shields.io/github/license/chquandogong/mission-spec)](https://github.com/chquandogong/mission-spec)
+
 AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration framework가 아닌, 기존 하네스 위에서 작동하는 portable한 run-scoped task contract입니다.
+
+**Repository:** https://github.com/chquandogong/mission-spec
 
 ## 핵심 파이프라인
 
@@ -10,16 +14,48 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 
 ## 5분 설치 가이드
 
-### 1. 설치
+### 방법 1: Claude Code Plugin으로 설치 (권장)
 
 ```bash
-git clone <repo-url>
+# Claude Code CLI에서 플러그인 설치
+claude plugin add github:chquandogong/mission-spec
+```
+
+설치 후 Claude Code에서 바로 사용 가능합니다:
+
+- `/ms:init` — 자연어 → mission.yaml 초안 자동 생성
+- `/ms:eval` — done_when 기준 대비 현재 상태 평가
+- `/ms:status` — 미션 진행 상황 요약
+- `/ms:report` — run report 생성 (markdown)
+
+### 방법 2: 소스에서 설치
+
+```bash
+git clone https://github.com/chquandogong/mission-spec.git
 cd mission-spec
 npm install
 npm run build
 ```
 
-### 2. Mission 초안 생성 (`/ms:init`)
+### 방법 3: 프로젝트에 로컬 플러그인으로 연결
+
+```bash
+# 프로젝트 디렉토리에서
+git clone https://github.com/chquandogong/mission-spec.git .mission-spec
+cd .mission-spec && npm install && npm run build && cd ..
+```
+
+`.claude/settings.json`에 플러그인 경로를 추가합니다:
+
+```json
+{
+  "plugins": [".mission-spec"]
+}
+```
+
+## 사용법
+
+### Mission 초안 생성 (`/ms:init`)
 
 프로젝트 디렉토리에서 자연어로 목표를 입력하면 `mission.yaml` 초안이 자동 생성됩니다.
 
@@ -33,7 +69,7 @@ const result = generateMissionDraft({
 console.log(result.yaml);
 ```
 
-### 3. 진행 상황 평가 (`/ms:eval`)
+### 진행 상황 평가 (`/ms:eval`)
 
 ```typescript
 import { evaluateMission } from 'mission-spec/commands/eval';
@@ -42,7 +78,7 @@ const result = evaluateMission('.');
 console.log(result.summary); // "3/5 criteria passed"
 ```
 
-### 4. 상태 요약 (`/ms:status`)
+### 상태 요약 (`/ms:status`)
 
 ```typescript
 import { getMissionStatus } from 'mission-spec/commands/status';
@@ -51,7 +87,7 @@ const status = getMissionStatus('.');
 console.log(status.markdown);
 ```
 
-### 5. 리포트 생성 (`/ms:report`)
+### 리포트 생성 (`/ms:report`)
 
 ```typescript
 import { generateMissionReport } from 'mission-spec/commands/report';
@@ -78,7 +114,7 @@ mission:
     topology: "sequential"
 ```
 
-전체 스키마: `src/schema/mission.schema.json`
+전체 스키마: [`src/schema/mission.schema.json`](src/schema/mission.schema.json)
 
 ## Cross-Platform 변환
 
