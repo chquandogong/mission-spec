@@ -45,9 +45,12 @@ export function convertToCodex(mission: MissionSpec): string {
 
 function tomlString(value: string): string {
   if (value.includes('\n')) {
+    // TOML multiline basic string: quotes are allowed inside without escaping
     return `"""\n${value}"""`;
   }
-  return `"${value}"`;
+  // TOML basic string: escape backslashes first, then double quotes
+  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
 }
 
 export function convertToOpenCode(mission: MissionSpec): string {

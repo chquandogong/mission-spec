@@ -101,6 +101,44 @@ describe('validateMission', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('rejects manual eval without description', () => {
+    const result = validateMission({
+      mission: {
+        title: 'test',
+        goal: 'test',
+        done_when: ['done'],
+        evals: [{ name: 'e', type: 'manual' }],
+      },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('description'))).toBe(true);
+  });
+
+  it('rejects llm-judge eval without pass_criteria', () => {
+    const result = validateMission({
+      mission: {
+        title: 'test',
+        goal: 'test',
+        done_when: ['done'],
+        evals: [{ name: 'e', type: 'llm-judge' }],
+      },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('pass_criteria'))).toBe(true);
+  });
+
+  it('accepts llm-judge eval with pass_criteria', () => {
+    const result = validateMission({
+      mission: {
+        title: 'test',
+        goal: 'test',
+        done_when: ['done'],
+        evals: [{ name: 'e', type: 'llm-judge', pass_criteria: 'score >= 0.8' }],
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
   it('rejects mission with unknown top-level properties', () => {
     const result = validateMission({
       mission: { title: 'test', goal: 'test', done_when: ['done'] },

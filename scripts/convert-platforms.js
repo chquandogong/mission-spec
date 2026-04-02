@@ -45,6 +45,19 @@ try {
     // Check that OpenCode doesn't have bare newlines inside double-quoted strings
     const badToml = opencode.match(/= "[^"]*\n/);
     if (badToml) { console.error('OpenCode: invalid TOML — bare newline in double-quoted string'); ok = false; }
+    // Check for unescaped double quotes inside single-line TOML strings
+    // Skip triple-quoted lines (""") which are valid multiline syntax
+    for (const line of opencode.split('\n')) {
+      const m = line.match(/^(\w+) = "(.+)"$/);
+      if (m && !line.includes('"""')) {
+        const inner = m[2];
+        const unescaped = inner.replace(/\\"/g, '');
+        if (unescaped.includes('"')) {
+          console.error(`OpenCode: unescaped quote in: ${line}`);
+          ok = false;
+        }
+      }
+    }
     if (ok) {
       console.log('All platform conversions verified successfully');
     } else {
