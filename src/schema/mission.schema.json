@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mission-spec.dev/schema/v1/mission.schema.json",
+  "title": "Mission Spec",
+  "description": "AI 에이전트 워크플로를 위한 task contract",
+  "type": "object",
+  "required": ["mission"],
+  "additionalProperties": false,
+  "properties": {
+    "mission": {
+      "type": "object",
+      "required": ["title", "goal", "done_when"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "미션 제목"
+        },
+        "goal": {
+          "type": "string",
+          "minLength": 1,
+          "description": "미션 목표 (자연어)"
+        },
+        "done_when": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "완료 조건 목록"
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "제약 조건 목록"
+        },
+        "approvals": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Approval" },
+          "description": "승인 게이트 목록"
+        },
+        "evals": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Eval" },
+          "description": "평가 항목 목록"
+        },
+        "budget_hint": {
+          "$ref": "#/definitions/BudgetHint",
+          "description": "리소스 예산 힌트 (advisory)"
+        },
+        "execution_hints": {
+          "$ref": "#/definitions/ExecutionHints",
+          "description": "실행 힌트 (advisory only — 런타임이 무시 가능)"
+        },
+        "skills_needed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "필요 스킬 목록"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "산출물 패턴 목록"
+        },
+        "version": {
+          "type": "string",
+          "description": "미션 스펙 버전"
+        },
+        "author": {
+          "type": "string",
+          "description": "작성자"
+        },
+        "created": {
+          "type": "string",
+          "description": "작성일"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Approval": {
+      "type": "object",
+      "required": ["gate", "approver"],
+      "additionalProperties": false,
+      "properties": {
+        "gate": {
+          "type": "string",
+          "minLength": 1,
+          "description": "승인 게이트 이름"
+        },
+        "approver": {
+          "type": "string",
+          "enum": ["human", "ai", "codex", "ci"],
+          "description": "승인자 유형"
+        },
+        "description": {
+          "type": "string",
+          "description": "승인 조건 설명"
+        }
+      }
+    },
+    "Eval": {
+      "type": "object",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "평가 이름"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["automated", "manual", "llm-judge"],
+          "description": "평가 유형"
+        },
+        "command": {
+          "type": "string",
+          "description": "자동화 평가 실행 명령"
+        },
+        "pass_criteria": {
+          "type": "string",
+          "description": "통과 기준"
+        },
+        "description": {
+          "type": "string",
+          "description": "수동 평가 설명"
+        }
+      }
+    },
+    "BudgetHint": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "max_tokens_per_session": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_parallel_agents": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "estimated_sessions": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "priority": {
+          "type": "string"
+        }
+      }
+    },
+    "ExecutionHints": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Advisory only — 런타임이 무시 가능",
+      "properties": {
+        "topology": {
+          "type": "string",
+          "description": "실행 토폴로지 제안"
+        },
+        "suggested_approach": {
+          "type": "string",
+          "description": "제안 접근 방식"
+        },
+        "note": {
+          "type": "string",
+          "description": "추가 노트"
+        }
+      }
+    }
+  }
+}

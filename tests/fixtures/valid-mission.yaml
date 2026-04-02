@@ -1,0 +1,10 @@
+mission:
+  title: "간단한 버그 수정"
+  goal: "로그인 페이지의 비밀번호 검증 버그를 수정한다"
+  done_when:
+    - "비밀번호 8자 이상 검증이 정상 작동"
+    - "모든 기존 테스트 통과"
+  constraints:
+    - "기존 API 인터페이스 변경 금지"
+  version: "1.0.0"
+  author: "tester"

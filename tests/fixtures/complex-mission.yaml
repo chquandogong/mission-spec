@@ -1,0 +1,43 @@
+mission:
+  title: "보안 리뷰 미션"
+  goal: |
+    인증 모듈의 보안 취약점을 점검하고 수정한다.
+    OWASP Top 10 기준으로 평가.
+  done_when:
+    - "SQL Injection 취약점 제거"
+    - "XSS 취약점 제거"
+    - "모든 입력값 검증 로직 추가"
+    - "보안 테스트 전체 통과"
+  constraints:
+    - "기존 API 호환성 유지"
+    - "성능 저하 10% 이내"
+  approvals:
+    - gate: "security_review"
+      approver: "human"
+      description: "보안팀 리뷰 필수"
+  evals:
+    - name: "security_scan"
+      type: "automated"
+      command: "npm run security:scan"
+      pass_criteria: "취약점 0건"
+    - name: "manual_pentest"
+      type: "manual"
+      description: "수동 침투 테스트"
+  budget_hint:
+    max_tokens_per_session: 200000
+    max_parallel_agents: 2
+    estimated_sessions: 4
+    priority: "security first"
+  execution_hints:
+    topology: "sequential"
+    suggested_approach: "OWASP Top 10 순서로 점검"
+    note: "이 힌트는 제안입니다"
+  skills_needed:
+    - "security-review"
+    - "systematic-debugging"
+  artifacts:
+    - "security-report.md"
+    - "tests/security/**/*.test.ts"
+  version: "1.0.0"
+  author: "security-team"
+  created: "2026-04-01"
