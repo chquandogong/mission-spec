@@ -27,7 +27,7 @@ try {
 
   // Dynamic import for ESM compatibility
   const { convertToCursor, convertToCodex, convertToOpenCode } = await import(
-    '../src/adapters/platforms.js'
+    '../dist/adapters/platforms.js'
   );
 
   const cursor = convertToCursor(mission);

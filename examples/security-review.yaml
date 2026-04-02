@@ -1,0 +1,35 @@
+mission:
+  title: "인증 모듈 보안 리뷰"
+  goal: |
+    인증 모듈의 OWASP Top 10 취약점을 점검하고 수정한다.
+    SQL Injection, XSS, CSRF 중심으로 검토.
+  done_when:
+    - "SQL Injection 취약점 제거 확인"
+    - "XSS 취약점 제거 확인"
+    - "CSRF 토큰 검증 로직 추가"
+    - "모든 입력값 서버사이드 검증"
+    - "보안 테스트 스위트 전체 통과"
+  constraints:
+    - "기존 API 하위 호환성 유지"
+    - "성능 저하 10% 이내"
+    - "외부 보안 라이브러리 추가 금지 (stdlib만 사용)"
+  approvals:
+    - gate: "security_scan"
+      approver: "human"
+      description: "보안팀 리뷰 후 머지"
+  evals:
+    - name: "automated_scan"
+      type: "automated"
+      command: "npm run security:check"
+      pass_criteria: "취약점 0건"
+    - name: "manual_pentest"
+      type: "manual"
+      description: "수동 침투 테스트로 우회 가능성 확인"
+  budget_hint:
+    max_tokens_per_session: 300000
+    estimated_sessions: 3
+    priority: "security first"
+  execution_hints:
+    topology: "sequential-with-review"
+    suggested_approach: "OWASP Top 10 항목별 순차 점검"
+    note: "이 힌트는 제안이며 런타임이 무시할 수 있습니다"

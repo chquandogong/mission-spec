@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { parse } from 'yaml';
 
-const { validateMission } = await import('../src/schema/validator.js');
+const { validateMission } = await import('../dist/schema/validator.js');
 
 const fixturesDir = resolve('tests/fixtures');
 const files = readdirSync(fixturesDir).filter((f) => f.endsWith('.yaml'));

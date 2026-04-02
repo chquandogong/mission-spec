@@ -1,0 +1,52 @@
+mission:
+  title: "결제 모듈 리팩토링"
+  goal: |
+    결제 모듈을 전략 패턴으로 리팩토링하여 새 PG사 추가 시 코드 변경을 최소화한다.
+    기존 if-else 체인을 제거하고 PaymentStrategy 인터페이스 기반으로 전환.
+  done_when:
+    - "PaymentStrategy 인터페이스 정의 완료"
+    - "기존 3개 PG사 어댑터 전략 패턴으로 전환"
+    - "새 PG사 추가 시 어댑터 파일 1개만 추가하면 됨"
+    - "기존 결제 플로우 모든 테스트 통과"
+    - "성능 벤치마크 기존 대비 동등 이상"
+  constraints:
+    - "결제 중단 없이 점진적 마이그레이션"
+    - "기존 DB 스키마 변경 없음"
+    - "외부 결제 API 인터페이스 변경 없음"
+  approvals:
+    - gate: "design_review"
+      approver: "human"
+      description: "아키텍처 리뷰 후 구현 시작"
+    - gate: "integration_test"
+      approver: "ci"
+      description: "CI 통합 테스트 통과 후 머지"
+  evals:
+    - name: "unit_tests"
+      type: "automated"
+      command: "npm test -- --filter=payment"
+      pass_criteria: "결제 관련 테스트 전체 통과"
+    - name: "benchmark"
+      type: "automated"
+      command: "npm run bench:payment"
+      pass_criteria: "기존 대비 p95 레이턴시 ±5% 이내"
+  budget_hint:
+    max_tokens_per_session: 400000
+    max_parallel_agents: 2
+    estimated_sessions: 5
+    priority: "quality over speed"
+  execution_hints:
+    topology: "sequential-with-review"
+    suggested_approach: |
+      1. PaymentStrategy 인터페이스 설계
+      2. 기존 코드 분석 및 어댑터 추출
+      3. 전략 패턴 적용 및 테스트
+      4. 벤치마크 및 최적화
+    note: "이 힌트는 제안이며 런타임이 무시할 수 있습니다"
+  skills_needed:
+    - "refactoring"
+    - "design-patterns"
+    - "test-driven-development"
+  artifacts:
+    - "src/payment/strategy.ts"
+    - "src/payment/adapters/*.ts"
+    - "tests/payment/**/*.test.ts"
