@@ -1,0 +1,16 @@
+{
+  "name": "mission-spec",
+  "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer",
+  "owner": {
+    "name": "Dr. QUAN",
+    "email": "chquandogong@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "mission-spec",
+      "source": "./",
+      "description": "자연어 → mission.yaml draft → eval scaffold → run report",
+      "version": "1.0.0"
+    }
+  ]
+}

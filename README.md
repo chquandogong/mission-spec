@@ -14,19 +14,28 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 
 ## 5분 설치 가이드
 
-### 방법 1: Claude Code Plugin으로 설치 (권장)
+### 방법 1: Claude Code Marketplace에서 설치 (권장)
 
 ```bash
-# Claude Code CLI에서 플러그인 설치
+# 1. marketplace 등록
+/plugin marketplace add chquandogong/mission-spec
+
+# 2. 플러그인 설치
+/plugin install mission-spec@mission-spec
+```
+
+또는 Claude Code CLI에서:
+
+```bash
 claude plugin add github:chquandogong/mission-spec
 ```
 
 설치 후 Claude Code에서 바로 사용 가능합니다:
 
-- `/ms:init` — 자연어 → mission.yaml 초안 자동 생성
-- `/ms:eval` — done_when 기준 대비 현재 상태 평가
-- `/ms:status` — 미션 진행 상황 요약
-- `/ms:report` — run report 생성 (markdown)
+- `/mission-spec:init` — 자연어 → mission.yaml 초안 자동 생성
+- `/mission-spec:eval` — done_when 기준 대비 현재 상태 평가
+- `/mission-spec:status` — 미션 진행 상황 요약
+- `/mission-spec:report` — run report 생성 (markdown)
 
 ### 방법 2: 소스에서 설치
 

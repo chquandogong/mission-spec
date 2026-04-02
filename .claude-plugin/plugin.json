@@ -1,0 +1,13 @@
+{
+  "name": "mission-spec",
+  "version": "1.0.0",
+  "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer. 자연어 → mission.yaml draft → eval scaffold → run report.",
+  "author": {
+    "name": "Dr. QUAN",
+    "url": "https://github.com/chquandogong"
+  },
+  "homepage": "https://github.com/chquandogong/mission-spec",
+  "repository": "https://github.com/chquandogong/mission-spec",
+  "license": "MIT",
+  "keywords": ["mission-spec", "ai-agent", "task-contract", "workflow", "eval"]
+}
