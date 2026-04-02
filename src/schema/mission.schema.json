@@ -125,6 +125,13 @@
           "type": "string",
           "description": "수동 평가 설명"
         }
+      },
+      "if": {
+        "properties": { "type": { "const": "automated" } },
+        "required": ["type"]
+      },
+      "then": {
+        "required": ["name", "type", "command", "pass_criteria"]
       }
     },
     "BudgetHint": {

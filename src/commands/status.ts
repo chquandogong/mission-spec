@@ -1,7 +1,5 @@
 // /ms:status — 미션 진행 상황 요약
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { parse } from 'yaml';
+import { loadAndValidateMission } from '../core/parser.js';
 import { evaluateMission } from './eval.js';
 
 export interface StatusResult {
@@ -16,19 +14,14 @@ export interface StatusResult {
 }
 
 export function getMissionStatus(projectDir: string): StatusResult {
-  const missionPath = join(projectDir, 'mission.yaml');
-  if (!existsSync(missionPath)) {
-    throw new Error(`mission.yaml not found in ${projectDir}`);
-  }
-  const content = readFileSync(missionPath, 'utf-8');
-  const doc = parse(content) as { mission: Record<string, unknown> };
+  const doc = loadAndValidateMission(projectDir);
   const m = doc.mission;
 
   const evalResult = evaluateMission(projectDir);
 
-  const title = m.title as string;
-  const goal = m.goal as string;
-  const constraints = (m.constraints as string[]) ?? [];
+  const title = m.title;
+  const goal = m.goal;
+  const constraints = m.constraints ?? [];
 
   const md = [
     `# ${title}`,

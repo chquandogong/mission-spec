@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { stringify } from 'yaml';
@@ -67,6 +67,11 @@ describe('getMissionStatus', () => {
 
   it('throws when mission.yaml is missing', () => {
     expect(() => getMissionStatus(tempDir)).toThrow();
+  });
+
+  it('throws on schema-invalid mission.yaml', () => {
+    writeFileSync(join(tempDir, 'mission.yaml'), stringify({ mission: { title: 'bad' } }));
+    expect(() => getMissionStatus(tempDir)).toThrow(/schema/i);
   });
 
   it('returns markdown-formatted output', () => {

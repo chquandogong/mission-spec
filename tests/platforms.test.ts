@@ -50,6 +50,73 @@ describe('convertToOpenCode', () => {
   });
 });
 
+describe('handles multiline goal', () => {
+  const multiline: MissionSpec = {
+    title: 'Multiline Mission',
+    goal: 'Line one.\nLine two.\nLine three.',
+    done_when: ['done'],
+  };
+
+  it('OpenCode uses TOML multiline string for multiline goal', () => {
+    const result = convertToOpenCode(multiline);
+    // Must NOT produce goal = "line1\nline2" (invalid TOML)
+    expect(result).not.toMatch(/goal = "[^"]*\n/);
+    // Must use triple-quote multiline
+    expect(result).toContain('"""');
+    expect(result).toContain('Line one.');
+    expect(result).toContain('Line two.');
+  });
+
+  it('Cursor preserves multiline goal', () => {
+    const result = convertToCursor(multiline);
+    expect(result).toContain('Line one.');
+    expect(result).toContain('Line two.');
+  });
+
+  it('Codex preserves multiline goal', () => {
+    const result = convertToCodex(multiline);
+    expect(result).toContain('Line one.');
+    expect(result).toContain('Line two.');
+  });
+});
+
+describe('handles TOML special characters', () => {
+  it('escapes double quotes in single-line strings', () => {
+    const mission: MissionSpec = {
+      title: 'T "quoted"',
+      goal: 'Say "hi"',
+      done_when: ['check "value"'],
+    };
+    const result = convertToOpenCode(mission);
+    // Must not produce title = "T "quoted"" — that's invalid TOML
+    expect(result).toContain('title = "T \\"quoted\\""');
+    expect(result).toContain('goal = "Say \\"hi\\""');
+    expect(result).toContain('"check \\"value\\""');
+  });
+
+  it('escapes backslashes in single-line strings', () => {
+    const mission: MissionSpec = {
+      title: 'path\\to\\file',
+      goal: 'fix it',
+      done_when: ['done'],
+    };
+    const result = convertToOpenCode(mission);
+    expect(result).toContain('title = "path\\\\to\\\\file"');
+  });
+
+  it('handles quotes inside multiline strings', () => {
+    const mission: MissionSpec = {
+      title: 'Test',
+      goal: 'Line "one"\nLine "two"',
+      done_when: ['done'],
+    };
+    const result = convertToOpenCode(mission);
+    // Multiline triple-quote: quotes inside are OK without escaping
+    expect(result).toContain('"""');
+    expect(result).toContain('Line "one"');
+  });
+});
+
 describe('handles minimal mission', () => {
   const minimal: MissionSpec = {
     title: 'Minimal',

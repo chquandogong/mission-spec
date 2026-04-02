@@ -37,8 +37,14 @@ try {
   if (verify) {
     let ok = true;
     if (!cursor.includes(mission.title)) { console.error('Cursor: missing title'); ok = false; }
+    if (!cursor.includes(mission.goal.split('\n')[0])) { console.error('Cursor: missing goal'); ok = false; }
     if (!codex.includes(mission.title)) { console.error('Codex: missing title'); ok = false; }
+    if (!codex.includes(mission.goal.split('\n')[0])) { console.error('Codex: missing goal'); ok = false; }
     if (!opencode.includes(mission.title)) { console.error('OpenCode: missing title'); ok = false; }
+    if (!opencode.includes(mission.goal.split('\n')[0])) { console.error('OpenCode: missing goal'); ok = false; }
+    // Check that OpenCode doesn't have bare newlines inside double-quoted strings
+    const badToml = opencode.match(/= "[^"]*\n/);
+    if (badToml) { console.error('OpenCode: invalid TOML — bare newline in double-quoted string'); ok = false; }
     if (ok) {
       console.log('All platform conversions verified successfully');
     } else {

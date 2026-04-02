@@ -43,20 +43,27 @@ export function convertToCodex(mission: MissionSpec): string {
   return lines.join('\n');
 }
 
+function tomlString(value: string): string {
+  if (value.includes('\n')) {
+    return `"""\n${value}"""`;
+  }
+  return `"${value}"`;
+}
+
 export function convertToOpenCode(mission: MissionSpec): string {
   const lines: string[] = [
     `[mission]`,
-    `title = "${mission.title}"`,
-    `goal = "${mission.goal}"`,
+    `title = ${tomlString(mission.title)}`,
+    `goal = ${tomlString(mission.goal)}`,
     '',
     '[mission.done_when]',
   ];
-  mission.done_when.forEach((c, i) => lines.push(`item_${i + 1} = "${c}"`));
+  mission.done_when.forEach((c, i) => lines.push(`item_${i + 1} = ${tomlString(c)}`));
 
   if (mission.constraints && mission.constraints.length > 0) {
     lines.push('', '[mission.constraints]');
     mission.constraints.forEach((c, i) =>
-      lines.push(`item_${i + 1} = "${c}"`),
+      lines.push(`item_${i + 1} = ${tomlString(c)}`),
     );
   }
 

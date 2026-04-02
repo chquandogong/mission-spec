@@ -94,4 +94,9 @@ describe('generateMissionReport', () => {
   it('throws when mission.yaml is missing', () => {
     expect(() => generateMissionReport(tempDir)).toThrow();
   });
+
+  it('throws on schema-invalid mission.yaml', () => {
+    writeFileSync(join(tempDir, 'mission.yaml'), stringify({ mission: { title: 'bad' } }));
+    expect(() => generateMissionReport(tempDir)).toThrow(/schema/i);
+  });
 });

@@ -16,7 +16,7 @@ mission:
     - "Mission Spec은 orchestration framework가 아니다 — task contract layer만 구현"
     - "execution_hints는 suggestion이지 directive가 아니다 — 런타임이 무시 가능해야 함"
     - "기존 워크플로(GitHub Issue, PR, CI/CD)에 녹아들어야 한다 — 별도 UI/SaaS 금지"
-    - "외부 dependency 최소화 — Node.js 표준 라이브러리 + JSON Schema validator만 허용"
+    - "외부 dependency 최소화 — Node.js 표준 라이브러리 + JSON Schema validator(ajv) + YAML parser(yaml)만 허용"
     - "코드 생성 시 반드시 테스트를 먼저 작성 (TDD)"
     - "한 번에 하나의 기능만 구현 — scope creep 방지"
 

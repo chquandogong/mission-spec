@@ -89,6 +89,12 @@ describe('evaluateMission', () => {
     expect(result.summary).toContain('0/2');
   });
 
+  it('throws on schema-invalid mission.yaml', () => {
+    // mission with no done_when → schema invalid
+    writeFileSync(join(tempDir, 'mission.yaml'), stringify({ mission: { title: 'bad' } }));
+    expect(() => evaluateMission(tempDir)).toThrow(/schema/i);
+  });
+
   it('detects test-related criteria with npm test check', () => {
     writeMission(tempDir, {
       title: 'Test Check',

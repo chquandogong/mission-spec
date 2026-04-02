@@ -64,6 +64,43 @@ describe('validateMission', () => {
     expect(result.valid).toBe(false);
   });
 
+  it('rejects automated eval without command', () => {
+    const result = validateMission({
+      mission: {
+        title: 'test',
+        goal: 'test',
+        done_when: ['done'],
+        evals: [{ name: 'e', type: 'automated' }],
+      },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('command'))).toBe(true);
+  });
+
+  it('accepts automated eval with command and pass_criteria', () => {
+    const result = validateMission({
+      mission: {
+        title: 'test',
+        goal: 'test',
+        done_when: ['done'],
+        evals: [{ name: 'e', type: 'automated', command: 'npm test', pass_criteria: 'all pass' }],
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it('accepts manual eval without command', () => {
+    const result = validateMission({
+      mission: {
+        title: 'test',
+        goal: 'test',
+        done_when: ['done'],
+        evals: [{ name: 'e', type: 'manual', description: 'check it' }],
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
   it('rejects mission with unknown top-level properties', () => {
     const result = validateMission({
       mission: { title: 'test', goal: 'test', done_when: ['done'] },
