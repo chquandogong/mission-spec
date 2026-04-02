@@ -126,13 +126,35 @@
           "description": "수동 평가 설명"
         }
       },
-      "if": {
-        "properties": { "type": { "const": "automated" } },
-        "required": ["type"]
-      },
-      "then": {
-        "required": ["name", "type", "command", "pass_criteria"]
-      }
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "automated" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["name", "type", "command", "pass_criteria"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "manual" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["name", "type", "description"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "llm-judge" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["name", "type", "pass_criteria"]
+          }
+        }
+      ]
     },
     "BudgetHint": {
       "type": "object",
