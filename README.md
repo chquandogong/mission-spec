@@ -32,10 +32,10 @@ claude plugin add github:chquandogong/mission-spec
 
 설치 후 Claude Code에서 바로 사용 가능합니다:
 
-- `/mission-spec:init` — 자연어 → mission.yaml 초안 자동 생성
-- `/mission-spec:eval` — done_when 기준 대비 현재 상태 평가
-- `/mission-spec:status` — 미션 진행 상황 요약
-- `/mission-spec:report` — run report 생성 (markdown)
+- `/mission-spec:ms-init` — 자연어 → mission.yaml 초안 자동 생성
+- `/mission-spec:ms-eval` — done_when 기준 대비 현재 상태 평가
+- `/mission-spec:ms-status` — 미션 진행 상황 요약
+- `/mission-spec:ms-report` — run report 생성 (markdown)
 
 ### 방법 2: 소스에서 설치
 

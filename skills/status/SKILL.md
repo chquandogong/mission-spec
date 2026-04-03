@@ -1,5 +1,5 @@
 ---
-name: status
+name: ms-status
 description: >
   mission.yaml 기반 미션 진행 상황을 markdown으로 요약합니다.
   "미션 상태", "진행 상황", "어디까지 했어" 등의 요청에 트리거됩니다.

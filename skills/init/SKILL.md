@@ -1,5 +1,5 @@
 ---
-name: init
+name: ms-init
 description: >
   자연어 목표로부터 mission.yaml 초안을 자동 생성합니다.
   사용자가 미션을 시작하거나, mission.yaml을 만들고 싶어 할 때 사용합니다.

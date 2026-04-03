@@ -1,5 +1,5 @@
 ---
-name: eval
+name: ms-eval
 description: >
   mission.yaml의 done_when 기준 대비 현재 프로젝트 상태를 평가합니다.
   "미션 평가해줘", "done_when 체크", "완료 조건 확인" 등의 요청에 트리거됩니다.

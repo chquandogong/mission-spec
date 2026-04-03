@@ -1,5 +1,5 @@
 ---
-name: report
+name: ms-report
 description: >
   미션 실행 결과를 markdown report로 생성합니다.
   "리포트 만들어줘", "미션 보고서", "run report" 등의 요청에 트리거됩니다.
