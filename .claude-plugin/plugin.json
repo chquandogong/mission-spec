@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer. 자연어 → mission.yaml draft → eval scaffold → run report.",
   "author": {
     "name": "Dr. QUAN",
