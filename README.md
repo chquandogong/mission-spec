@@ -64,7 +64,7 @@ cd .mission-spec && npm install && npm run build && cd ..
 
 ## 사용법
 
-### Mission 초안 생성 (`/ms:init`)
+### Mission 초안 생성 (`/mission-spec:ms-init`)
 
 프로젝트 디렉토리에서 자연어로 목표를 입력하면 `mission.yaml` 초안이 자동 생성됩니다.
 
@@ -78,7 +78,7 @@ const result = generateMissionDraft({
 console.log(result.yaml);
 ```
 
-### 진행 상황 평가 (`/ms:eval`)
+### 진행 상황 평가 (`/mission-spec:ms-eval`)
 
 ```typescript
 import { evaluateMission } from 'mission-spec/commands/eval';
@@ -87,7 +87,7 @@ const result = evaluateMission('.');
 console.log(result.summary); // "3/5 criteria passed"
 ```
 
-### 상태 요약 (`/ms:status`)
+### 상태 요약 (`/mission-spec:ms-status`)
 
 ```typescript
 import { getMissionStatus } from 'mission-spec/commands/status';
@@ -96,7 +96,7 @@ const status = getMissionStatus('.');
 console.log(status.markdown);
 ```
 
-### 리포트 생성 (`/ms:report`)
+### 리포트 생성 (`/mission-spec:ms-report`)
 
 ```typescript
 import { generateMissionReport } from 'mission-spec/commands/report';

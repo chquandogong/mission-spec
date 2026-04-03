@@ -12,7 +12,7 @@ allowed-tools:
   - Grep
 ---
 
-# /ms:eval — done_when 기준 평가
+# /mission-spec:ms-eval — done_when 기준 평가
 
 ## 동작
 

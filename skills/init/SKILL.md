@@ -14,7 +14,7 @@ allowed-tools:
   - Grep
 ---
 
-# /ms:init — 자연어 → mission.yaml 초안 생성
+# /mission-spec:ms-init — 자연어 → mission.yaml 초안 생성
 
 ## 동작
 

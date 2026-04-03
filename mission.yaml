@@ -21,10 +21,10 @@ mission:
     - "한 번에 하나의 기능만 구현 — scope creep 방지"
 
   done_when:
-    - "/ms:init 명령으로 자연어에서 mission.yaml 초안 자동 생성"
-    - "/ms:eval 명령으로 done_when 기준 대비 현재 상태 평가"
-    - "/ms:status 명령으로 진행 상황 요약"
-    - "/ms:report 명령으로 run report 생성"
+    - "/mission-spec:ms-init 명령으로 자연어에서 mission.yaml 초안 자동 생성"
+    - "/mission-spec:ms-eval 명령으로 done_when 기준 대비 현재 상태 평가"
+    - "/mission-spec:ms-status 명령으로 진행 상황 요약"
+    - "/mission-spec:ms-report 명령으로 run report 생성"
     - "Claude Code plugin marketplace에 설치 가능"
     - "Cursor, Codex, OpenCode에서도 사용 가능 (cross-platform conversion)"
     - "README.md에 5분 이내 설치·사용 가이드 완성"
@@ -36,7 +36,7 @@ mission:
       description: "mission.yaml JSON Schema 확정 전 인간 리뷰"
     - gate: "first_command"
       approver: "human"
-      description: "/ms:init 첫 작동 확인 후 나머지 진행"
+      description: "/mission-spec:ms-init 첫 작동 확인 후 나머지 진행"
     - gate: "cross_platform"
       approver: "codex"
       description: "Codex가 cross-platform 호환성 adversarial review"
@@ -55,7 +55,7 @@ mission:
       pass_criteria: "모든 unit test 통과"
     - name: "dogfood_test"
       type: "manual"
-      description: "이 mission.yaml 자체로 /ms:eval 실행하여 done_when 충족 확인"
+      description: "이 mission.yaml 자체로 /mission-spec:ms-eval 실행하여 done_when 충족 확인"
     - name: "cross_platform"
       type: "automated"
       command: "node scripts/convert-platforms.js --verify"
@@ -71,9 +71,9 @@ mission:
     topology: "sequential-with-review"
     suggested_approach: |
       Phase 1: Schema + CLI skeleton (1 session)
-      Phase 2: /ms:init command (1 session)
-      Phase 3: /ms:eval + /ms:status (1 session)
-      Phase 4: /ms:report (1 session)
+      Phase 2: /mission-spec:ms-init command (1 session)
+      Phase 3: /mission-spec:ms-eval + /mission-spec:ms-status (1 session)
+      Phase 4: /mission-spec:ms-report (1 session)
       Phase 5: Cross-platform conversion (1 session)
       Phase 6: README + dogfooding (1 session)
       Phase 7: Adversarial review + iteration (2 sessions)

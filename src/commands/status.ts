@@ -1,4 +1,4 @@
-// /ms:status — 미션 진행 상황 요약
+// /mission-spec:ms-status — 미션 진행 상황 요약
 import { loadAndValidateMission } from '../core/parser.js';
 import { evaluateMission } from './eval.js';
 
