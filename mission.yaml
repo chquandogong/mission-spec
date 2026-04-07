@@ -5,7 +5,7 @@ mission:
   title: "Mission Spec v1.0 — Claude Code Plugin 구현"
   author: "Dr. QUAN"
   created: "2026-04-01"
-  version: "1.1.0"
+  version: "1.2.0"
 
   goal: |
     Mission Spec을 Claude Code plugin으로 구현한다.

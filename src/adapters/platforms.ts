@@ -53,21 +53,20 @@ function tomlString(value: string): string {
   return `"${escaped}"`;
 }
 
+function tomlArray(arr: string[]): string {
+  return `[ ${arr.map((s) => tomlString(s)).join(', ')} ]`;
+}
+
 export function convertToOpenCode(mission: MissionSpec): string {
   const lines: string[] = [
     `[mission]`,
     `title = ${tomlString(mission.title)}`,
     `goal = ${tomlString(mission.goal)}`,
-    '',
-    '[mission.done_when]',
+    `done_when = ${tomlArray(mission.done_when)}`,
   ];
-  mission.done_when.forEach((c, i) => lines.push(`item_${i + 1} = ${tomlString(c)}`));
 
   if (mission.constraints && mission.constraints.length > 0) {
-    lines.push('', '[mission.constraints]');
-    mission.constraints.forEach((c, i) =>
-      lines.push(`item_${i + 1} = ${tomlString(c)}`),
-    );
+    lines.push(`constraints = ${tomlArray(mission.constraints)}`);
   }
 
   return lines.join('\n');

@@ -68,15 +68,29 @@ function deriveTitleFromGoal(goal: string): string {
 }
 
 function deriveDoneWhenFromGoal(goal: string): string[] {
-  // 목표에서 핵심 동사+목적어 패턴 추출하여 완료 조건 생성
   const criteria: string[] = [];
   const goalText = goal.trim();
+  const firstLine = goalText.split('\n')[0].trim();
 
-  // 기본 완료 조건: 목표 자체를 조건으로
-  criteria.push(goalText.split('\n')[0].trim());
+  // 1. 핵심 목표
+  criteria.push(firstLine);
 
-  // 공통 완료 조건 추가
-  criteria.push('모든 관련 테스트 통과');
+  // 2. 동사 기반 추론 (구현, 추가, 생성 등)
+  if (/구현|개발|작성|추가|생성|implement|add|create|write/i.test(goalText)) {
+    criteria.push('코드 구현 완료 및 작동 확인');
+  }
+
+  // 3. 테스트/검증
+  if (/테스트|검증|verify|test/i.test(goalText)) {
+    criteria.push('모든 단위 테스트 통과');
+  } else {
+    criteria.push('npm test 또는 핵심 로직 검증 완료');
+  }
+
+  // 4. 문서화
+  if (/문서|가이드|README|doc/i.test(goalText)) {
+    criteria.push('README.md 또는 관련 문서 업데이트');
+  }
 
   return criteria;
 }

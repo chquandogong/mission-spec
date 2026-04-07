@@ -15,8 +15,9 @@ export interface EvalResult {
 export function evaluateMission(projectDir: string): EvalResult {
   const doc = loadAndValidateMission(projectDir);
   const doneWhen = doc.mission.done_when;
+  const evals = doc.mission.evals;
 
-  const criteria = evaluateAllCriteria(doneWhen, projectDir);
+  const criteria = evaluateAllCriteria(doneWhen, projectDir, evals);
   const passed = criteria.filter((c) => c.passed).length;
   const total = criteria.length;
   const allPassed = passed === total;
