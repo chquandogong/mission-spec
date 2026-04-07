@@ -89,6 +89,44 @@ describe('evaluateMission', () => {
     expect(result.summary).toContain('0/2');
   });
 
+  it('runs automated eval when criterion matches eval name', () => {
+    writeMission(tempDir, {
+      title: 'Automated Eval',
+      goal: 'Run command',
+      done_when: ['command_test'],
+      evals: [
+        {
+          name: 'command_test',
+          type: 'automated',
+          command: 'node -e "process.exit(0)"',
+          pass_criteria: 'command exits 0',
+        },
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].reason).toContain('자동화 명령 성공');
+  });
+
+  it('reports automated eval failure when command exits non-zero', () => {
+    writeMission(tempDir, {
+      title: 'Automated Eval Failure',
+      goal: 'Run command',
+      done_when: ['command_test'],
+      evals: [
+        {
+          name: 'command_test',
+          type: 'automated',
+          command: 'node -e "process.exit(1)"',
+          pass_criteria: 'command exits 0',
+        },
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toContain('자동화 명령 실패');
+  });
+
   it('throws on schema-invalid mission.yaml', () => {
     // mission with no done_when → schema invalid
     writeFileSync(join(tempDir, 'mission.yaml'), stringify({ mission: { title: 'bad' } }));
