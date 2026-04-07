@@ -1,7 +1,7 @@
 {
   "name": "mission-spec",
-  "version": "1.2.0",
-  "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer. 자연어 → mission.yaml draft → eval scaffold → run report.",
+  "version": "1.3.0",
+  "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer. 라이브러리 API와 Claude Code용 skill bundle을 함께 제공합니다.",
   "author": {
     "name": "Dr. QUAN",
     "url": "https://github.com/chquandogong"

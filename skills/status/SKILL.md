@@ -12,7 +12,7 @@ allowed-tools:
   - Grep
 ---
 
-# /mission-spec:ms-status — 미션 진행 상황 요약
+# ms-status — 미션 진행 상황 요약
 
 ## 동작
 

@@ -1,4 +1,4 @@
-// /mission-spec:ms-eval — done_when 기준 대비 현재 상태 평가
+// ms-eval — done_when 기준 대비 현재 상태 평가
 import { loadAndValidateMission } from '../core/parser.js';
 import { evaluateAllCriteria, type CriterionResult } from '../core/evaluator.js';
 

@@ -1,4 +1,4 @@
-// /mission-spec:ms-report — run report 생성
+// ms-report — run report 생성
 import { loadAndValidateMission } from '../core/parser.js';
 import { evaluateMission } from './eval.js';
 import { renderReport } from '../core/reporter.js';

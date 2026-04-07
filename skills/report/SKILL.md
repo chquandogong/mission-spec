@@ -13,7 +13,7 @@ allowed-tools:
   - Grep
 ---
 
-# /mission-spec:ms-report — Run Report 생성
+# ms-report — Run Report 생성
 
 ## 동작
 

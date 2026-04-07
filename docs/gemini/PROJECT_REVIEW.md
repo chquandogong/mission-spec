@@ -1,5 +1,7 @@
 # Mission Spec Project Critical Review & Verification Report
 
+> Archived note: 이 문서는 v1.1.0 시점의 외부 리뷰 스냅샷입니다. 현재 저장소의 authoritative review는 `docs/codex/PROJECT_REVIEW.md`를 기준으로 봅니다.
+
 **Date:** 2026-04-07
 **Version:** 1.1.0 (Dogfooding)
 **Reviewer:** Gemini CLI

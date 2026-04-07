@@ -1,4 +1,4 @@
-// /mission-spec:ms-init — 자연어 → mission.yaml 초안 자동 생성
+// ms-init — 자연어 → mission.yaml 초안 자동 생성
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { stringify } from 'yaml';

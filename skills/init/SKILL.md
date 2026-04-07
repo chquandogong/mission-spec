@@ -14,18 +14,15 @@ allowed-tools:
   - Grep
 ---
 
-# /mission-spec:ms-init — 자연어 → mission.yaml 초안 생성
+# ms-init — 자연어 → mission.yaml 초안 생성
 
 ## 동작
 
 1. 사용자에게 자연어로 **미션 목표**를 물어봅니다 (이미 제공된 경우 생략).
-2. 현재 프로젝트 컨텍스트를 수집합니다:
-   - `package.json` (프로젝트 이름, 설명)
-   - `README.md` (프로젝트 개요)
-   - `git log --oneline -10` (최근 작업 방향)
-3. 목표에서 **title**, **done_when** 조건을 도출합니다.
+2. 현재 구현은 `package.json`과 `README.md`의 존재 여부를 확인하고, `package.json`에서 프로젝트 이름과 설명을 읽습니다.
+3. 목표에서 **title**, **done_when** 조건을 휴리스틱으로 도출합니다.
 4. 사용자가 제공한 제약 조건이 있으면 **constraints**에 포함합니다.
-5. `mission.yaml` 파일을 생성하고, 스키마 검증을 수행합니다.
+5. `mission.yaml` 초안을 생성하고, 스키마 검증을 수행합니다.
 
 ## mission.yaml 스키마 (필수 필드)
 
@@ -67,4 +64,4 @@ else { console.error('INVALID:', r.errors.join(', ')); process.exit(1); }
 
 - `execution_hints`는 **suggestion**이지 directive가 아닙니다. 런타임이 무시 가능해야 합니다.
 - 외부 API 호출 없이, rule-based로만 동작합니다.
-- 기존 `mission.yaml`이 있으면 덮어쓰기 전 사용자에게 확인합니다.
+- 현재 라이브러리 함수 `generateMissionDraft()`는 파일을 직접 쓰지 않고 YAML 문자열을 반환합니다.

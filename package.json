@@ -1,10 +1,32 @@
 {
   "name": "mission-spec",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./commands/init": {
+      "types": "./dist/commands/init.d.ts",
+      "import": "./dist/commands/init.js"
+    },
+    "./commands/eval": {
+      "types": "./dist/commands/eval.d.ts",
+      "import": "./dist/commands/eval.js"
+    },
+    "./commands/status": {
+      "types": "./dist/commands/status.d.ts",
+      "import": "./dist/commands/status.js"
+    },
+    "./commands/report": {
+      "types": "./dist/commands/report.d.ts",
+      "import": "./dist/commands/report.js"
+    }
+  },
   "scripts": {
     "build": "tsc && cp src/schema/mission.schema.json dist/schema/",
     "test": "vitest run",
