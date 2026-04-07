@@ -4,5 +4,5 @@ dist/
 .DS_Store
 
 # Internal docs (not for public release)
-docs/internal/
+docs/
 CLAUDE.md
