@@ -2,10 +2,10 @@
 # 이 파일이 Mission Spec의 첫 번째 실증(dogfooding)입니다.
 
 mission:
-  title: "Mission Spec v1.3 — Core API + Claude Code Skills"
+  title: "Mission Spec v1.4 — Core API + Claude Code Skills"
   author: "Dr. QUAN"
   created: "2026-04-01"
-  version: "1.3.0"
+  version: "1.4.0"
 
   goal: |
     Mission Spec을 core library와 Claude Code skill bundle로 구현한다.
@@ -21,10 +21,10 @@ mission:
     - "한 번에 하나의 기능만 구현 — scope creep 방지"
 
   done_when:
-    - "skills/init/SKILL.md 존재"
-    - "skills/eval/SKILL.md 존재"
-    - "skills/status/SKILL.md 존재"
-    - "skills/report/SKILL.md 존재"
+    - "skills/ms-init/SKILL.md 존재"
+    - "skills/ms-eval/SKILL.md 존재"
+    - "skills/ms-status/SKILL.md 존재"
+    - "skills/ms-report/SKILL.md 존재"
     - ".claude-plugin/plugin.json 존재"
     - "README.md 존재"
     - "schema_validation_passes"

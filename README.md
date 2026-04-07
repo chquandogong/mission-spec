@@ -14,7 +14,22 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 
 ## 5분 설치 가이드
 
-### 방법 1: 소스에서 설치
+### 방법 1: Claude Code Marketplace에서 설치 (권장)
+
+```bash
+# Claude Code 안에서 실행
+/plugin marketplace add chquandogong/mission-spec
+/plugin install mission-spec@mission-spec
+```
+
+설치 후 다음 skill을 바로 사용할 수 있습니다:
+
+- `/mission-spec:ms-init` — 자연어 → mission.yaml 초안 자동 생성
+- `/mission-spec:ms-eval` — done_when 기준 대비 현재 상태 평가
+- `/mission-spec:ms-status` — 미션 진행 상황 요약
+- `/mission-spec:ms-report` — run report 생성 (markdown)
+
+### 방법 2: 소스에서 설치
 
 ```bash
 git clone https://github.com/chquandogong/mission-spec.git
@@ -23,15 +38,12 @@ npm install
 npm run build
 ```
 
-### 방법 2: 프로젝트에 로컬 플러그인으로 연결
+### 방법 3: 프로젝트에 로컬 플러그인으로 연결
 
 ```bash
 # 프로젝트 디렉토리에서
 git clone https://github.com/chquandogong/mission-spec.git .mission-spec
-cd .mission-spec
-npm install
-npm run build
-cd ..
+cd .mission-spec && npm install && npm run build && cd ..
 ```
 
 `.claude/settings.json`에 플러그인 경로를 추가합니다:
@@ -42,25 +54,16 @@ cd ..
 }
 ```
 
-이 저장소에 포함된 Claude Code skill file의 canonical name은 다음과 같습니다.
-
-- `ms-init`
-- `ms-eval`
-- `ms-status`
-- `ms-report`
-
-호스트 환경에 따라 호출 시 플러그인 prefix가 붙을 수 있지만, 저장소 안에서 정의된 실제 skill name은 위 네 가지입니다.
-
 ## 사용법
 
 ### Mission 초안 생성 (`ms-init`)
 
 ```typescript
-import { generateMissionDraft } from 'mission-spec';
+import { generateMissionDraft } from "mission-spec";
 
 const result = generateMissionDraft({
-  goal: '사용자 인증 시스템을 구현한다',
-  projectDir: '.',
+  goal: "사용자 인증 시스템을 구현한다",
+  projectDir: ".",
 });
 
 console.log(result.yaml);
@@ -69,34 +72,34 @@ console.log(result.yaml);
 ### 진행 상황 평가 (`ms-eval`)
 
 ```typescript
-import { evaluateMission } from 'mission-spec';
+import { evaluateMission } from "mission-spec";
 
-const result = evaluateMission('.');
+const result = evaluateMission(".");
 console.log(result.summary);
 ```
 
 ### 상태 요약 (`ms-status`)
 
 ```typescript
-import { getMissionStatus } from 'mission-spec';
+import { getMissionStatus } from "mission-spec";
 
-const status = getMissionStatus('.');
+const status = getMissionStatus(".");
 console.log(status.markdown);
 ```
 
 ### 리포트 생성 (`ms-report`)
 
 ```typescript
-import { generateMissionReport } from 'mission-spec';
+import { generateMissionReport } from "mission-spec";
 
-const report = generateMissionReport('.');
+const report = generateMissionReport(".");
 console.log(report.markdown);
 ```
 
 필요하면 subpath import도 사용할 수 있습니다:
 
 ```typescript
-import { evaluateMission } from 'mission-spec/commands/eval';
+import { evaluateMission } from "mission-spec/commands/eval";
 ```
 
 ## mission.yaml 형식
