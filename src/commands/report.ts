@@ -1,7 +1,8 @@
 // ms-report — run report 생성
-import { loadAndValidateMission } from '../core/parser.js';
-import { evaluateMission } from './eval.js';
-import { renderReport } from '../core/reporter.js';
+import { loadAndValidateMission } from "../core/parser.js";
+import { evaluateMission } from "./eval.js";
+import { renderReport } from "../core/reporter.js";
+import { loadHistory } from "../core/history.js";
 
 export interface ReportResult {
   markdown: string;
@@ -18,6 +19,9 @@ export function generateMissionReport(projectDir: string): ReportResult {
   const evalResult = evaluateMission(projectDir);
   const timestamp = new Date().toISOString();
 
+  const history = loadHistory(projectDir);
+  const recentChanges = history?.timeline.slice(0, 3);
+
   const markdown = renderReport({
     title: m.title,
     goal: m.goal.trim(),
@@ -28,6 +32,7 @@ export function generateMissionReport(projectDir: string): ReportResult {
     total: evalResult.total,
     allPassed: evalResult.allPassed,
     timestamp,
+    recentChanges,
   });
 
   return {

@@ -93,3 +93,9 @@ mission:
     - "tests/**/*.test.ts"
     - "README.md"
     - ".claude-plugin/plugin.json"
+
+  lineage:
+    initial_version: "1.0.0"
+    initial_date: "2026-04-02"
+    total_revisions: 4
+    history: "mission-history.yaml"

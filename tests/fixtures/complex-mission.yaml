@@ -41,3 +41,8 @@ mission:
   version: "1.0.0"
   author: "security-team"
   created: "2026-04-01"
+  lineage:
+    initial_version: "0.1.0"
+    initial_date: "2026-03-15"
+    total_revisions: 3
+    history: "mission-history.yaml"
