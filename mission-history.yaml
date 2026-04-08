@@ -13,7 +13,6 @@ meta:
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
-
   - change_id: "MSC-2026-04-08-001"
     semantic_version: "1.5.0"
     change_sequence: 9
@@ -84,7 +83,17 @@ timeline:
         - "evals 이름: schema_validity→schema_validation_passes, cross_platform→cross_platform_verifies"
         - "artifacts: .claude-plugin/manifest.json → .claude-plugin/plugin.json"
       removed: []
-    changed_sections: [title, version, goal, done_when, approvals, evals, execution_hints, artifacts]
+    changed_sections:
+      [
+        title,
+        version,
+        goal,
+        done_when,
+        approvals,
+        evals,
+        execution_hints,
+        artifacts,
+      ]
     done_when_delta:
       added:
         - "skills/ms-init/SKILL.md 존재"
@@ -183,7 +192,8 @@ timeline:
         - "execution_hints: /ms:* → /mission-spec:ms-*"
         - "constraint: dependency 설명에 ajv, yaml 명시 추가"
       removed: []
-    changed_sections: [version, constraints, done_when, approvals, evals, execution_hints]
+    changed_sections:
+      [version, constraints, done_when, approvals, evals, execution_hints]
     done_when_delta:
       added: []
       modified:
@@ -228,7 +238,19 @@ timeline:
         - "테스트 suite (vitest)"
       modified: []
       removed: []
-    changed_sections: [title, goal, constraints, done_when, approvals, evals, budget_hint, execution_hints, skills_needed, artifacts]
+    changed_sections:
+      [
+        title,
+        goal,
+        constraints,
+        done_when,
+        approvals,
+        evals,
+        budget_hint,
+        execution_hints,
+        skills_needed,
+        artifacts,
+      ]
     done_when_delta:
       added:
         - "/ms:init 명령으로 자연어에서 mission.yaml 초안 자동 생성"
@@ -250,8 +272,10 @@ timeline:
       runtime: true
     breaking: true
     risk: "low — 최초 릴리스"
-    related_commits: ["444b659", "1e9d51f", "2362895", "758b4a4", "236109e", "079b0b1"]
-    related_decisions: ["MDR-001-task-contract-only", "MDR-003-minimal-dependencies"]
+    related_commits:
+      ["444b659", "1e9d51f", "2362895", "758b4a4", "236109e", "079b0b1"]
+    related_decisions:
+      ["MDR-001-task-contract-only", "MDR-003-minimal-dependencies"]
     snapshot_after: ".mission/snapshots/2026-04-02_v1.0.0_mission.yaml"
     follow_up: []
 
@@ -292,14 +316,16 @@ evolution_summary:
       identity: "Portable한 task contract 도구 (core library + skill bundle)"
     - version: "1.5.0"
       identity: "자산 관리가 가능한 task contract 도구 (Living Asset Registry)"
-    note: "제품 정체성이 플러그인 → 범용 도구 → 자산 관리 도구로 진화"
+
+  identity_evolution_note: "제품 정체성이 플러그인 → 범용 도구 → 자산 관리 도구로 진화"
 
   done_when_evolution:
     - version: "1.0.0"
       style: "선언적 문장 중심 (/ms:init 명령으로 ...)"
     - version: "1.4.0"
       style: "검증 가능한 기술 기준 (파일 존재 + automated eval 이름)"
-    note: "완료 조건이 서술형 → 실행 가능한 계약으로 진화"
+
+  done_when_evolution_note: "완료 조건이 서술형 → 실행 가능한 계약으로 진화"
 
 # ─── 핵심 결정 인덱스 ───
 
