@@ -4,15 +4,60 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.4 — Core API + Claude Code Skills"
+  mission_title: "Mission Spec v1.5 — Core API + Claude Code Skills + Living Asset Registry"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 4
-  latest_version: "1.4.0"
+  total_revisions: 5
+  latest_version: "1.5.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+
+  - change_id: "MSC-2026-04-08-001"
+    semantic_version: "1.5.0"
+    change_sequence: 9
+    date: "2026-04-08"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.6"]
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "Living Asset Registry 도입 — lineage 스키마, history 연동, 문서 정비"
+    decision: "lineage optional 필드 추가, ms-status/ms-report에서 mission-history.yaml 연동, ms-init에서 lineage 자동 생성"
+    triggered_by: "9개 제안 → 3개 최종안 → 확정안(MISSION_VERSIONING_DEFINITIVE.md) 기반 구현"
+    issue_or_context: "mission.yaml 변경 이력의 의도/맥락/영향 범위가 git log에만 산재하여 자산 가치 미확보"
+    changes:
+      added:
+        - "src/core/history.ts (mission-history.yaml 로더)"
+        - "lineage 필드 (mission.schema.json, Lineage definition)"
+        - "mission-history.yaml (루트, 변경 원장)"
+        - ".mission/ 디렉토리 (snapshots, decisions, templates, CURRENT_STATE)"
+        - "MDR 4건 (task-contract-only, ms-prefix, minimal-deps, done-when-eval-linking)"
+      modified:
+        - "ms-status: Evolution 섹션 추가 (phase, revisions, timeline)"
+        - "ms-report: Recent Changes 섹션 추가 (최근 3건)"
+        - "ms-init: lineage + version 자동 생성"
+        - "README.md, SKILL 파일 전체 업데이트"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — optional 필드 추가, 기존 mission.yaml 호환 유지"
+    related_commits: ["03bfb9c", "187a016"]
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-08_v1.5.0_mission.yaml"
+    follow_up: []
 
   - change_id: "MSC-2026-04-07-002"
     semantic_version: "1.4.0"
@@ -234,13 +279,20 @@ evolution_summary:
       date_range: "2026-04-07"
       theme: "배포 준비, 정체성 확립"
       description: "done_when을 기술 기준으로 전면 재작성, 플러그인 메타데이터 추가"
+    - name: "living-asset"
+      versions: ["1.5.0"]
+      date_range: "2026-04-08"
+      theme: "Living Asset Registry 도입"
+      description: "lineage 스키마 확장, mission-history.yaml 변경 원장, MDR 4건, ms-status/ms-report history 연동"
 
   identity_evolution:
     - version: "1.0.0"
       identity: "Claude Code Plugin 구현"
     - version: "1.4.0"
       identity: "Portable한 task contract 도구 (core library + skill bundle)"
-    note: "제품 정체성이 플러그인 → 범용 도구로 진화"
+    - version: "1.5.0"
+      identity: "자산 관리가 가능한 task contract 도구 (Living Asset Registry)"
+    note: "제품 정체성이 플러그인 → 범용 도구 → 자산 관리 도구로 진화"
 
   done_when_evolution:
     - version: "1.0.0"

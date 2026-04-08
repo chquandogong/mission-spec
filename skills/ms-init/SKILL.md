@@ -28,9 +28,9 @@ allowed-tools:
 
 ```yaml
 mission:
-  title: string     # 필수 — 미션 제목
-  goal: string      # 필수 — 미션 목표 (자연어)
-  done_when:        # 필수 — 완료 조건 (1개 이상)
+  title: string # 필수 — 미션 제목
+  goal: string # 필수 — 미션 목표 (자연어)
+  done_when: # 필수 — 완료 조건 (1개 이상)
     - "조건 1"
     - "조건 2"
 ```
@@ -43,6 +43,16 @@ mission:
 - `budget_hint`: 리소스 힌트 (advisory)
 - `execution_hints`: 실행 힌트 (advisory only — 런타임이 무시 가능)
 - `skills_needed`, `artifacts`, `version`, `author`
+- `lineage`: 변경 이력 참조 (`initial_version`, `history` 필수) — v1.5.0+
+
+## 자동 생성 필드 (v1.5.0+)
+
+`generateMissionDraft()`는 다음 필드를 자동으로 포함합니다:
+
+- `version: "1.0.0"`
+- `lineage.initial_version: "1.0.0"`
+- `lineage.initial_date`: 현재 날짜
+- `lineage.history: "mission-history.yaml"`
 
 ## 스키마 검증
 

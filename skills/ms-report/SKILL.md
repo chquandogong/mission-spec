@@ -51,6 +51,7 @@ console.log(r.markdown);
   - 실패 사유
 
 ---
+
 Mission Spec Report — 2026-04-02T12:00:00.000Z
 ```
 
@@ -68,7 +69,23 @@ console.log('Report saved to mission-report.md');
 "
 ```
 
+## Recent Changes 섹션 (v1.5.0+)
+
+`mission-history.yaml`이 프로젝트 루트에 존재하면, 리포트에 최근 3건의 변경 이력이 포함됩니다:
+
+```markdown
+## Recent Changes
+
+### 1.5.0 (2026-04-08)
+
+- **Intent:** Living Asset Registry 도입
+- **Type:** enhancement | **Persistence:** permanent
+- Added: src/core/history.ts, lineage 필드, ...
+- Modified: ms-status, ms-report, ms-init, ...
+```
+
 ## 주의
 
 - 리포트에는 타임스탬프가 포함되어 각 실행을 구분할 수 있습니다.
 - PASS는 모든 done_when이 충족된 경우에만 표시됩니다.
+- `mission-history.yaml`이 없으면 Recent Changes 섹션이 생략됩니다.

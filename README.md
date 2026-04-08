@@ -2,14 +2,16 @@
 
 [![GitHub](https://img.shields.io/github/license/chquandogong/mission-spec)](https://github.com/chquandogong/mission-spec)
 
-AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration framework가 아닌, 기존 하네스 위에서 작동하는 portable한 run-scoped task contract입니다. 현재 저장소는 TypeScript 라이브러리와 Claude Code용 skill bundle을 함께 제공합니다.
+AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration framework가 아닌, 기존 하네스 위에서 작동하는 portable한 run-scoped task contract입니다. TypeScript 라이브러리와 Claude Code용 skill bundle, 그리고 **Living Asset Registry**를 함께 제공합니다.
 
 **Repository:** https://github.com/chquandogong/mission-spec
 
 ## 핵심 파이프라인
 
 ```text
-자연어 -> mission.yaml draft -> eval scaffold -> run report
+자연어 → mission.yaml draft → eval scaffold → run report
+                  ↕
+         mission-history.yaml (변경 원장)
 ```
 
 ## 5분 설치 가이드
@@ -118,9 +120,80 @@ mission:
       approver: "human"
   execution_hints:
     topology: "sequential"
+  lineage: # v1.5.0+
+    initial_version: "1.0.0"
+    initial_date: "2026-04-02"
+    total_revisions: 3
+    history: "mission-history.yaml"
 ```
 
 전체 스키마: [`src/schema/mission.schema.json`](src/schema/mission.schema.json)
+
+## Living Asset Registry (v1.5.0)
+
+mission.yaml의 변경 이력을 구조화하여 회사 자산으로 관리합니다.
+
+### 구조
+
+```
+project-root/
+├── mission.yaml                    # 현재 authoritative spec
+├── mission-history.yaml            # 구조화된 변경 원장
+└── .mission/
+    ├── CURRENT_STATE.md            # 현재 상태 대시보드
+    ├── snapshots/                  # 버전별 mission.yaml 원본
+    ├── decisions/                  # MDR (Mission Decision Records)
+    └── templates/                  # 변경 항목 + MDR 템플릿
+```
+
+### mission-history.yaml
+
+변경의 의도, 영향 범위, 완료 조건 변화를 구조화된 YAML로 추적합니다:
+
+```yaml
+timeline:
+  - change_id: "MSC-2026-04-08-001"
+    semantic_version: "1.5.0"
+    date: "2026-04-08"
+    author: "Dr. QUAN"
+    change_type: "enhancement"
+    persistence: "permanent" # permanent | transient | experimental
+    intent: "Living Asset Registry 도입"
+    done_when_delta: # 완료 조건의 변화 추적
+      added: [".claude-plugin/plugin.json 존재"]
+      removed: []
+    impact_scope:
+      schema: true
+      skills: true
+```
+
+### lineage 필드
+
+`ms-init`으로 새 mission을 생성하면 `lineage` 필드가 자동으로 포함됩니다:
+
+```yaml
+lineage:
+  initial_version: "1.0.0"
+  history: "mission-history.yaml"
+```
+
+### 도구 연동
+
+- **ms-status**: `mission-history.yaml`을 읽어 현재 phase와 진화 요약을 출력
+- **ms-report**: 최근 3건의 변경 이력을 리포트에 포함
+- **ms-init**: 새 mission 생성 시 `lineage` + `version` 자동 생성
+
+### History API
+
+```typescript
+import { loadHistory, getCurrentPhase, getLatestEntry } from "mission-spec";
+
+const history = loadHistory(".");
+if (history) {
+  console.log(getCurrentPhase(history)); // { name: "living-asset", theme: "..." }
+  console.log(getLatestEntry(history)); // 최신 timeline 항목
+}
+```
 
 ## Cross-Platform 변환
 
@@ -153,6 +226,8 @@ npm run build
 - 제공 중: schema validation, mission draft generation, rule-based evaluation, status/report generation
 - 제공 중: cross-platform conversion for Cursor, Codex, OpenCode
 - 제공 중: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`
+- 제공 중: Living Asset Registry — `lineage` 스키마, `mission-history.yaml` 변경 원장, MDR, 스냅샷
+- 제공 중: history API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`
 - 미포함: GitHub/PR integration runtime, 별도 orchestration framework, SaaS/UI
 
 ## 설계 원칙

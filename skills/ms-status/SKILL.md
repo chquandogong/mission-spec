@@ -41,16 +41,38 @@ console.log(s.markdown);
 **Progress:** 3/5
 
 ## Constraints
+
 - 제약 조건 1
 - 제약 조건 2
 
 ## Done When
+
 - [x] 완료된 조건
 - [ ] 미완료 조건
   - 실패 사유
 ```
 
+## Evolution 섹션 (v1.5.0+)
+
+`mission-history.yaml`이 프로젝트 루트에 존재하면 출력에 Evolution 섹션이 추가됩니다:
+
+```markdown
+## Evolution
+
+**Phase:** living-asset — Living Asset Registry 도입
+**Revisions:** 5
+
+- **initial-release** (1.0.0): 핵심 기능 구현
+- **stabilization** (1.1.0): 이름 충돌 해소
+- **hardening** (1.2.0): adversarial review 반영
+- **marketplace-ready** (1.4.0): 배포 준비, 정체성 확립
+- **living-asset** (1.5.0): Living Asset Registry 도입
+```
+
+반환값에 `phase`, `phaseTheme`, `totalRevisions` 필드가 추가됩니다.
+
 ## 주의
 
 - `mission.yaml`이 없으면 에러를 반환합니다.
 - constraints가 없으면 해당 섹션을 생략합니다.
+- `mission-history.yaml`이 없으면 Evolution 섹션이 생략됩니다.

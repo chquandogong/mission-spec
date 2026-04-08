@@ -1,11 +1,11 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-08 | Version: 1.4.0
+> Last updated: 2026-04-08 | Version: 1.5.0
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.4 — Core API + Claude Code Skills
-- **Phase:** marketplace-ready
+- **Title:** Mission Spec v1.5 — Core API + Claude Code Skills + Living Asset Registry
+- **Phase:** living-asset
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01
 
@@ -13,6 +13,7 @@
 
 Mission Spec을 core library와 Claude Code skill bundle로 구현.
 누구나 쉽게 설치하여 사용할 수 있는 portable한 task contract 도구.
+mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 
 ## 핵심 제약 (활성)
 
@@ -41,8 +42,8 @@ Mission Spec을 core library와 Claude Code skill bundle로 구현.
 
 ## 다음 변경 후보
 
-- mission-history.yaml 기반 ms-status/ms-report 연동
-- lineage 필드 스키마 추가 검토
+- pre-commit hook으로 snapshot 자동 생성
+- LLM-as-judge eval 타입 구현
 
 ## 자기 검증
 
