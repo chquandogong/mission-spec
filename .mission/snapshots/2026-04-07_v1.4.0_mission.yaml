@@ -1,0 +1,95 @@
+# Mission Spec: Mission Spec 구현 자체를 위한 작업 계약
+# 이 파일이 Mission Spec의 첫 번째 실증(dogfooding)입니다.
+
+mission:
+  title: "Mission Spec v1.4 — Core API + Claude Code Skills"
+  author: "Dr. QUAN"
+  created: "2026-04-01"
+  version: "1.4.0"
+
+  goal: |
+    Mission Spec을 core library와 Claude Code skill bundle로 구현한다.
+    핵심 파이프라인: 자연어 → mission draft 자동 생성 → eval scaffold → run report.
+    누구나(사람/AI) 쉽게 설치하여 사용할 수 있는 portable한 task contract 도구로 유지한다.
+
+  constraints:
+    - "Mission Spec은 orchestration framework가 아니다 — task contract layer만 구현"
+    - "execution_hints는 suggestion이지 directive가 아니다 — 런타임이 무시 가능해야 함"
+    - "기존 워크플로(GitHub Issue, PR, CI/CD)에 녹아들어야 한다 — 별도 UI/SaaS 금지"
+    - "외부 dependency 최소화 — Node.js 표준 라이브러리 + JSON Schema validator(ajv) + YAML parser(yaml)만 허용"
+    - "코드 생성 시 반드시 테스트를 먼저 작성 (TDD)"
+    - "한 번에 하나의 기능만 구현 — scope creep 방지"
+
+  done_when:
+    - "skills/ms-init/SKILL.md 존재"
+    - "skills/ms-eval/SKILL.md 존재"
+    - "skills/ms-status/SKILL.md 존재"
+    - "skills/ms-report/SKILL.md 존재"
+    - ".claude-plugin/plugin.json 존재"
+    - "README.md 존재"
+    - "schema_validation_passes"
+    - "command_test"
+    - "cross_platform_verifies"
+
+  approvals:
+    - gate: "schema_design"
+      approver: "human"
+      description: "mission.yaml JSON Schema 확정 전 인간 리뷰"
+    - gate: "first_command"
+      approver: "human"
+      description: "ms-init 첫 작동 확인 후 나머지 진행"
+    - gate: "cross_platform"
+      approver: "codex"
+      description: "Codex가 cross-platform 호환성 adversarial review"
+    - gate: "release"
+      approver: "human"
+      description: "v1.0.0 릴리스 전 최종 승인"
+
+  evals:
+    - name: "schema_validation_passes"
+      type: "automated"
+      command: "node scripts/validate-schema.js"
+      pass_criteria: "모든 예제 mission.yaml이 schema 통과"
+    - name: "command_test"
+      type: "automated"
+      command: "npm test"
+      pass_criteria: "모든 unit test 통과"
+    - name: "dogfood_test"
+      type: "manual"
+      description: "이 mission.yaml 자체로 evaluateMission('.') 실행하여 done_when 충족 확인"
+    - name: "cross_platform_verifies"
+      type: "automated"
+      command: "node scripts/convert-platforms.js --verify"
+      pass_criteria: "Cursor, Codex, OpenCode 포맷 변환 성공"
+
+  budget_hint:
+    max_tokens_per_session: 500000
+    max_parallel_agents: 3
+    estimated_sessions: 8
+    priority: "quality over speed"
+
+  execution_hints:
+    topology: "sequential-with-review"
+    suggested_approach: |
+      Phase 1: Schema + CLI skeleton (1 session)
+      Phase 2: ms-init skill + API (1 session)
+      Phase 3: ms-eval + ms-status skills + API (1 session)
+      Phase 4: ms-report skill + API (1 session)
+      Phase 5: Cross-platform conversion (1 session)
+      Phase 6: README + dogfooding (1 session)
+      Phase 7: Adversarial review + iteration (2 sessions)
+    note: "이 힌트는 제안이며 런타임이 무시할 수 있습니다"
+
+  skills_needed:
+    - "test-driven-development"
+    - "systematic-debugging"
+    - "writing-plans"
+
+  artifacts:
+    - "mission-spec.schema.json"
+    - "package.json"
+    - "src/commands/*.ts"
+    - "src/schema/*.ts"
+    - "tests/**/*.test.ts"
+    - "README.md"
+    - ".claude-plugin/plugin.json"

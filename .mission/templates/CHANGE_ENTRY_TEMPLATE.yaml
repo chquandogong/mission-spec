@@ -1,0 +1,54 @@
+# Mission History — 변경 항목 템플릿
+# mission-history.yaml의 timeline에 추가할 때 이 템플릿을 복사하여 사용한다.
+# 필수 필드는 [필수]로, 권장 필드는 [권장]으로 표시되어 있다.
+
+- change_id: "MSC-YYYY-MM-DD-NNN" # [필수] 고유 식별자
+  semantic_version: "X.Y.Z" # [필수] 변경 후 semantic version
+  change_sequence: 0 # [권장] 커밋 순번
+  date: "YYYY-MM-DD" # [필수] 변경 날짜
+  author: "" # [필수] 주 작성자
+  contributors: [] # [권장] author 외 기여자
+
+  # 분류
+  change_type: "" # [필수] enhancement | bugfix | refactor | hotfix | experiment
+  motivation_type: "" # [권장] delivery | alignment | compliance | incident | exploration
+  persistence: "" # [필수] permanent | transient | experimental
+  # transient인 경우 resolved_at 필수:
+  # resolved_at: "X.Y.Z"
+
+  # 의도와 맥락
+  intent: "" # [필수] 변경 의도 (한 문장)
+  decision: "" # [권장] 내린 결정 (한 문장)
+  triggered_by: "" # [권장] 변경 촉발 사건
+  issue_or_context: "" # [권장] 배경 이슈/맥락
+
+  # 변경 내역
+  changes: # [필수]
+    added: []
+    modified: []
+    removed: []
+
+  changed_sections: [] # [권장] 변경된 mission.yaml 섹션명
+
+  # 완료 조건 변경
+  done_when_delta: # [필수]
+    added: []
+    modified: []
+    removed: []
+
+  # 영향 범위
+  impact_scope: # [필수]
+    schema: false
+    skills: false
+    api: false
+    tests: false
+    docs: false
+    runtime: false
+  breaking: false # [필수]
+  risk: "" # [권장] 위험도 평가
+
+  # 추적
+  related_commits: [] # [권장]
+  related_decisions: [] # [권장] 관련 MDR ID
+  snapshot_after: "" # [권장] .mission/snapshots/ 경로
+  follow_up: [] # [권장] 후속 조치

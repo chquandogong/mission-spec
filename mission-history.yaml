@@ -1,0 +1,278 @@
+# Mission History — mission.yaml의 구조화된 변경 원장
+# mission.yaml과 같은 디렉토리(루트)에 위치한다.
+# 확정안: docs/MISSION_VERSIONING_DEFINITIVE.md
+
+meta:
+  mission_id: "mission-spec"
+  mission_title: "Mission Spec v1.4 — Core API + Claude Code Skills"
+  tracking_since: "2026-04-02"
+  tracking_mode: "semantic-version + commit-backed"
+  total_revisions: 4
+  latest_version: "1.4.0"
+
+# ─── 변경 이력 (최신 → 과거 순) ───
+
+timeline:
+
+  - change_id: "MSC-2026-04-07-002"
+    semantic_version: "1.4.0"
+    change_sequence: 7
+    date: "2026-04-07"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.6"]
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "Claude Code marketplace 배포 준비, 제품 정체성을 portable task contract 도구로 확립"
+    decision: "title/goal/done_when을 기술 기준으로 전면 재작성, plugin metadata 추가"
+    triggered_by: "marketplace 배포 결정"
+    issue_or_context: "선언적 done_when이 자동 평가 불가, plugin 등록용 메타데이터 부재"
+    changes:
+      added:
+        - ".claude-plugin/plugin.json"
+        - ".claude-plugin/marketplace.json"
+        - "marketplace 설치 가이드 (README)"
+      modified:
+        - "title: 'Claude Code Plugin 구현' → 'Core API + Claude Code Skills'"
+        - "goal: 'plugin으로 구현/배포' → 'core library + skill bundle, portable task contract 도구'"
+        - "done_when 전면 재작성 (선언적 → 검증 가능한 기술 기준)"
+        - "evals 이름: schema_validity→schema_validation_passes, cross_platform→cross_platform_verifies"
+        - "artifacts: .claude-plugin/manifest.json → .claude-plugin/plugin.json"
+      removed: []
+    changed_sections: [title, version, goal, done_when, approvals, evals, execution_hints, artifacts]
+    done_when_delta:
+      added:
+        - "skills/ms-init/SKILL.md 존재"
+        - "skills/ms-eval/SKILL.md 존재"
+        - "skills/ms-status/SKILL.md 존재"
+        - "skills/ms-report/SKILL.md 존재"
+        - ".claude-plugin/plugin.json 존재"
+        - "README.md 존재"
+        - "schema_validation_passes"
+        - "command_test"
+        - "cross_platform_verifies"
+      modified: []
+      removed:
+        - "/mission-spec:ms-init 명령으로 자연어에서 mission.yaml 초안 자동 생성"
+        - "/mission-spec:ms-eval 명령으로 done_when 기준 대비 현재 상태 평가"
+        - "/mission-spec:ms-status 명령으로 진행 상황 요약"
+        - "/mission-spec:ms-report 명령으로 run report 생성"
+        - "Claude Code plugin marketplace에 설치 가능"
+        - "Cursor, Codex, OpenCode에서도 사용 가능 (cross-platform conversion)"
+        - "README.md에 5분 이내 설치·사용 가이드 완성"
+        - "자체 mission.yaml로 dogfooding 완료 (이 파일 자체)"
+    impact_scope:
+      schema: false
+      skills: true
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — 메타데이터 추가, 기존 기능 변경 없음"
+    related_commits: ["1f6f8b4", "8e97379", "6551158", "900f4a9", "89f767f"]
+    related_decisions: ["MDR-004-done-when-eval-linking"]
+    snapshot_after: ".mission/snapshots/2026-04-07_v1.4.0_mission.yaml"
+    follow_up: []
+
+  - change_id: "MSC-2026-04-07-001"
+    semantic_version: "1.2.0"
+    change_sequence: 5
+    date: "2026-04-07"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.6", "Codex", "Gemini"]
+    change_type: "enhancement"
+    motivation_type: "alignment"
+    persistence: "permanent"
+    intent: "Codex/Gemini adversarial review 반영, 루트 API 정비"
+    decision: "루트 export 정비, automated eval 실행 로직 추가"
+    triggered_by: "Codex adversarial review + Gemini 크로스 리뷰"
+    issue_or_context: "크로스 플랫폼 리뷰에서 API 노출 부족, eval 실행 미구현, TOML 문법 오류 발견"
+    changes:
+      added:
+        - "루트 export API (src/index.ts)"
+        - "package.json exports 맵 (subpath import)"
+        - "evaluator automated eval 실행 로직 (execSync)"
+      modified:
+        - "OpenCode 변환 TOML 배열 문법 수정"
+        - "conditional required fields for eval types 보강"
+      removed: []
+    changed_sections: [version]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: false
+      api: true
+      tests: true
+      docs: false
+      runtime: true
+    breaking: false
+    risk: "low — 기능 추가/수정, 기존 인터페이스 유지"
+    related_commits: ["b6458dd", "6ad54cb", "d1abc74", "c381706"]
+    related_decisions: ["MDR-001-task-contract-only"]
+    snapshot_after: ".mission/snapshots/2026-04-07_v1.2.0_mission.yaml"
+    follow_up: ["dogfooding evaluateMission('.') 재검증"]
+
+  - change_id: "MSC-2026-04-03-001"
+    semantic_version: "1.1.0"
+    change_sequence: 4
+    date: "2026-04-03"
+    author: "Dr. QUAN"
+    contributors: []
+    change_type: "refactor"
+    motivation_type: "alignment"
+    persistence: "permanent"
+    intent: "skill 이름 충돌 방지를 위한 ms-* prefix 및 /mission-spec: namespace 적용"
+    decision: "모든 skill ID에 ms-* prefix, 커맨드 참조를 /mission-spec:ms-* 형식으로 통일"
+    triggered_by: "Claude Code marketplace에서 다른 플러그인과 skill 이름 충돌 가능성 발견"
+    issue_or_context: "init, eval 등 일반적 skill 이름이 다른 플러그인과 충돌할 수 있는 구조"
+    changes:
+      added: []
+      modified:
+        - "done_when: /ms:* → /mission-spec:ms-* 형식으로 통일"
+        - "approvals: /ms:init → /mission-spec:ms-init"
+        - "evals dogfood: /ms:eval → /mission-spec:ms-eval"
+        - "execution_hints: /ms:* → /mission-spec:ms-*"
+        - "constraint: dependency 설명에 ajv, yaml 명시 추가"
+      removed: []
+    changed_sections: [version, constraints, done_when, approvals, evals, execution_hints]
+    done_when_delta:
+      added: []
+      modified:
+        - "/ms:init → /mission-spec:ms-init"
+        - "/ms:eval → /mission-spec:ms-eval"
+        - "/ms:status → /mission-spec:ms-status"
+        - "/ms:report → /mission-spec:ms-report"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: true
+    risk: "medium — 기존 /ms:* 호출이 깨짐"
+    related_commits: ["96d151a", "67a1f45", "9144a25"]
+    related_decisions: ["MDR-002-ms-prefix-adoption"]
+    snapshot_after: ".mission/snapshots/2026-04-03_v1.1.0_mission.yaml"
+    follow_up: []
+
+  - change_id: "MSC-2026-04-02-001"
+    semantic_version: "1.0.0"
+    change_sequence: 1
+    date: "2026-04-02"
+    author: "Dr. QUAN"
+    contributors: []
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "최초 릴리스 — 스키마, 4개 커맨드, 크로스 플랫폼 변환"
+    decision: "task contract only 접근, 최소 의존성, TDD 기반 구현"
+    triggered_by: "프로젝트 시작"
+    issue_or_context: "AI 에이전트 작업에 재사용 가능한 task contract 표준 부재"
+    changes:
+      added:
+        - "mission.schema.json (JSON Schema Draft-07)"
+        - "ms-init, ms-eval, ms-status, ms-report 커맨드"
+        - "Cursor, Codex, OpenCode 플랫폼 변환"
+        - "README.md, 예제 3개 (bugfix, security, multi-agent)"
+        - "테스트 suite (vitest)"
+      modified: []
+      removed: []
+    changed_sections: [title, goal, constraints, done_when, approvals, evals, budget_hint, execution_hints, skills_needed, artifacts]
+    done_when_delta:
+      added:
+        - "/ms:init 명령으로 자연어에서 mission.yaml 초안 자동 생성"
+        - "/ms:eval 명령으로 done_when 기준 대비 현재 상태 평가"
+        - "/ms:status 명령으로 진행 상황 요약"
+        - "/ms:report 명령으로 run report 생성"
+        - "Claude Code plugin marketplace에 설치 가능"
+        - "Cursor, Codex, OpenCode에서도 사용 가능 (cross-platform conversion)"
+        - "README.md에 5분 이내 설치·사용 가이드 완성"
+        - "자체 mission.yaml로 dogfooding 완료 (이 파일 자체)"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: true
+    risk: "low — 최초 릴리스"
+    related_commits: ["444b659", "1e9d51f", "2362895", "758b4a4", "236109e", "079b0b1"]
+    related_decisions: ["MDR-001-task-contract-only", "MDR-003-minimal-dependencies"]
+    snapshot_after: ".mission/snapshots/2026-04-02_v1.0.0_mission.yaml"
+    follow_up: []
+
+# ─── 진화 요약 ───
+
+evolution_summary:
+  phases:
+    - name: "initial-release"
+      versions: ["1.0.0"]
+      date_range: "2026-04-02"
+      theme: "핵심 기능 구현"
+      description: "스키마 정의, 4개 커맨드, 크로스 플랫폼 변환, TDD 기반 구현"
+    - name: "stabilization"
+      versions: ["1.1.0"]
+      date_range: "2026-04-03"
+      theme: "이름 충돌 해소"
+      description: "marketplace 배포를 위한 skill ID 및 namespace 표준화"
+    - name: "hardening"
+      versions: ["1.2.0"]
+      date_range: "2026-04-07"
+      theme: "adversarial review 반영"
+      description: "Codex/Gemini 크로스 리뷰 이슈 해결, 공개 API 정비"
+    - name: "marketplace-ready"
+      versions: ["1.4.0"]
+      date_range: "2026-04-07"
+      theme: "배포 준비, 정체성 확립"
+      description: "done_when을 기술 기준으로 전면 재작성, 플러그인 메타데이터 추가"
+
+  identity_evolution:
+    - version: "1.0.0"
+      identity: "Claude Code Plugin 구현"
+    - version: "1.4.0"
+      identity: "Portable한 task contract 도구 (core library + skill bundle)"
+    note: "제품 정체성이 플러그인 → 범용 도구로 진화"
+
+  done_when_evolution:
+    - version: "1.0.0"
+      style: "선언적 문장 중심 (/ms:init 명령으로 ...)"
+    - version: "1.4.0"
+      style: "검증 가능한 기술 기준 (파일 존재 + automated eval 이름)"
+    note: "완료 조건이 서술형 → 실행 가능한 계약으로 진화"
+
+# ─── 핵심 결정 인덱스 ───
+
+key_decisions:
+  - decision: "task contract only — orchestration 하지 않음"
+    version: "1.0.0"
+    rationale: "scope creep 방지, 단일 책임"
+    status: "active"
+    mdr: "MDR-001-task-contract-only"
+  - decision: "execution_hints는 suggestion으로만"
+    version: "1.0.0"
+    rationale: "런타임 자율성 보장"
+    status: "active"
+  - decision: "ms-* prefix 및 /mission-spec: namespace 도입"
+    version: "1.1.0"
+    rationale: "marketplace 이름 충돌 방지"
+    status: "active"
+    mdr: "MDR-002-ms-prefix-adoption"
+  - decision: "외부 dependency 최소화 (ajv + yaml만)"
+    version: "1.0.0"
+    rationale: "portability, 설치 부담 최소화"
+    status: "active"
+    mdr: "MDR-003-minimal-dependencies"
+  - decision: "done_when을 검증 가능한 기술 기준으로 전환"
+    version: "1.4.0"
+    rationale: "self-dogfooding, evaluateMission('.')으로 자동 평가 가능"
+    status: "active"
+    mdr: "MDR-004-done-when-eval-linking"
