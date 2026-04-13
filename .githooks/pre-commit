@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+npm run snapshot --silent
+# 디렉토리 형태로 git add — 글롭 확장 이슈 없이 신규 스냅샷만 스테이징.
+if [ -d .mission/snapshots ]; then
+  git add .mission/snapshots
+fi

@@ -28,7 +28,8 @@
     }
   },
   "scripts": {
-    "build": "tsc && cp src/schema/mission.schema.json dist/schema/",
+    "snapshot": "node scripts/snapshot-mission.js",
+    "build": "tsc && cp src/schema/*.schema.json dist/schema/",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit"
