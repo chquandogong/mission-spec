@@ -217,4 +217,31 @@ describe("validateMission", () => {
     });
     expect(result.valid).toBe(false);
   });
+
+  it("accepts llm-eval type in evals", () => {
+    const result = validateMission({
+      mission: {
+        title: "test",
+        goal: "test",
+        done_when: ["done"],
+        evals: [
+          { name: "e", type: "llm-eval", pass_criteria: "UX feels good" },
+        ],
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects llm-eval without pass_criteria", () => {
+    const result = validateMission({
+      mission: {
+        title: "test",
+        goal: "test",
+        done_when: ["done"],
+        evals: [{ name: "e", type: "llm-eval" }],
+      },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("pass_criteria"))).toBe(true);
+  });
 });

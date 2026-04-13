@@ -17,7 +17,9 @@ allowed-tools:
 ## 동작
 
 1. 현재 디렉토리의 `mission.yaml`을 읽고 스키마 검증합니다.
-2. `done_when` 목록의 각 조건을 rule-based로 평가합니다:
+2. `done_when` 목록의 각 조건을 평가합니다:
+   - **LLM/주관 평가 연결 (v1.6.0+)**: `evals[].name`이 criterion과 같고 `type: llm-eval` 또는 `llm-judge`이면
+     `.mission/evals/<name>.result.yaml` 오버라이드 파일을 조회. 파일이 있으면 그 판정을 사용, 없으면 "LLM 검증 대기"로 표시.
    - **자동화 eval 연결**: `evals[].name`이 criterion과 정확히 같고 `type: automated`이면 해당 명령을 실행
    - **파일 존재 체크**: "X 파일 존재", "X exists" → 해당 파일이 프로젝트에 있는지 확인
    - **테스트 관련 문구**: 명시적 automated eval이 없으면 수동 확인 필요로 표시
@@ -52,9 +54,27 @@ r.criteria.forEach(c => {
   → 자동 평가 불가 — 수동 확인 필요
 ```
 
+## LLM/주관 평가 오버라이드 (v1.6.0+)
+
+`llm-eval` 또는 `llm-judge` 타입의 eval은 기계적으로 판정할 수 없으므로,
+외부 판정 결과를 `.mission/evals/<eval-name>.result.yaml`에 기록합니다:
+
+```yaml
+# .mission/evals/subjective_quality.result.yaml
+passed: true
+reason: "리뷰어 3인 판정, 모두 동의"
+evaluated_by: "human" # 또는 "llm-claude", "llm-gpt5" 등
+evaluated_at: "2026-04-13"
+```
+
+- 파일 존재 + `passed: true` → PASS
+- 파일 존재 + `passed: false` → FAIL (판정 사유 함께 표시)
+- 파일 없음 → "LLM 검증 대기" (pending)
+- `passed` 필드 누락/타입 오류 → "형식 오류"
+
 ## 주의
 
 - `mission.yaml`이 없으면 에러를 반환합니다.
 - 스키마가 유효하지 않으면 에러를 반환합니다.
 - `evals[].name`과 `done_when`이 연결되지 않으면 automated eval은 실행되지 않습니다.
-- v1은 rule-based eval만 지원합니다 (LLM-as-judge 없음).
+- `llm-eval` / `llm-judge` 타입은 오버라이드 파일이 기록될 때까지 pending 상태로 표시됩니다.

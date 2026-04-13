@@ -114,7 +114,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["automated", "manual", "llm-judge"],
+          "enum": ["automated", "manual", "llm-judge", "llm-eval"],
           "description": "평가 유형"
         },
         "command": {
@@ -147,6 +147,15 @@
           },
           "then": {
             "required": ["name", "type", "description"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "llm-eval" } },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["name", "type", "pass_criteria"]
           }
         },
         {
