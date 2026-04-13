@@ -186,14 +186,60 @@ lineage:
 ### History API
 
 ```typescript
-import { loadHistory, getCurrentPhase, getLatestEntry } from "mission-spec";
+import {
+  loadHistory,
+  getCurrentPhase,
+  getLatestEntry,
+  validateHistory,
+} from "mission-spec";
 
-const history = loadHistory(".");
+const history = loadHistory("."); // schema 오류 시 throw (v1.6.0+)
 if (history) {
   console.log(getCurrentPhase(history)); // { name: "living-asset", theme: "..." }
   console.log(getLatestEntry(history)); // 최신 timeline 항목
 }
+
+// 임의 데이터를 mission-history.yaml 스키마로 검증
+const { valid, errors } = validateHistory(anyData);
 ```
+
+## LLM/주관 평가 (v1.6.0+)
+
+`done_when` 조건 중 기계적으로 판정하기 어려운 항목은 `llm-eval` 또는 `llm-judge` 타입 eval로 정의하고, 외부 판정을 `.mission/evals/<eval-name>.result.yaml`에 기록합니다:
+
+```yaml
+# mission.yaml
+done_when:
+  - "subjective_quality"
+evals:
+  - name: "subjective_quality"
+    type: "llm-eval" # 또는 "llm-judge"
+    pass_criteria: "UX가 직관적이고 사용자 혼란 없음"
+```
+
+```yaml
+# .mission/evals/subjective_quality.result.yaml
+passed: true
+reason: "리뷰어 3인 판정"
+evaluated_by: "human" # 또는 "llm-claude", "llm-gpt5" 등
+evaluated_at: "2026-04-13"
+```
+
+`ms-eval`은 오버라이드 파일을 읽어 판정을 확정합니다. 파일이 없으면 `LLM 검증 대기` 상태로 유지됩니다.
+
+## 스냅샷 및 pre-commit 훅 (v1.6.0+)
+
+`mission.yaml`이 변경될 때마다 버전별 스냅샷을 `.mission/snapshots/`에 자동으로 아카이브할 수 있습니다:
+
+```bash
+# 수동 스냅샷 생성
+npm run snapshot
+
+# 커밋 시 자동 스냅샷 (한 번만 설정)
+git config core.hooksPath .githooks
+```
+
+스냅샷 스크립트는 버전 기반 dedup을 수행 — 같은 `version`의 스냅샷이 이미 있으면 생성하지 않습니다.
 
 ## Cross-Platform 변환
 
@@ -227,7 +273,9 @@ npm run build
 - 제공 중: cross-platform conversion for Cursor, Codex, OpenCode
 - 제공 중: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`
 - 제공 중: Living Asset Registry — `lineage` 스키마, `mission-history.yaml` 변경 원장, MDR, 스냅샷
-- 제공 중: history API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`
+- 제공 중: history API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`, `validateHistory()`
+- 제공 중: LLM/주관 평가 오버라이드 (`llm-eval`, `llm-judge` + `.mission/evals/<name>.result.yaml`)
+- 제공 중: 스냅샷 자동화 (`npm run snapshot`, `.githooks/pre-commit`)
 - 미포함: GitHub/PR integration runtime, 별도 orchestration framework, SaaS/UI
 
 ## 설계 원칙

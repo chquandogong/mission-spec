@@ -1,11 +1,11 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-08 | Version: 1.5.0
+> Last updated: 2026-04-13 | Version: 1.6.0
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.5 — Core API + Claude Code Skills + Living Asset Registry
-- **Phase:** living-asset
+- **Title:** Mission Spec v1.6 — Evaluator Extensibility + Snapshot Automation
+- **Phase:** eval-extensibility
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01
 
@@ -40,10 +40,17 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 
 - (없음)
 
+## 최근 구현 (v1.6.0)
+
+- [x] pre-commit hook으로 snapshot 자동 생성 (`.githooks/pre-commit` + `scripts/snapshot-mission.js`)
+- [x] LLM/주관 평가 타입 (`llm-eval` + `llm-judge`) 및 `.mission/evals/<name>.result.yaml` 오버라이드
+- [x] `mission-history.yaml` JSON Schema + `validateHistory()` public API
+- [x] ms-status/ms-report graceful fallback (history 스키마 오류 시 경고만 표시)
+
 ## 다음 변경 후보
 
-- pre-commit hook으로 snapshot 자동 생성
-- LLM-as-judge eval 타입 구현
+- 스냅샷 훅 자동 설치 커맨드 (`npm run setup-hooks`)
+- `ms-eval`이 LLM 오버라이드 생성/갱신을 대화형으로 돕는 UX
 
 ## 자기 검증
 
