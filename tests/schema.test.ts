@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateMission } from "../src/schema/validator.js";
+import { validateMission, validateHistory } from "../src/schema/validator.js";
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
 import { resolve } from "node:path";
@@ -243,5 +243,113 @@ describe("validateMission", () => {
     });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes("pass_criteria"))).toBe(true);
+  });
+});
+
+describe("validateHistory", () => {
+  it("accepts a minimal valid history", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m1",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "tester",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "first release",
+          changes: { added: [], modified: [], removed: [] },
+          done_when_delta: { added: [], modified: [], removed: [] },
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("accepts the project's own mission-history.yaml", () => {
+    const content = readFileSync(
+      resolve(__dirname, "..", "mission-history.yaml"),
+      "utf-8",
+    );
+    const result = validateHistory(parse(content));
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects history missing meta", () => {
+    const result = validateHistory({ timeline: [] });
+    expect(result.valid).toBe(false);
+  });
+
+  it("rejects history missing timeline", () => {
+    const result = validateHistory({
+      meta: { mission_id: "m", total_revisions: 0, latest_version: "1.0.0" },
+    });
+    expect(result.valid).toBe(false);
+  });
+
+  it("rejects timeline entry with invalid persistence enum", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "bogus",
+          intent: "",
+          changes: {},
+          done_when_delta: {},
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(false);
+  });
+
+  it("rejects history with sparse changes objects", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: {},
+          done_when_delta: {},
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("added"))).toBe(true);
+  });
+
+  it("rejects null input", () => {
+    const result = validateHistory(null);
+    expect(result.valid).toBe(false);
   });
 });

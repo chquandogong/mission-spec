@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mission-spec.dev/schema/v1/mission-history.schema.json",
+  "title": "Mission History Ledger",
+  "description": "Mission Spec의 진화와 변경 이력을 추적하는 원장",
+  "type": "object",
+  "required": ["meta", "timeline"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["mission_id", "total_revisions", "latest_version"],
+      "additionalProperties": false,
+      "properties": {
+        "mission_id": { "type": "string" },
+        "mission_title": { "type": "string" },
+        "tracking_since": { "type": "string" },
+        "tracking_mode": { "type": "string" },
+        "total_revisions": { "type": "integer", "minimum": 0 },
+        "latest_version": { "type": "string" }
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "change_id", "semantic_version", "date", "author",
+          "change_type", "persistence", "intent", "changes",
+          "done_when_delta", "impact_scope", "breaking"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "change_id": { "type": "string" },
+          "semantic_version": { "type": "string" },
+          "change_sequence": { "type": "integer" },
+          "date": { "type": "string" },
+          "author": { "type": "string" },
+          "contributors": { "type": "array", "items": { "type": "string" } },
+          "change_type": { "type": "string" },
+          "motivation_type": { "type": "string" },
+          "persistence": { "type": "string", "enum": ["permanent", "transient", "experimental"] },
+          "intent": { "type": "string" },
+          "decision": { "type": "string" },
+          "triggered_by": { "type": "string" },
+          "issue_or_context": { "type": "string" },
+          "changes": {
+            "type": "object",
+            "required": ["added", "modified", "removed"],
+            "additionalProperties": false,
+            "properties": {
+              "added": { "type": "array", "items": { "type": "string" } },
+              "modified": { "type": "array", "items": { "type": "string" } },
+              "removed": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "changed_sections": { "type": "array", "items": { "type": "string" } },
+          "done_when_delta": {
+            "type": "object",
+            "required": ["added", "modified", "removed"],
+            "additionalProperties": false,
+            "properties": {
+              "added": { "type": "array", "items": { "type": "string" } },
+              "modified": { "type": "array", "items": { "type": "string" } },
+              "removed": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "impact_scope": { "type": "object", "additionalProperties": true },
+          "breaking": { "type": "boolean" },
+          "risk": { "type": "string" },
+          "related_commits": { "type": "array", "items": { "type": "string" } },
+          "related_decisions": { "type": "array", "items": { "type": "string" } },
+          "snapshot_after": { "type": "string" },
+          "follow_up": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "evolution_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "key_decisions": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    }
+  }
+}

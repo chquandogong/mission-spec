@@ -2,6 +2,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
+import { validateHistory } from "../schema/validator.js";
 
 export interface HistoryEntry {
   change_id: string;
@@ -57,7 +58,14 @@ export function loadHistory(projectDir: string): MissionHistory | null {
   if (!existsSync(historyPath)) return null;
 
   const content = readFileSync(historyPath, "utf-8");
-  return parse(content) as MissionHistory;
+  const data = parse(content);
+  const result = validateHistory(data);
+  if (!result.valid) {
+    throw new Error(
+      `mission-history.yaml schema 오류:\n${result.errors.join("\n")}`,
+    );
+  }
+  return data as MissionHistory;
 }
 
 export function getLatestEntry(history: MissionHistory): HistoryEntry | null {

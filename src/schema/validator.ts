@@ -7,6 +7,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const schema = JSON.parse(
   readFileSync(resolve(__dirname, 'mission.schema.json'), 'utf-8'),
 );
+const historySchema = JSON.parse(
+  readFileSync(resolve(__dirname, 'mission-history.schema.json'), 'utf-8'),
+);
 
 export interface ValidationResult {
   valid: boolean;
@@ -14,23 +17,30 @@ export interface ValidationResult {
 }
 
 const ajv = new (Ajv as unknown as typeof Ajv.default)({ allErrors: true });
-const validate = ajv.compile(schema);
+const validateMissionFn = ajv.compile(schema);
+const validateHistoryFn = ajv.compile(historySchema);
+
+function formatErrors(errors: ErrorObject[] | null | undefined): string[] {
+  return (errors ?? []).map((err: ErrorObject) => {
+    const path = err.instancePath || '/';
+    return `${path}: ${err.message}`;
+  });
+}
 
 export function validateMission(data: unknown): ValidationResult {
   if (data === null || data === undefined || typeof data !== 'object') {
     return { valid: false, errors: ['Input must be a non-null object'] };
   }
 
-  const valid = validate(data);
+  const valid = validateMissionFn(data);
+  return { valid, errors: valid ? [] : formatErrors(validateMissionFn.errors) };
+}
 
-  if (valid) {
-    return { valid: true, errors: [] };
+export function validateHistory(data: unknown): ValidationResult {
+  if (data === null || data === undefined || typeof data !== 'object') {
+    return { valid: false, errors: ['Input must be a non-null object'] };
   }
 
-  const errors = (validate.errors ?? []).map((err: ErrorObject) => {
-    const path = err.instancePath || '/';
-    return `${path}: ${err.message}`;
-  });
-
-  return { valid: false, errors };
+  const valid = validateHistoryFn(data);
+  return { valid, errors: valid ? [] : formatErrors(validateHistoryFn.errors) };
 }
