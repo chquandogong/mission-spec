@@ -89,3 +89,7 @@ console.log('Report saved to mission-report.md');
 - 리포트에는 타임스탬프가 포함되어 각 실행을 구분할 수 있습니다.
 - PASS는 모든 done_when이 충족된 경우에만 표시됩니다.
 - `mission-history.yaml`이 없으면 Recent Changes 섹션이 생략됩니다.
+- `mission-history.yaml`이 스키마에 맞지 않으면 (v1.6.0+) 실패 대신
+  리포트에 `## History` 섹션으로 `History unavailable: ...` 경고를 표시하고
+  나머지 평가는 정상 수행합니다. 반환값의 `historyWarning` 필드로도 전달됩니다.
+- `llm-eval` / `llm-judge` 타입 criterion은 `.mission/evals/<name>.result.yaml`에 판정이 기록되어야 PASS로 집계됩니다 (ms-eval SKILL 참조).

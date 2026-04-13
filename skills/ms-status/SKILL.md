@@ -76,3 +76,6 @@ console.log(s.markdown);
 - `mission.yaml`이 없으면 에러를 반환합니다.
 - constraints가 없으면 해당 섹션을 생략합니다.
 - `mission-history.yaml`이 없으면 Evolution 섹션이 생략됩니다.
+- `mission-history.yaml`이 스키마에 맞지 않으면 (v1.6.0+) 실패 대신
+  Evolution 섹션에 `History unavailable: ...` 경고만 표시하고 상태 평가는 정상 수행합니다.
+  반환값의 `historyWarning` 필드로도 전달됩니다.

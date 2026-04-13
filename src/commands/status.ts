@@ -14,6 +14,7 @@ export interface StatusResult {
   phase?: string;
   phaseTheme?: string;
   totalRevisions?: number;
+  historyWarning?: string;
   markdown: string;
 }
 
@@ -53,28 +54,35 @@ export function getMissionStatus(projectDir: string): StatusResult {
   let phase: string | undefined;
   let phaseTheme: string | undefined;
   let totalRevisions: number | undefined;
+  let historyWarning: string | undefined;
 
-  const history = loadHistory(projectDir);
-  if (history) {
-    totalRevisions = history.meta.total_revisions;
-    const currentPhase = getCurrentPhase(history);
-    if (currentPhase) {
-      phase = currentPhase.name;
-      phaseTheme = currentPhase.theme;
-    }
+  try {
+    const history = loadHistory(projectDir);
+    if (history) {
+      totalRevisions = history.meta.total_revisions;
+      const currentPhase = getCurrentPhase(history);
+      if (currentPhase) {
+        phase = currentPhase.name;
+        phaseTheme = currentPhase.theme;
+      }
 
-    md.push("", "## Evolution", "");
-    if (currentPhase) {
-      md.push(`**Phase:** ${currentPhase.name} — ${currentPhase.theme}`);
-    }
-    md.push(`**Revisions:** ${history.meta.total_revisions}`);
+      md.push("", "## Evolution", "");
+      if (currentPhase) {
+        md.push(`**Phase:** ${currentPhase.name} — ${currentPhase.theme}`);
+      }
+      md.push(`**Revisions:** ${history.meta.total_revisions}`);
 
-    if (history.evolution_summary?.phases) {
-      md.push("");
-      history.evolution_summary.phases.forEach((p) => {
-        md.push(`- **${p.name}** (${p.versions.join(", ")}): ${p.theme}`);
-      });
+      if (history.evolution_summary?.phases) {
+        md.push("");
+        history.evolution_summary.phases.forEach((p) => {
+          md.push(`- **${p.name}** (${p.versions.join(", ")}): ${p.theme}`);
+        });
+      }
     }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    historyWarning = `History unavailable: ${message}`;
+    md.push("", "## Evolution", "", historyWarning);
   }
 
   return {
@@ -88,6 +96,7 @@ export function getMissionStatus(projectDir: string): StatusResult {
     phase,
     phaseTheme,
     totalRevisions,
+    historyWarning,
     markdown: md.join("\n"),
   };
 }

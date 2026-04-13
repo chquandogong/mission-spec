@@ -84,4 +84,17 @@ describe('getMissionStatus', () => {
     expect(result.markdown).toContain('# Markdown');
     expect(result.markdown).toContain('condition 1');
   });
+
+  it('falls back gracefully when mission-history.yaml is invalid', () => {
+    writeMission(tempDir, {
+      title: 'History Fallback',
+      goal: 'Status still works',
+      done_when: ['condition 1'],
+    });
+    writeFileSync(join(tempDir, 'mission-history.yaml'), 'meta: {}\n');
+    const result = getMissionStatus(tempDir);
+    expect(result.progress).toBe('0/1');
+    expect(result.historyWarning).toContain('History unavailable');
+    expect(result.markdown).toContain('History unavailable');
+  });
 });

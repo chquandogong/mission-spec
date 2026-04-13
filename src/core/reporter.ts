@@ -13,6 +13,7 @@ export interface ReportData {
   allPassed: boolean;
   timestamp: string;
   recentChanges?: HistoryEntry[];
+  historyWarning?: string;
 }
 
 export function renderReport(data: ReportData): string {
@@ -39,6 +40,8 @@ export function renderReport(data: ReportData): string {
   if (data.recentChanges && data.recentChanges.length > 0) {
     lines.push("", "## Recent Changes", "");
     data.recentChanges.forEach((entry) => {
+      const added = entry.changes?.added ?? [];
+      const modified = entry.changes?.modified ?? [];
       lines.push(`### ${entry.semantic_version} (${entry.date})`);
       lines.push("");
       lines.push(`- **Intent:** ${entry.intent}`);
@@ -46,14 +49,18 @@ export function renderReport(data: ReportData): string {
         `- **Type:** ${entry.change_type} | **Persistence:** ${entry.persistence}`,
       );
       if (entry.breaking) lines.push("- **Breaking change**");
-      if (entry.changes.added.length > 0) {
-        lines.push(`- Added: ${entry.changes.added.join(", ")}`);
+      if (added.length > 0) {
+        lines.push(`- Added: ${added.join(", ")}`);
       }
-      if (entry.changes.modified.length > 0) {
-        lines.push(`- Modified: ${entry.changes.modified.join(", ")}`);
+      if (modified.length > 0) {
+        lines.push(`- Modified: ${modified.join(", ")}`);
       }
       lines.push("");
     });
+  }
+
+  if (data.historyWarning) {
+    lines.push("", "## History", "", data.historyWarning);
   }
 
   lines.push("---", `Mission Spec Report — ${data.timestamp}`);

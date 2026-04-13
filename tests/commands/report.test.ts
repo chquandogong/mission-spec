@@ -99,4 +99,53 @@ describe('generateMissionReport', () => {
     writeFileSync(join(tempDir, 'mission.yaml'), stringify({ mission: { title: 'bad' } }));
     expect(() => generateMissionReport(tempDir)).toThrow(/schema/i);
   });
+
+  it('falls back gracefully when mission-history.yaml is invalid', () => {
+    writeMission(tempDir, {
+      title: 'History Fallback',
+      goal: 'Report still works',
+      done_when: ['condition 1'],
+    });
+    writeFileSync(join(tempDir, 'mission-history.yaml'), 'meta: {}\n');
+    const result = generateMissionReport(tempDir);
+    expect(result.historyWarning).toContain('History unavailable');
+    expect(result.markdown).toContain('## History');
+    expect(result.markdown).toContain('History unavailable');
+  });
+
+  it('renders recent changes when history uses empty arrays', () => {
+    writeMission(tempDir, {
+      title: 'History Present',
+      goal: 'Report recent changes',
+      done_when: ['condition 1'],
+    });
+    writeFileSync(
+      join(tempDir, 'mission-history.yaml'),
+      stringify({
+        meta: {
+          mission_id: 'm',
+          total_revisions: 1,
+          latest_version: '1.0.0',
+        },
+        timeline: [
+          {
+            change_id: 'c1',
+            semantic_version: '1.0.0',
+            date: '2026-04-01',
+            author: 'tester',
+            change_type: 'initial',
+            persistence: 'permanent',
+            intent: 'first release',
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = generateMissionReport(tempDir);
+    expect(result.markdown).toContain('## Recent Changes');
+    expect(result.markdown).toContain('### 1.0.0 (2026-04-01)');
+  });
 });

@@ -2,7 +2,7 @@
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
 import { renderReport } from "../core/reporter.js";
-import { loadHistory } from "../core/history.js";
+import { loadHistory, type HistoryEntry } from "../core/history.js";
 
 export interface ReportResult {
   markdown: string;
@@ -10,6 +10,7 @@ export interface ReportResult {
   total: number;
   allPassed: boolean;
   timestamp: string;
+  historyWarning?: string;
 }
 
 export function generateMissionReport(projectDir: string): ReportResult {
@@ -19,8 +20,15 @@ export function generateMissionReport(projectDir: string): ReportResult {
   const evalResult = evaluateMission(projectDir);
   const timestamp = new Date().toISOString();
 
-  const history = loadHistory(projectDir);
-  const recentChanges = history?.timeline.slice(0, 3);
+  let recentChanges: HistoryEntry[] | undefined;
+  let historyWarning: string | undefined;
+  try {
+    const history = loadHistory(projectDir);
+    recentChanges = history?.timeline.slice(0, 3);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    historyWarning = `History unavailable: ${message}`;
+  }
 
   const markdown = renderReport({
     title: m.title,
@@ -33,6 +41,7 @@ export function generateMissionReport(projectDir: string): ReportResult {
     allPassed: evalResult.allPassed,
     timestamp,
     recentChanges,
+    historyWarning,
   });
 
   return {
@@ -41,5 +50,6 @@ export function generateMissionReport(projectDir: string): ReportResult {
     total: evalResult.total,
     allPassed: evalResult.allPassed,
     timestamp,
+    historyWarning,
   };
 }
