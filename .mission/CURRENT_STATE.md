@@ -1,11 +1,11 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-13 | Version: 1.6.0
+> Last updated: 2026-04-14 | Version: 1.7.0
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.6 — Evaluator Extensibility + Snapshot Automation
-- **Phase:** eval-extensibility
+- **Title:** Mission Spec v1.7 — Architecture Assetization
+- **Phase:** architecture-assetization
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01
 
@@ -14,6 +14,7 @@
 Mission Spec을 core library와 Claude Code skill bundle로 구현.
 누구나 쉽게 설치하여 사용할 수 있는 portable한 task contract 도구.
 mission.yaml의 변경 이력을 Living Asset Registry로 관리.
+아키텍처 지식을 machine-readable 자산으로 포착.
 
 ## 핵심 제약 (활성)
 
@@ -40,17 +41,29 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 
 - (없음)
 
-## 최근 구현 (v1.6.0)
+## 최근 구현 (v1.7.0)
 
-- [x] pre-commit hook으로 snapshot 자동 생성 (`.githooks/pre-commit` + `scripts/snapshot-mission.js`)
-- [x] LLM/주관 평가 타입 (`llm-eval` + `llm-judge`) 및 `.mission/evals/<name>.result.yaml` 오버라이드
+- [x] `design_refs` 스키마 필드 — 설계 문서 위치 포인터
+- [x] `architecture_doc_freshness` llm-eval — 설계 문서 stale 자동 감지
+- [x] `architecture_delta` history 스키마 필드 — 모듈/인터페이스 변경 추적
+- [x] Architecture Registry (`.mission/architecture/ARCHITECTURE_CURRENT.yaml`)
+- [x] Dependency Graph (`.mission/architecture/DEPENDENCY_GRAPH.yaml`)
+- [x] API/Interface Registry (`.mission/interfaces/API_REGISTRY.yaml`)
+- [x] Traceability Matrix (`.mission/traceability/TRACE_MATRIX.yaml`)
+
+## 이전 구현 (v1.6.0)
+
+- [x] pre-commit hook으로 snapshot 자동 생성
+- [x] LLM/주관 평가 타입 (`llm-eval` + `llm-judge`) 및 오버라이드
 - [x] `mission-history.yaml` JSON Schema + `validateHistory()` public API
-- [x] ms-status/ms-report graceful fallback (history 스키마 오류 시 경고만 표시)
+- [x] ms-status/ms-report graceful fallback
 
-## 다음 변경 후보
+## 다음 변경 후보 (Tier 3: Consumption Layer)
 
-- 스냅샷 훅 자동 설치 커맨드 (`npm run setup-hooks`)
-- `ms-eval`이 LLM 오버라이드 생성/갱신을 대화형으로 돕는 UX
+- `ms-context` 명령어 — 새 에이전트를 위한 시스템 프롬프트 자동 생성
+- Reconstruction Playbook — 빈 프로젝트에서 자산만으로 재구현하는 가이드
+- Traceability Report 자동 생성 — ms-report에서 TRACE_MATRIX 기반 표 렌더링
+- Verification Evidence Ledger — 검증 시점/환경/결과 기록 (CI/CD 연동)
 
 ## 자기 검증
 
@@ -58,3 +71,4 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 - [x] mission-history.yaml만 보면 왜 그렇게 바뀌었는지 알 수 있는가?
 - [x] 특정 버전을 다시 꺼내 재실행할 수 있는가?
 - [x] 임시 조치인지 영구 정책인지 구분되는가?
+- [x] 코드를 읽지 않고도 모듈 구조를 알 수 있는가? (v1.7.0+)

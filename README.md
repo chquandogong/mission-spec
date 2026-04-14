@@ -281,6 +281,8 @@ npm run build
 - 제공 중: history API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`, `validateHistory()`
 - 제공 중: LLM/주관 평가 오버라이드 (`llm-eval`, `llm-judge` + `.mission/evals/<name>.result.yaml`)
 - 제공 중: 스냅샷 자동화 (`npm run snapshot`, `.githooks/pre-commit`)
+- 제공 중: `design_refs` 스키마 필드 + `architecture_delta` history 필드 (v1.7.0+)
+- 제공 중: Architecture Registry, Dependency Graph, API Registry, Traceability Matrix (`.mission/` 하위)
 - 미포함: GitHub/PR integration runtime, 별도 orchestration framework, SaaS/UI
 
 ## 설계 원칙

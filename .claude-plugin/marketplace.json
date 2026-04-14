@@ -9,8 +9,8 @@
     {
       "name": "mission-spec",
       "source": "./",
-      "description": "Mission Spec core API + Claude Code skills (ms-init, ms-eval, ms-status, ms-report) + Living Asset Registry + LLM/주관 평가 오버라이드",
-      "version": "1.6.0"
+      "description": "Mission Spec core API + Claude Code skills (ms-init, ms-eval, ms-status, ms-report) + Living Asset Registry + Architecture Registry",
+      "version": "1.7.0"
     }
   ]
 }

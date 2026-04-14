@@ -4,15 +4,88 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.6 — Evaluator Extensibility + Snapshot Automation"
+  mission_title: "Mission Spec v1.7 — Architecture Assetization"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 6
-  latest_version: "1.6.0"
+  total_revisions: 7
+  latest_version: "1.7.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-14-001"
+    semantic_version: "1.7.0"
+    change_sequence: 11
+    date: "2026-04-14"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.6", "Gemini", "Codex"]
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "Architecture Assetization — 3-모델 교차 검증 합의에 따라 아키텍처 지식을 machine-readable 자산으로 포착"
+    decision: "Tier 1(Capture Stabilization): design_refs 스키마 필드, architecture_doc_freshness llm-eval, architecture_delta history 필드. Tier 2(Registry Layer): Architecture Registry, Dependency Graph, API/Interface Registry, Traceability Matrix."
+    triggered_by: "3-모델(Gemini, Claude Opus 4.6, Codex) 독립 분석 + 2라운드 교차 검증 → 아키텍처 정보 부재가 재현성의 핵심 갭임을 만장일치 식별"
+    issue_or_context: "Living Asset Registry(v1.5.0)가 '변경 이력'을 자산화했으나, '아키텍처 지식'(모듈 구조, 의존 그래프, API 시그니처, 컴포넌트 프로토콜)은 코드에만 존재하여 재현 불가"
+    changes:
+      added:
+        - "design_refs 스키마 필드 (mission.schema.json, DesignRefs definition)"
+        - "architecture_delta history 스키마 필드 (mission-history.schema.json)"
+        - "architecture_doc_freshness eval (mission.yaml, llm-eval 타입)"
+        - ".mission/architecture/ARCHITECTURE_CURRENT.yaml (11 모듈 registry)"
+        - ".mission/architecture/DEPENDENCY_GRAPH.yaml (14 edges directed graph)"
+        - ".mission/interfaces/API_REGISTRY.yaml (11 functions, 4 skills, 5 file contracts)"
+        - ".mission/traceability/TRACE_MATRIX.yaml (9 requirements, 4 MDR traces, 8 test files)"
+        - "ArchitectureDelta, ModuleEntry, InterfaceChange TypeScript types"
+      modified:
+        - "mission.yaml: design_refs 추가, architecture_doc_freshness eval 추가"
+        - "src/core/parser.ts: MissionDocument에 design_refs 필드"
+        - "src/core/history.ts: ArchitectureDelta 관련 타입 추가"
+        - "README.md: design_refs 문서, 현재 범위 업데이트"
+        - "skills/ms-eval/SKILL.md: architecture_doc_freshness 언급"
+      removed: []
+    changed_sections: [title, version, design_refs, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: true
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — 모든 추가 필드는 optional, 기존 mission.yaml/history.yaml 호환 유지"
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-14_v1.7.0_mission.yaml"
+    follow_up:
+      - "Tier 3: ms-context 명령어 (AI agent onboarding prompt 자동 생성)"
+      - "Tier 3: Reconstruction Playbook (.mission/reconstruction/REBUILD_PLAYBOOK.md)"
+      - "Tier 3: Traceability Report 자동 생성 (ms-report 확장)"
+    architecture_delta:
+      modules_added: []
+      interfaces_changed:
+        - module: "src/schema/mission.schema.json"
+          added_fields: ["design_refs (DesignRefs)"]
+          reason: "설계 문서 위치 포인터 선언"
+        - module: "src/schema/mission-history.schema.json"
+          added_fields: ["architecture_delta (optional object)"]
+          reason: "모듈/인터페이스 변경 추적"
+        - module: "src/core/parser.ts"
+          added_fields: ["MissionDocument.mission.design_refs"]
+          reason: "design_refs 타입 반영"
+        - module: "src/core/history.ts"
+          added_fields:
+            [
+              "HistoryEntry.architecture_delta",
+              "ModuleEntry",
+              "InterfaceChange",
+              "ArchitectureDelta",
+            ]
+          reason: "architecture_delta 타입 정의"
+
   - change_id: "MSC-2026-04-13-001"
     semantic_version: "1.6.0"
     change_sequence: 10
@@ -364,6 +437,11 @@ evolution_summary:
       date_range: "2026-04-13"
       theme: "Evaluator 확장성 + 스냅샷 자동화"
       description: "llm-eval 타입과 오버라이드 파일로 LLM/주관 판정 수용, mission-history JSON Schema + validateHistory API, 스냅샷 스크립트 + pre-commit 훅, status/report graceful fallback"
+    - name: "architecture-assetization"
+      versions: ["1.7.0"]
+      date_range: "2026-04-14"
+      theme: "아키텍처 지식의 자산화"
+      description: "3-모델 교차 검증 합의 기반. design_refs + architecture_delta 스키마 확장, Architecture/Dependency/API Registry + Traceability Matrix로 구조 정보를 machine-readable 자산화"
 
   identity_evolution:
     - version: "1.0.0"
@@ -374,8 +452,10 @@ evolution_summary:
       identity: "자산 관리가 가능한 task contract 도구 (Living Asset Registry)"
     - version: "1.6.0"
       identity: "확장 가능한 평가 + 자동 아카이브 도구 (Evaluator Extensibility + Snapshot Automation)"
+    - version: "1.7.0"
+      identity: "재현 가능한 아키텍처 자산 도구 (Architecture Assetization)"
 
-  identity_evolution_note: "제품 정체성이 플러그인 → 범용 도구 → 자산 관리 도구 → 확장 가능한 평가/자동화 도구로 진화"
+  identity_evolution_note: "제품 정체성이 플러그인 → 범용 도구 → 자산 관리 → 평가/자동화 → 재현 가능한 아키텍처 자산으로 진화"
 
   done_when_evolution:
     - version: "1.0.0"
