@@ -1,8 +1,11 @@
-// ms-eval — done_when 기준 대비 현재 상태 평가
-import { loadAndValidateMission } from '../core/parser.js';
-import { evaluateAllCriteria, type CriterionResult } from '../core/evaluator.js';
+// ms-eval — evaluate current state against done_when criteria
+import { loadAndValidateMission } from "../core/parser.js";
+import {
+  evaluateAllCriteria,
+  type CriterionResult,
+} from "../core/evaluator.js";
 
-export { type CriterionResult } from '../core/evaluator.js';
+export { type CriterionResult } from "../core/evaluator.js";
 
 export interface EvalResult {
   criteria: CriterionResult[];
@@ -22,7 +25,7 @@ export function evaluateMission(projectDir: string): EvalResult {
   const total = criteria.length;
   const allPassed = passed === total;
 
-  const summary = `${passed}/${total} criteria passed${allPassed ? ' — mission complete!' : ''}`;
+  const summary = `${passed}/${total} criteria passed${allPassed ? " — mission complete!" : ""}`;
 
   return { criteria, allPassed, passed, total, summary };
 }

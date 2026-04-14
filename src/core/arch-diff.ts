@@ -1,4 +1,4 @@
-// Architecture Registry 버전 간 diff 생성
+// Architecture Registry diff generation between versions
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";

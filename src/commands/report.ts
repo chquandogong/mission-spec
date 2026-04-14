@@ -1,4 +1,4 @@
-// ms-report — run report 생성
+// ms-report — run report generation
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";

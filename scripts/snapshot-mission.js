@@ -20,7 +20,7 @@ const missionData = parse(content);
 const version = missionData?.mission?.version;
 
 if (!version) {
-  console.error("mission.yaml에 version 필드가 없습니다.");
+  console.error("mission.yaml is missing the version field.");
   process.exit(1);
 }
 
@@ -44,14 +44,14 @@ const existingSnapshot = readdirSync(snapshotDir).find((name) =>
 
 if (existingSnapshot) {
   if (existingSnapshot !== snapshotName) {
-    console.log(`기존 버전 스냅샷 유지: ${existingSnapshot}`);
+    console.log(`Existing version snapshot retained: ${existingSnapshot}`);
   }
   process.exit(0);
 }
 
 if (!existsSync(snapshotPath)) {
-  console.log(`새로운 스냅샷 생성: ${snapshotName}`);
+  console.log(`New snapshot created: ${snapshotName}`);
   copyFileSync(missionPath, snapshotPath);
-  // 스테이징은 호출측(pre-commit 훅 등)에서 수행합니다.
-  // 스크립트 자체는 git 상태를 변경하지 않습니다.
+  // Staging is handled by the caller (e.g., pre-commit hook).
+  // This script does not modify git state.
 }

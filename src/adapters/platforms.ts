@@ -1,4 +1,4 @@
-// Cross-platform 변환: Cursor, Codex, OpenCode
+// Cross-platform conversion: Cursor, Codex, OpenCode
 export interface MissionSpec {
   title: string;
   goal: string;
@@ -9,52 +9,52 @@ export interface MissionSpec {
 export function convertToCursor(mission: MissionSpec): string {
   const lines: string[] = [
     `# ${mission.title}`,
-    '',
+    "",
     `## Goal`,
     mission.goal,
-    '',
-    '## Done When',
+    "",
+    "## Done When",
   ];
   mission.done_when.forEach((c) => lines.push(`- ${c}`));
 
   if (mission.constraints && mission.constraints.length > 0) {
-    lines.push('', '## Constraints');
+    lines.push("", "## Constraints");
     mission.constraints.forEach((c) => lines.push(`- ${c}`));
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 export function convertToCodex(mission: MissionSpec): string {
   const lines: string[] = [
     `# ${mission.title}`,
-    '',
+    "",
     mission.goal,
-    '',
-    '## Checklist',
+    "",
+    "## Checklist",
   ];
   mission.done_when.forEach((c) => lines.push(`- [ ] ${c}`));
 
   if (mission.constraints && mission.constraints.length > 0) {
-    lines.push('', '## Constraints');
+    lines.push("", "## Constraints");
     mission.constraints.forEach((c) => lines.push(`- ${c}`));
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function tomlString(value: string): string {
-  if (value.includes('\n')) {
+  if (value.includes("\n")) {
     // TOML multiline basic string: quotes are allowed inside without escaping
     return `"""\n${value}"""`;
   }
   // TOML basic string: escape backslashes first, then double quotes
-  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   return `"${escaped}"`;
 }
 
 function tomlArray(arr: string[]): string {
-  return `[ ${arr.map((s) => tomlString(s)).join(', ')} ]`;
+  return `[ ${arr.map((s) => tomlString(s)).join(", ")} ]`;
 }
 
 export function convertToOpenCode(mission: MissionSpec): string {
@@ -69,5 +69,5 @@ export function convertToOpenCode(mission: MissionSpec): string {
     lines.push(`constraints = ${tomlArray(mission.constraints)}`);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

@@ -47,6 +47,8 @@ timeline:
         - "package.json, plugin.json, marketplace.json: descriptions to English"
         - "scripts/validate-history-commits.js: all messages to English"
         - "tests/commands/eval.test.ts, tests/scripts/validate-history-commits.test.ts: expected strings updated"
+        - "src/commands/{status,report,context,eval}.ts, src/adapters/platforms.ts, src/core/arch-diff.ts: header comments to English"
+        - "scripts/{validate-schema,convert-platforms,snapshot-mission}.js: comments and console messages to English"
       removed: []
     changed_sections: [title, version]
     done_when_delta:

@@ -1,4 +1,4 @@
-// ms-context — AI 에이전트를 위한 프로젝트 컨텍스트 프롬프트 생성
+// ms-context — project context prompt generation for AI agents
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";

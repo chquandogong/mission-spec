@@ -1,4 +1,4 @@
-// ms-status — 미션 진행 상황 요약
+// ms-status — mission progress summary
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
 import { loadHistory, getCurrentPhase } from "../core/history.js";
