@@ -4,6 +4,26 @@ import { join } from "node:path";
 import { parse } from "yaml";
 import { validateHistory } from "../schema/validator.js";
 
+export interface ModuleEntry {
+  path: string;
+  role: string;
+  depends_on?: string[];
+  depended_by?: string[];
+}
+
+export interface InterfaceChange {
+  module: string;
+  added_fields?: string[];
+  removed_fields?: string[];
+  reason?: string;
+}
+
+export interface ArchitectureDelta {
+  modules_added?: ModuleEntry[];
+  modules_removed?: string[];
+  interfaces_changed?: InterfaceChange[];
+}
+
 export interface HistoryEntry {
   change_id: string;
   semantic_version: string;
@@ -18,6 +38,7 @@ export interface HistoryEntry {
   impact_scope: Record<string, boolean>;
   breaking: boolean;
   risk?: string;
+  architecture_delta?: ArchitectureDelta;
 }
 
 export interface EvolutionPhase {

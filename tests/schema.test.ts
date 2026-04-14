@@ -391,4 +391,82 @@ describe("validateHistory", () => {
     const result = validateHistory(null);
     expect(result.valid).toBe(false);
   });
+
+  it("accepts timeline entry with architecture_delta", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "enhancement",
+          persistence: "permanent",
+          intent: "add history loader",
+          changes: {
+            added: ["src/core/history.ts"],
+            modified: [],
+            removed: [],
+          },
+          done_when_delta: { added: [], modified: [], removed: [] },
+          impact_scope: { api: true },
+          breaking: false,
+          architecture_delta: {
+            modules_added: [
+              {
+                path: "src/core/history.ts",
+                role: "mission-history.yaml loader",
+                depends_on: ["src/schema/validator.ts"],
+                depended_by: ["src/commands/status.ts"],
+              },
+            ],
+            interfaces_changed: [
+              {
+                module: "src/commands/status.ts",
+                added_fields: ["historyWarning?: string"],
+                reason: "graceful fallback",
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects architecture_delta with unknown module fields", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "enhancement",
+          persistence: "permanent",
+          intent: "test",
+          changes: { added: [], modified: [], removed: [] },
+          done_when_delta: { added: [], modified: [], removed: [] },
+          impact_scope: {},
+          breaking: false,
+          architecture_delta: {
+            modules_added: [
+              { path: "x.ts", role: "test", unknown_field: true },
+            ],
+          },
+        },
+      ],
+    });
+    expect(result.valid).toBe(false);
+  });
 });

@@ -24,9 +24,17 @@
       "items": {
         "type": "object",
         "required": [
-          "change_id", "semantic_version", "date", "author",
-          "change_type", "persistence", "intent", "changes",
-          "done_when_delta", "impact_scope", "breaking"
+          "change_id",
+          "semantic_version",
+          "date",
+          "author",
+          "change_type",
+          "persistence",
+          "intent",
+          "changes",
+          "done_when_delta",
+          "impact_scope",
+          "breaking"
         ],
         "additionalProperties": false,
         "properties": {
@@ -38,7 +46,10 @@
           "contributors": { "type": "array", "items": { "type": "string" } },
           "change_type": { "type": "string" },
           "motivation_type": { "type": "string" },
-          "persistence": { "type": "string", "enum": ["permanent", "transient", "experimental"] },
+          "persistence": {
+            "type": "string",
+            "enum": ["permanent", "transient", "experimental"]
+          },
           "intent": { "type": "string" },
           "decision": { "type": "string" },
           "triggered_by": { "type": "string" },
@@ -53,7 +64,10 @@
               "removed": { "type": "array", "items": { "type": "string" } }
             }
           },
-          "changed_sections": { "type": "array", "items": { "type": "string" } },
+          "changed_sections": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
           "done_when_delta": {
             "type": "object",
             "required": ["added", "modified", "removed"],
@@ -68,9 +82,63 @@
           "breaking": { "type": "boolean" },
           "risk": { "type": "string" },
           "related_commits": { "type": "array", "items": { "type": "string" } },
-          "related_decisions": { "type": "array", "items": { "type": "string" } },
+          "related_decisions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
           "snapshot_after": { "type": "string" },
-          "follow_up": { "type": "array", "items": { "type": "string" } }
+          "follow_up": { "type": "array", "items": { "type": "string" } },
+          "architecture_delta": {
+            "type": "object",
+            "description": "이 변경으로 인한 모듈 구조/인터페이스 변화 (optional)",
+            "additionalProperties": false,
+            "properties": {
+              "modules_added": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["path", "role"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "path": { "type": "string" },
+                    "role": { "type": "string" },
+                    "depends_on": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "depended_by": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              },
+              "modules_removed": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "interfaces_changed": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["module"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "module": { "type": "string" },
+                    "added_fields": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "removed_fields": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "reason": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
