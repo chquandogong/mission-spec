@@ -94,6 +94,11 @@ mission:
     - "README.md"
     - ".claude-plugin/plugin.json"
 
+  design_refs:
+    architecture: "docs/internal/ARCHITECTURE.md"
+    api_surface: "src/index.ts"
+    type_definitions: "src/core/parser.ts"
+
   lineage:
     initial_version: "1.0.0"
     initial_date: "2026-04-02"

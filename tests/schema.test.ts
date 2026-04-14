@@ -244,6 +244,45 @@ describe("validateMission", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes("pass_criteria"))).toBe(true);
   });
+
+  it("accepts mission with design_refs", () => {
+    const result = validateMission({
+      mission: {
+        title: "test",
+        goal: "test",
+        done_when: ["done"],
+        design_refs: {
+          architecture: "docs/ARCHITECTURE.md",
+          api_surface: "src/index.ts",
+        },
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("accepts mission with empty design_refs", () => {
+    const result = validateMission({
+      mission: {
+        title: "test",
+        goal: "test",
+        done_when: ["done"],
+        design_refs: {},
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  it("rejects design_refs with unknown properties", () => {
+    const result = validateMission({
+      mission: {
+        title: "test",
+        goal: "test",
+        done_when: ["done"],
+        design_refs: { unknown_field: "path" },
+      },
+    });
+    expect(result.valid).toBe(false);
+  });
 });
 
 describe("validateHistory", () => {

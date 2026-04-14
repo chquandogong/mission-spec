@@ -120,6 +120,11 @@ mission:
       approver: "human"
   execution_hints:
     topology: "sequential"
+  design_refs: # v1.7.0+
+    architecture: "docs/internal/ARCHITECTURE.md"
+    api_surface: "src/index.ts"
+    type_definitions: "src/core/parser.ts"
+    component_protocol: "docs/internal/DATA_FLOW.md"
   lineage: # v1.5.0+
     initial_version: "1.0.0"
     initial_date: "2026-04-02"

@@ -76,6 +76,10 @@
         "lineage": {
           "$ref": "#/definitions/Lineage",
           "description": "변경 이력 참조 (optional)"
+        },
+        "design_refs": {
+          "$ref": "#/definitions/DesignRefs",
+          "description": "설계 문서 위치 포인터 (optional) — 아키텍처, API, 타입 정의 등"
         }
       }
     }
@@ -206,6 +210,29 @@
         "note": {
           "type": "string",
           "description": "추가 노트"
+        }
+      }
+    },
+    "DesignRefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "프로젝트 설계 문서 위치 포인터. 실제 설계 내용은 포함하지 않고 경로만 선언한다.",
+      "properties": {
+        "architecture": {
+          "type": "string",
+          "description": "아키텍처 문서 경로 (예: docs/internal/ARCHITECTURE.md)"
+        },
+        "api_surface": {
+          "type": "string",
+          "description": "공개 API 정의 파일 경로 (예: src/index.ts)"
+        },
+        "type_definitions": {
+          "type": "string",
+          "description": "핵심 타입 정의 파일 경로 (예: src/core/parser.ts)"
+        },
+        "component_protocol": {
+          "type": "string",
+          "description": "컴포넌트 간 데이터 흐름 문서 경로"
         }
       }
     },

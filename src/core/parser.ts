@@ -25,6 +25,12 @@ export interface MissionDocument {
     version?: string;
     author?: string;
     created?: string;
+    design_refs?: {
+      architecture?: string;
+      api_surface?: string;
+      type_definitions?: string;
+      component_protocol?: string;
+    };
     lineage?: {
       initial_version: string;
       initial_date?: string;
