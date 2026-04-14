@@ -88,11 +88,11 @@ timeline:
         "a34ff47",
         "f473350",
         "80bad04",
+        "83d078c",
       ]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-14_v1.7.0_mission.yaml"
     follow_up:
-      - "Architecture Registry 버전 간 diff 자동 생성기"
       - "ms-context 출력을 clipboard/파일로 직접 내보내는 UX"
       - "CI/CD에서 VERIFICATION_LOG 자동 갱신"
     architecture_delta:
