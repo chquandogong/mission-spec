@@ -8,6 +8,10 @@ export { getMissionStatus } from "./commands/status.js";
 export { generateMissionReport } from "./commands/report.js";
 export { generateContext } from "./commands/context.js";
 export {
+  diffArchitectures,
+  diffArchitectureFromGit,
+} from "./core/arch-diff.js";
+export {
   loadHistory,
   getLatestEntry,
   getCurrentPhase,

@@ -63,6 +63,12 @@ public_api:
     - name: "generateContext"
       signature: "(projectDir: string) => ContextResult"
       source: "src/commands/context.ts"
+    - name: "diffArchitectures"
+      signature: "(oldData, newData, fromLabel?, toLabel?) => ArchDiffResult"
+      source: "src/core/arch-diff.ts"
+    - name: "diffArchitectureFromGit"
+      signature: "(projectDir: string, ref?: string) => ArchDiffResult"
+      source: "src/core/arch-diff.ts"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 

@@ -64,12 +64,14 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 - [x] Reconstruction Playbook — `.mission/reconstruction/REBUILD_PLAYBOOK.md`
 - [x] Traceability Report 자동 생성 — ms-report에서 TRACE_MATRIX 기반 표 렌더링
 - [x] Verification Evidence Ledger — `.mission/evidence/VERIFICATION_LOG.yaml`
+- [x] Architecture Diff 자동 생성기 — `npm run arch-diff [ref]` + `diffArchitectures()` API
+- [x] History commit validation — `npm run validate:history-commits` + pre-commit 연동
 
 ## 다음 변경 후보
 
-- Architecture Diff 자동 생성기 (Architecture Registry 버전 간 비교)
 - `ms-context` 출력을 clipboard/파일로 직접 내보내는 UX
 - CI/CD에서 VERIFICATION_LOG 자동 갱신
+- versioned architecture snapshots (`.mission/architecture/snapshots/`)
 
 ## 자기 검증
 

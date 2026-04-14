@@ -207,6 +207,20 @@ test_coverage:
         "error",
       ]
 
+  - test_file: "tests/core/arch-diff.test.ts"
+    cases: 7
+    covers: [arch-diff]
+    categories:
+      [
+        "module added",
+        "module removed",
+        "module changed",
+        "dependency edges",
+        "no diff",
+        "empty old",
+        "null modules",
+      ]
+
   - test_file: "tests/index.test.ts"
     cases: 1
     covers: []

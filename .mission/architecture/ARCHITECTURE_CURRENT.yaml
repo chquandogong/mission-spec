@@ -126,6 +126,18 @@ modules:
     types:
       - "ContextResult"
 
+  - id: arch-diff
+    path: "src/core/arch-diff.ts"
+    responsibility: "Architecture Registry 버전 간 diff 생성 (모듈/의존 변경 감지)"
+    depends_on: []
+    exports:
+      - "diffArchitectures(oldData, newData, fromLabel?, toLabel?): ArchDiffResult"
+      - "diffArchitectureFromGit(projectDir, ref?): ArchDiffResult"
+    types:
+      - "ArchDiffResult"
+      - "ModuleDiff"
+      - "DependencyDiff"
+
   - id: platforms
     path: "src/adapters/platforms.ts"
     responsibility: "cross-platform 변환 (Cursor, Codex, OpenCode)"

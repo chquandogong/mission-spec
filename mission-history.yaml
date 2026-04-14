@@ -43,6 +43,9 @@ timeline:
         - "scripts/validate-history-commits.js"
         - "tests/scripts/validate-history-commits.test.ts"
         - "ArchitectureDelta, ModuleEntry, InterfaceChange TypeScript types"
+        - "src/core/arch-diff.ts + diffArchitectures/diffArchitectureFromGit public API"
+        - "scripts/architecture-diff.js (CLI: npm run arch-diff [ref])"
+        - "tests/core/arch-diff.test.ts (7 tests)"
       modified:
         - "mission.yaml: design_refs 추가, architecture_doc_freshness eval 추가"
         - "src/core/parser.ts: MissionDocument에 design_refs 필드"
@@ -68,7 +71,24 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 신규 자산과 API는 대부분 optional이며, 기존 mission.yaml/history.yaml 호환 유지. 다만 문서/registry 동기화 운영 부담은 증가"
-    related_commits: ["ff7b76d", "47d8f0c", "c64ac59", "96c597a", "13e67cc", "3f90a5d", "878fee6", "210a444", "f7cced0", "f2a5151", "c193919", "d031863", "a34ff47", "f473350"]
+    related_commits:
+      [
+        "ff7b76d",
+        "47d8f0c",
+        "c64ac59",
+        "96c597a",
+        "13e67cc",
+        "3f90a5d",
+        "878fee6",
+        "210a444",
+        "f7cced0",
+        "f2a5151",
+        "c193919",
+        "d031863",
+        "a34ff47",
+        "f473350",
+        "80bad04",
+      ]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-14_v1.7.0_mission.yaml"
     follow_up:
@@ -274,7 +294,16 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — 메타데이터 추가, 기존 기능 변경 없음"
-    related_commits: ["c975f05", "8687510", "1f6f8b4", "8e97379", "6551158", "900f4a9", "89f767f"]
+    related_commits:
+      [
+        "c975f05",
+        "8687510",
+        "1f6f8b4",
+        "8e97379",
+        "6551158",
+        "900f4a9",
+        "89f767f",
+      ]
     related_decisions: ["MDR-004-done-when-eval-linking"]
     snapshot_after: ".mission/snapshots/2026-04-07_v1.4.0_mission.yaml"
     follow_up: []

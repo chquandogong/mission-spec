@@ -37,6 +37,9 @@ nodes:
   - id: context
     path: "src/commands/context.ts"
     layer: commands
+  - id: arch-diff
+    path: "src/core/arch-diff.ts"
+    layer: core
   - id: platforms
     path: "src/adapters/platforms.ts"
     layer: adapters
