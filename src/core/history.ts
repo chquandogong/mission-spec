@@ -38,6 +38,7 @@ export interface HistoryEntry {
   impact_scope: Record<string, boolean>;
   breaking: boolean;
   risk?: string;
+  decision?: string;
   architecture_delta?: ArchitectureDelta;
 }
 

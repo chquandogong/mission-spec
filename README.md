@@ -30,6 +30,7 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 - `/mission-spec:ms-eval` — done_when 기준 대비 현재 상태 평가
 - `/mission-spec:ms-status` — 미션 진행 상황 요약
 - `/mission-spec:ms-report` — run report 생성 (markdown)
+- `/mission-spec:ms-context` — AI 에이전트를 위한 프로젝트 컨텍스트 프롬프트 생성 (v1.7.0+)
 
 ### 방법 2: 소스에서 설치
 

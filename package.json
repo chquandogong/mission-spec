@@ -25,6 +25,10 @@
     "./commands/report": {
       "types": "./dist/commands/report.d.ts",
       "import": "./dist/commands/report.js"
+    },
+    "./commands/context": {
+      "types": "./dist/commands/context.d.ts",
+      "import": "./dist/commands/context.js"
     }
   },
   "scripts": {
