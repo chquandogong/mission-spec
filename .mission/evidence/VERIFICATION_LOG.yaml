@@ -1,0 +1,68 @@
+# Mission Spec — Verification Evidence Ledger
+# 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
+# CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
+# Last updated: 2026-04-14 | Version: 1.7.0
+
+entries:
+  - version: "1.7.0"
+    date: "2026-04-14"
+    verified_by: "Claude Opus 4.6"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 103
+        failed: 0
+        files: 9
+      npm_build: "success"
+      validate_schema: "3 fixtures passed"
+      convert_platforms_verify: "all conversions passed"
+      evaluate_mission:
+        criteria_passed: 9
+        criteria_total: 9
+        status: "mission complete"
+    notes: "Tier 1-3 로드맵 완료 후 최종 검증"
+
+  - version: "1.6.0"
+    date: "2026-04-13"
+    verified_by: "Claude Opus 4.6"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 88
+        failed: 0
+        files: 8
+      npm_build: "success"
+      validate_schema: "3 fixtures passed"
+      convert_platforms_verify: "all conversions passed"
+      evaluate_mission:
+        criteria_passed: 9
+        criteria_total: 9
+        status: "mission complete"
+    notes: "v1.6.0 릴리스 검증"
+
+  - version: "1.6.0"
+    date: "2026-04-14"
+    verified_by: "Codex"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 88
+        failed: 0
+        files: 8
+      npm_build: "success"
+      validate_schema: "3 fixtures passed"
+      convert_platforms_verify: "all conversions passed"
+      evaluate_mission:
+        criteria_passed: 9
+        criteria_total: 9
+        status: "mission complete"
+    notes: "교차 검증 보고서 작성 시 독립 검증"
