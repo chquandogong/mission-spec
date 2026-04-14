@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://mission-spec.dev/schema/v1/mission-history.schema.json",
   "title": "Mission History Ledger",
-  "description": "Mission Spec의 진화와 변경 이력을 추적하는 원장",
+  "description": "Ledger for tracking Mission Spec evolution and change history",
   "type": "object",
   "required": ["meta", "timeline"],
   "properties": {
@@ -97,7 +97,7 @@
           "follow_up": { "type": "array", "items": { "type": "string" } },
           "architecture_delta": {
             "type": "object",
-            "description": "이 변경으로 인한 모듈 구조/인터페이스 변화 (optional)",
+            "description": "Module structure/interface changes from this revision (optional)",
             "additionalProperties": false,
             "properties": {
               "modules_added": {

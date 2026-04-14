@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer",
+  "description": "Mission Spec — task contract layer for AI agent workflows",
   "owner": {
     "name": "Dr. QUAN",
     "email": "chquandogong@gmail.com"
@@ -10,7 +10,7 @@
       "name": "mission-spec",
       "source": "./",
       "description": "Mission Spec core API + Claude Code skills (ms-init, ms-eval, ms-status, ms-report) + Living Asset Registry + Architecture Registry",
-      "version": "1.7.0"
+      "version": "1.8.0"
     }
   ]
 }

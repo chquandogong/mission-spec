@@ -1,8 +1,8 @@
 ---
 name: ms-eval
 description: >
-  mission.yaml의 done_when 기준 대비 현재 프로젝트 상태를 평가합니다.
-  "미션 평가해줘", "done_when 체크", "완료 조건 확인" 등의 요청에 트리거됩니다.
+  Evaluates the current project state against done_when criteria in mission.yaml.
+  Triggered by requests like "evaluate mission", "check done_when", "verify completion criteria".
 user-invocable: true
 allowed-tools:
   - Read
@@ -12,21 +12,22 @@ allowed-tools:
   - Grep
 ---
 
-# ms-eval — done_when 기준 평가
+[English](SKILL.md) | [한국어](SKILL.ko.md) | [中文](SKILL.zh.md)
 
-## 동작
+# ms-eval — done_when Criteria Evaluation
 
-1. 현재 디렉토리의 `mission.yaml`을 읽고 스키마 검증합니다.
-2. `done_when` 목록의 각 조건을 평가합니다:
-   - **LLM/주관 평가 연결 (v1.6.0+)**: `evals[].name`이 criterion과 같고 `type: llm-eval` 또는 `llm-judge`이면
-     `.mission/evals/<name>.result.yaml` 오버라이드 파일을 조회. 파일이 있으면 그 판정을 사용, 없으면 "LLM 검증 대기"로 표시.
-   - **자동화 eval 연결**: `evals[].name`이 criterion과 정확히 같고 `type: automated`이면 해당 명령을 실행
-   - **파일 존재 체크**: "X 파일 존재", "X exists" → 해당 파일이 프로젝트에 있는지 확인
-   - **테스트 관련 문구**: 명시적 automated eval이 없으면 수동 확인 필요로 표시
-   - **기타**: 자동 평가 불가 → 수동 확인 필요로 표시
-3. 결과를 체크리스트 형태로 출력합니다.
+## Behavior
 
-## 실행 방법
+1. Reads `mission.yaml` from the current directory and validates the schema.
+2. Evaluates each condition in the `done_when` list:
+   - **LLM/subjective eval linkage (v1.6.0+)**: If `evals[].name` matches the criterion and `type: llm-eval` or `llm-judge`, looks up the override file at `.mission/evals/<name>.result.yaml`. Uses that verdict if present, otherwise marks as "Awaiting LLM evaluation".
+   - **Automated eval linkage**: If `evals[].name` exactly matches the criterion and `type: automated`, runs the command.
+   - **File existence check**: "X file exists", "X 존재" → checks if the file exists in the project.
+   - **Test-related phrases**: Marks as manual verification required if no explicit automated eval exists.
+   - **Other**: Cannot auto-evaluate → marks as manual verification required.
+3. Outputs results as a checklist.
+
+## How to Run
 
 ```bash
 node -e "
@@ -41,41 +42,40 @@ r.criteria.forEach(c => {
 "
 ```
 
-## 출력 형식
+## Output Format
 
 ```
 3/5 criteria passed
-[x] package.json 존재
-[x] README.md 파일 존재
-[ ] 모든 테스트 통과
-  → 수동 확인 필요: npm test 실행 결과를 확인하세요
-[x] src/index.ts 존재
-[ ] 배포 완료
-  → 자동 평가 불가 — 수동 확인 필요
+[x] package.json exists
+[x] README.md file exists
+[ ] All tests passing
+  → Manual verification required: check npm test results
+[x] src/index.ts exists
+[ ] Deployment complete
+  → Cannot auto-evaluate — manual verification required
 ```
 
-## LLM/주관 평가 오버라이드 (v1.6.0+)
+## LLM/Subjective Evaluation Override (v1.6.0+)
 
-`llm-eval` 또는 `llm-judge` 타입의 eval은 기계적으로 판정할 수 없으므로,
-외부 판정 결과를 `.mission/evals/<eval-name>.result.yaml`에 기록합니다:
+For `llm-eval` or `llm-judge` type evals that cannot be mechanically evaluated, record external verdicts in `.mission/evals/<eval-name>.result.yaml`:
 
 ```yaml
 # .mission/evals/subjective_quality.result.yaml
 passed: true
-reason: "리뷰어 3인 판정, 모두 동의"
-evaluated_by: "human" # 또는 "llm-claude", "llm-gpt5" 등
+reason: "Reviewed by 3 reviewers, all agreed"
+evaluated_by: "human" # or "llm-claude", "llm-gpt5", etc.
 evaluated_at: "2026-04-13"
 ```
 
-- 파일 존재 + `passed: true` → PASS
-- 파일 존재 + `passed: false` → FAIL (판정 사유 함께 표시)
-- 파일 없음 → "LLM 검증 대기" (pending)
-- `passed` 필드 누락/타입 오류 → "형식 오류"
+- File exists + `passed: true` → PASS
+- File exists + `passed: false` → FAIL (shows verdict reason)
+- File missing → "Awaiting LLM evaluation" (pending)
+- Missing/invalid `passed` field → "format error"
 
-## 주의
+## Notes
 
-- `mission.yaml`이 없으면 에러를 반환합니다.
-- 스키마가 유효하지 않으면 에러를 반환합니다.
-- `evals[].name`과 `done_when`이 연결되지 않으면 automated eval은 실행되지 않습니다.
-- `llm-eval` / `llm-judge` 타입은 오버라이드 파일이 기록될 때까지 pending 상태로 표시됩니다.
-- `architecture_doc_freshness` eval (v1.7.0+)을 통해 `design_refs`가 가리키는 설계 문서의 최신성을 검증할 수 있습니다.
+- Returns an error if `mission.yaml` is missing.
+- Returns an error if schema is invalid.
+- Automated eval is not executed if `evals[].name` does not match a `done_when` entry.
+- `llm-eval` / `llm-judge` type criteria remain pending until an override file is recorded.
+- The `architecture_doc_freshness` eval (v1.7.0+) can verify freshness of design documents referenced by `design_refs`.

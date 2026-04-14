@@ -1,7 +1,7 @@
 {
   "name": "mission-spec",
-  "version": "1.7.0",
-  "description": "Mission Spec — AI 에이전트 워크플로를 위한 task contract layer. 라이브러리 API, Claude Code skill bundle, Living Asset Registry, LLM/주관 평가 오버라이드, Architecture Registry를 함께 제공합니다.",
+  "version": "1.8.0",
+  "description": "Mission Spec — task contract layer for AI agent workflows. Provides library API, Claude Code skill bundle, Living Asset Registry, LLM/subjective evaluation override, and Architecture Registry.",
   "author": {
     "name": "Dr. QUAN",
     "url": "https://github.com/chquandogong"

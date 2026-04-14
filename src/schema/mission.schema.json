@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://mission-spec.dev/schema/v1/mission.schema.json",
   "title": "Mission Spec",
-  "description": "AI 에이전트 워크플로를 위한 task contract",
+  "description": "Task contract for AI agent workflows",
   "type": "object",
   "required": ["mission"],
   "additionalProperties": false,
@@ -15,71 +15,71 @@
         "title": {
           "type": "string",
           "minLength": 1,
-          "description": "미션 제목"
+          "description": "Mission title"
         },
         "goal": {
           "type": "string",
           "minLength": 1,
-          "description": "미션 목표 (자연어)"
+          "description": "Mission goal (natural language)"
         },
         "done_when": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "minItems": 1,
-          "description": "완료 조건 목록"
+          "description": "Completion criteria list"
         },
         "constraints": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "description": "제약 조건 목록"
+          "description": "Constraint list"
         },
         "approvals": {
           "type": "array",
           "items": { "$ref": "#/definitions/Approval" },
-          "description": "승인 게이트 목록"
+          "description": "Approval gate list"
         },
         "evals": {
           "type": "array",
           "items": { "$ref": "#/definitions/Eval" },
-          "description": "평가 항목 목록"
+          "description": "Evaluation item list"
         },
         "budget_hint": {
           "$ref": "#/definitions/BudgetHint",
-          "description": "리소스 예산 힌트 (advisory)"
+          "description": "Resource budget hint (advisory)"
         },
         "execution_hints": {
           "$ref": "#/definitions/ExecutionHints",
-          "description": "실행 힌트 (advisory only — 런타임이 무시 가능)"
+          "description": "Execution hints (advisory only — runtime may ignore)"
         },
         "skills_needed": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "description": "필요 스킬 목록"
+          "description": "Required skills list"
         },
         "artifacts": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "description": "산출물 패턴 목록"
+          "description": "Artifact pattern list"
         },
         "version": {
           "type": "string",
-          "description": "미션 스펙 버전"
+          "description": "Mission spec version"
         },
         "author": {
           "type": "string",
-          "description": "작성자"
+          "description": "Author"
         },
         "created": {
           "type": "string",
-          "description": "작성일"
+          "description": "Creation date"
         },
         "lineage": {
           "$ref": "#/definitions/Lineage",
-          "description": "변경 이력 참조 (optional)"
+          "description": "Change history reference (optional)"
         },
         "design_refs": {
           "$ref": "#/definitions/DesignRefs",
-          "description": "설계 문서 위치 포인터 (optional) — 아키텍처, API, 타입 정의 등"
+          "description": "Design document location pointers (optional) — architecture, API, type definitions, etc."
         }
       }
     }
@@ -93,16 +93,16 @@
         "gate": {
           "type": "string",
           "minLength": 1,
-          "description": "승인 게이트 이름"
+          "description": "Approval gate name"
         },
         "approver": {
           "type": "string",
           "enum": ["human", "ai", "codex", "ci"],
-          "description": "승인자 유형"
+          "description": "Approver type"
         },
         "description": {
           "type": "string",
-          "description": "승인 조건 설명"
+          "description": "Approval condition description"
         }
       }
     },
@@ -114,24 +114,24 @@
         "name": {
           "type": "string",
           "minLength": 1,
-          "description": "평가 이름"
+          "description": "Evaluation name"
         },
         "type": {
           "type": "string",
           "enum": ["automated", "manual", "llm-judge", "llm-eval"],
-          "description": "평가 유형"
+          "description": "Evaluation type"
         },
         "command": {
           "type": "string",
-          "description": "자동화 평가 실행 명령"
+          "description": "Automated evaluation command"
         },
         "pass_criteria": {
           "type": "string",
-          "description": "통과 기준"
+          "description": "Pass criteria"
         },
         "description": {
           "type": "string",
-          "description": "수동 평가 설명"
+          "description": "Manual evaluation description"
         }
       },
       "allOf": [
@@ -197,42 +197,42 @@
     "ExecutionHints": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Advisory only — 런타임이 무시 가능",
+      "description": "Advisory only — runtime may ignore",
       "properties": {
         "topology": {
           "type": "string",
-          "description": "실행 토폴로지 제안"
+          "description": "Suggested execution topology"
         },
         "suggested_approach": {
           "type": "string",
-          "description": "제안 접근 방식"
+          "description": "Suggested approach"
         },
         "note": {
           "type": "string",
-          "description": "추가 노트"
+          "description": "Additional notes"
         }
       }
     },
     "DesignRefs": {
       "type": "object",
       "additionalProperties": false,
-      "description": "프로젝트 설계 문서 위치 포인터. 실제 설계 내용은 포함하지 않고 경로만 선언한다.",
+      "description": "Project design document location pointers. Declares paths only, not actual design content.",
       "properties": {
         "architecture": {
           "type": "string",
-          "description": "아키텍처 문서 경로 (예: docs/internal/ARCHITECTURE.md)"
+          "description": "Architecture document path (e.g., docs/internal/ARCHITECTURE.md)"
         },
         "api_surface": {
           "type": "string",
-          "description": "공개 API 정의 파일 경로 (예: src/index.ts)"
+          "description": "Public API definition file path (e.g., src/index.ts)"
         },
         "type_definitions": {
           "type": "string",
-          "description": "핵심 타입 정의 파일 경로 (예: src/core/parser.ts)"
+          "description": "Core type definition file path (e.g., src/core/parser.ts)"
         },
         "component_protocol": {
           "type": "string",
-          "description": "컴포넌트 간 데이터 흐름 문서 경로"
+          "description": "Inter-component data flow document path"
         }
       }
     },
@@ -240,24 +240,24 @@
       "type": "object",
       "required": ["initial_version", "history"],
       "additionalProperties": false,
-      "description": "변경 이력 추적을 위한 메타데이터",
+      "description": "Metadata for change history tracking",
       "properties": {
         "initial_version": {
           "type": "string",
-          "description": "최초 버전"
+          "description": "Initial version"
         },
         "initial_date": {
           "type": "string",
-          "description": "최초 작성일"
+          "description": "Initial creation date"
         },
         "total_revisions": {
           "type": "integer",
           "minimum": 0,
-          "description": "총 변경 횟수"
+          "description": "Total revision count"
         },
         "history": {
           "type": "string",
-          "description": "변경 이력 파일 경로"
+          "description": "Change history file path"
         }
       }
     }

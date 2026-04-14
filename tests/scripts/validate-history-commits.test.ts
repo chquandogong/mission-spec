@@ -104,7 +104,10 @@ describe("validate-history-commits", () => {
   it("passes when all committed implementation changes are recorded in history", () => {
     commitAll("initial history-backed commit");
 
-    appendFileSync(join(tempDir, "src", "core.ts"), "export const nextValue = 2;\n");
+    appendFileSync(
+      join(tempDir, "src", "core.ts"),
+      "export const nextValue = 2;\n",
+    );
     const implementationSha = commitAll("feat: add next value");
 
     writeHistory([implementationSha]);
@@ -112,36 +115,45 @@ describe("validate-history-commits", () => {
 
     const result = runValidator();
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain("mission-history commit 검증 통과");
+    expect(result.stdout).toContain("mission-history commit validation passed");
   });
 
   it("fails when a committed implementation change is missing from related_commits", () => {
     commitAll("initial history-backed commit");
 
-    appendFileSync(join(tempDir, "src", "core.ts"), "export const nextValue = 2;\n");
+    appendFileSync(
+      join(tempDir, "src", "core.ts"),
+      "export const nextValue = 2;\n",
+    );
     const implementationSha = commitAll("feat: add next value");
 
     const result = runValidator();
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("history에 기록되지 않은 관련 commit");
+    expect(result.stderr).toContain("Relevant commit not recorded in history");
     expect(result.stderr).toContain(implementationSha);
   });
 
   it("fails pre-commit style when impactful staged changes exist without mission-history.yaml", () => {
     commitAll("initial history-backed commit");
 
-    appendFileSync(join(tempDir, "src", "core.ts"), "export const stagedOnly = 3;\n");
+    appendFileSync(
+      join(tempDir, "src", "core.ts"),
+      "export const stagedOnly = 3;\n",
+    );
     git(["add", "src/core.ts"]);
 
     const result = runValidator();
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("mission-history.yaml이 함께 staged되지 않았습니다");
+    expect(result.stderr).toContain("mission-history.yaml is not staged");
   });
 
   it("passes staged checks when mission-history.yaml is staged with the impactful changes", () => {
     commitAll("initial history-backed commit");
 
-    appendFileSync(join(tempDir, "src", "core.ts"), "export const stagedOnly = 3;\n");
+    appendFileSync(
+      join(tempDir, "src", "core.ts"),
+      "export const stagedOnly = 3;\n",
+    );
     writeFileSync(
       join(tempDir, "mission-history.yaml"),
       stringify({
@@ -178,7 +190,10 @@ describe("validate-history-commits", () => {
   it("allows the latest HEAD commit to change code and mission-history together", () => {
     commitAll("initial history-backed commit");
 
-    appendFileSync(join(tempDir, "src", "core.ts"), "export const headOnly = 4;\n");
+    appendFileSync(
+      join(tempDir, "src", "core.ts"),
+      "export const headOnly = 4;\n",
+    );
     writeFileSync(
       join(tempDir, "mission-history.yaml"),
       stringify({
@@ -219,7 +234,10 @@ describe("validate-history-commits", () => {
   it("fails once a code+history commit is no longer HEAD and is still missing from related_commits", () => {
     commitAll("initial history-backed commit");
 
-    appendFileSync(join(tempDir, "src", "core.ts"), "export const headOnly = 4;\n");
+    appendFileSync(
+      join(tempDir, "src", "core.ts"),
+      "export const headOnly = 4;\n",
+    );
     writeFileSync(
       join(tempDir, "mission-history.yaml"),
       stringify({
@@ -288,7 +306,7 @@ describe("validate-history-commits", () => {
 
     const result = runValidator();
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("history에 기록되지 않은 관련 commit");
+    expect(result.stderr).toContain("Relevant commit not recorded in history");
     expect(result.stderr).toContain(sameCommitSha);
   });
 });

@@ -1,4 +1,4 @@
-// Report 생성기
+// Report generator
 import type { CriterionResult } from "./evaluator.js";
 import type { HistoryEntry } from "./history.js";
 

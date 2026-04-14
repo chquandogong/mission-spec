@@ -105,7 +105,7 @@ describe("evaluateMission", () => {
     });
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(true);
-    expect(result.criteria[0].reason).toContain("자동화 명령 성공");
+    expect(result.criteria[0].reason).toContain("Automated command succeeded");
   });
 
   it("reports automated eval failure when command exits non-zero", () => {
@@ -124,7 +124,7 @@ describe("evaluateMission", () => {
     });
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(false);
-    expect(result.criteria[0].reason).toContain("자동화 명령 실패");
+    expect(result.criteria[0].reason).toContain("Automated command failed");
   });
 
   it("throws on schema-invalid mission.yaml", () => {
@@ -151,7 +151,7 @@ describe("evaluateMission", () => {
     });
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(false);
-    expect(result.criteria[0].reason).toContain("LLM 검증 대기");
+    expect(result.criteria[0].reason).toContain("Awaiting LLM evaluation");
     expect(result.criteria[0].reason).toContain("UX feels intuitive");
     expect(result.criteria[0].reason).toContain(
       ".mission/evals/subjective_quality.result.yaml",
@@ -173,7 +173,7 @@ describe("evaluateMission", () => {
     });
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(false);
-    expect(result.criteria[0].reason).toContain("LLM 검증 대기");
+    expect(result.criteria[0].reason).toContain("Awaiting LLM evaluation");
   });
 
   it("uses override file to mark llm-eval criterion as passed", () => {
@@ -251,7 +251,7 @@ describe("evaluateMission", () => {
     );
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(false);
-    expect(result.criteria[0].reason).toContain("형식 오류");
+    expect(result.criteria[0].reason).toContain("format error");
   });
 
   it("detects test-related criteria with npm test check", () => {

@@ -4,15 +4,64 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.7 — Architecture Assetization"
+  mission_title: "Mission Spec v1.8 — Internationalization"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 7
-  latest_version: "1.7.0"
+  total_revisions: 8
+  latest_version: "1.8.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-14-002"
+    semantic_version: "1.8.0"
+    change_sequence: 12
+    date: "2026-04-14"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.6"]
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "Trilingual documentation (en/zh/ko) and English-only codebase — internationalize user-facing docs while unifying all source code, schemas, metadata, and error messages to English"
+    decision: "Documentation (README + 5 SKILL.md) gets trilingual support (en as default, ko, zh). All runtime output, error messages, schema descriptions, and metadata are unified to English. Korean regex patterns in init.ts preserved for user input detection."
+    triggered_by: "Project analysis identified documentation as Korean-only, blocking international adoption"
+    issue_or_context: "All docs and code messages were Korean-only or mixed Korean/English. International users and AI agents outside Korean context could not effectively use the project."
+    changes:
+      added:
+        - "README.ko.md (Korean README)"
+        - "README.zh.md (Chinese README)"
+        - "skills/ms-init/SKILL.ko.md, SKILL.zh.md"
+        - "skills/ms-eval/SKILL.ko.md, SKILL.zh.md"
+        - "skills/ms-status/SKILL.ko.md, SKILL.zh.md"
+        - "skills/ms-report/SKILL.ko.md, SKILL.zh.md"
+        - "skills/ms-context/SKILL.ko.md, SKILL.zh.md"
+      modified:
+        - "README.md: rewritten in English with language switcher"
+        - "All 5 SKILL.md: rewritten in English with language switcher"
+        - "src/commands/init.ts: error messages and heuristic suggestions to English"
+        - "src/core/evaluator.ts: all evaluation reason strings to English"
+        - "src/core/history.ts: error message to English"
+        - "src/core/parser.ts, src/core/reporter.ts: comments to English"
+        - "src/schema/mission.schema.json: all field descriptions to English"
+        - "src/schema/mission-history.schema.json: descriptions to English"
+        - "package.json, plugin.json, marketplace.json: descriptions to English"
+        - "scripts/validate-history-commits.js: all messages to English"
+        - "tests/commands/eval.test.ts, tests/scripts/validate-history-commits.test.ts: expected strings updated"
+      removed: []
+    changed_sections: [title, version]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: true
+      docs: true
+      tests: true
+    breaking: false
+    risk: "low — no API changes, only string translations and new documentation files"
+    related_decisions: []
+
   - change_id: "MSC-2026-04-14-001"
     semantic_version: "1.7.0"
     change_sequence: 11

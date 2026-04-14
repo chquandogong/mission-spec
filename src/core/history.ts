@@ -1,4 +1,4 @@
-// mission-history.yaml 로더
+// mission-history.yaml loader
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
@@ -84,7 +84,7 @@ export function loadHistory(projectDir: string): MissionHistory | null {
   const result = validateHistory(data);
   if (!result.valid) {
     throw new Error(
-      `mission-history.yaml schema 오류:\n${result.errors.join("\n")}`,
+      `mission-history.yaml schema errors:\n${result.errors.join("\n")}`,
     );
   }
   return data as MissionHistory;

@@ -1,9 +1,9 @@
 ---
 name: ms-init
 description: >
-  자연어 목표로부터 mission.yaml 초안을 자동 생성합니다.
-  사용자가 미션을 시작하거나, mission.yaml을 만들고 싶어 할 때 사용합니다.
-  "미션 만들어줘", "mission.yaml 생성", "새 작업 계약" 등의 요청에 트리거됩니다.
+  Automatically generates a mission.yaml draft from a natural language goal.
+  Use when the user wants to start a mission or create a mission.yaml.
+  Triggered by requests like "create a mission", "generate mission.yaml", "new task contract".
 user-invocable: true
 allowed-tools:
   - Read
@@ -14,49 +14,51 @@ allowed-tools:
   - Grep
 ---
 
-# ms-init — 자연어 → mission.yaml 초안 생성
+[English](SKILL.md) | [한국어](SKILL.ko.md) | [中文](SKILL.zh.md)
 
-## 동작
+# ms-init — Natural Language → mission.yaml Draft Generation
 
-1. 사용자에게 자연어로 **미션 목표**를 물어봅니다 (이미 제공된 경우 생략).
-2. 현재 구현은 `package.json`과 `README.md`의 존재 여부를 확인하고, `package.json`에서 프로젝트 이름과 설명을 읽습니다.
-3. 목표에서 **title**, **done_when** 조건을 휴리스틱으로 도출합니다.
-4. 사용자가 제공한 제약 조건이 있으면 **constraints**에 포함합니다.
-5. `mission.yaml` 초안을 생성하고, 스키마 검증을 수행합니다.
+## Behavior
 
-## mission.yaml 스키마 (필수 필드)
+1. Ask the user for a **mission goal** in natural language (skip if already provided).
+2. The current implementation checks for `package.json` and `README.md`, and reads project name and description from `package.json`.
+3. Heuristically derives **title** and **done_when** criteria from the goal.
+4. Includes user-provided constraints in **constraints** if any.
+5. Generates a `mission.yaml` draft and performs schema validation.
+
+## mission.yaml Schema (Required Fields)
 
 ```yaml
 mission:
-  title: string # 필수 — 미션 제목
-  goal: string # 필수 — 미션 목표 (자연어)
-  done_when: # 필수 — 완료 조건 (1개 이상)
-    - "조건 1"
-    - "조건 2"
+  title: string # Required — Mission title
+  goal: string # Required — Mission goal (natural language)
+  done_when: # Required — Completion criteria (at least 1)
+    - "Criterion 1"
+    - "Criterion 2"
 ```
 
-## 선택 필드
+## Optional Fields
 
-- `constraints`: 제약 조건 목록
-- `approvals`: 승인 게이트 (`gate`, `approver`: human|ai|codex|ci)
-- `evals`: 평가 항목 (automated → command+pass_criteria 필수, manual → description 필수)
-- `budget_hint`: 리소스 힌트 (advisory)
-- `execution_hints`: 실행 힌트 (advisory only — 런타임이 무시 가능)
+- `constraints`: Constraint list
+- `approvals`: Approval gates (`gate`, `approver`: human|ai|codex|ci)
+- `evals`: Evaluation items (automated → command+pass_criteria required, manual → description required)
+- `budget_hint`: Resource hints (advisory)
+- `execution_hints`: Execution hints (advisory only — runtime may ignore)
 - `skills_needed`, `artifacts`, `version`, `author`
-- `lineage`: 변경 이력 참조 (`initial_version`, `history` 필수) — v1.5.0+
+- `lineage`: Change history reference (`initial_version`, `history` required) — v1.5.0+
 
-## 자동 생성 필드 (v1.5.0+)
+## Auto-Generated Fields (v1.5.0+)
 
-`generateMissionDraft()`는 다음 필드를 자동으로 포함합니다:
+`generateMissionDraft()` automatically includes:
 
 - `version: "1.0.0"`
 - `lineage.initial_version: "1.0.0"`
-- `lineage.initial_date`: 현재 날짜
+- `lineage.initial_date`: Current date
 - `lineage.history: "mission-history.yaml"`
 
-## 스키마 검증
+## Schema Validation
 
-생성 후 반드시 스키마 검증을 수행합니다:
+Schema validation is always performed after generation:
 
 ```bash
 node -e "
@@ -70,8 +72,8 @@ else { console.error('INVALID:', r.errors.join(', ')); process.exit(1); }
 "
 ```
 
-## 주의
+## Notes
 
-- `execution_hints`는 **suggestion**이지 directive가 아닙니다. 런타임이 무시 가능해야 합니다.
-- 외부 API 호출 없이, rule-based로만 동작합니다.
-- 현재 라이브러리 함수 `generateMissionDraft()`는 파일을 직접 쓰지 않고 YAML 문자열을 반환합니다.
+- `execution_hints` are **suggestions**, not directives. Runtime may ignore them.
+- Operates rule-based only, with no external API calls.
+- The library function `generateMissionDraft()` returns a YAML string without writing to disk.

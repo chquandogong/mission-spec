@@ -1,4 +1,4 @@
-// ms-init — 자연어 → mission.yaml 초안 자동 생성
+// ms-init — natural language → mission.yaml draft auto-generation
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
@@ -67,7 +67,7 @@ function detectProjectContext(projectDir: string): ProjectContext {
 }
 
 function deriveTitleFromGoal(goal: string): string {
-  // 첫 문장을 제목으로 사용, 50자 이내로 자름
+  // Use first sentence as title, truncate to 50 chars
   const firstLine = goal.split("\n")[0].trim();
   if (firstLine.length <= 50) return firstLine;
   return firstLine.slice(0, 47) + "...";
@@ -78,24 +78,24 @@ function deriveDoneWhenFromGoal(goal: string): string[] {
   const goalText = goal.trim();
   const firstLine = goalText.split("\n")[0].trim();
 
-  // 1. 핵심 목표
+  // 1. Core objective
   criteria.push(firstLine);
 
-  // 2. 동사 기반 추론 (구현, 추가, 생성 등)
+  // 2. Verb-based inference (implement, add, create, etc.)
   if (/구현|개발|작성|추가|생성|implement|add|create|write/i.test(goalText)) {
-    criteria.push("코드 구현 완료 및 작동 확인");
+    criteria.push("Code implementation complete and verified");
   }
 
-  // 3. 테스트/검증
+  // 3. Test/verification
   if (/테스트|검증|verify|test/i.test(goalText)) {
-    criteria.push("모든 단위 테스트 통과");
+    criteria.push("All unit tests passing");
   } else {
-    criteria.push("npm test 또는 핵심 로직 검증 완료");
+    criteria.push("npm test or core logic verification complete");
   }
 
-  // 4. 문서화
+  // 4. Documentation
   if (/문서|가이드|README|doc/i.test(goalText)) {
-    criteria.push("README.md 또는 관련 문서 업데이트");
+    criteria.push("README.md or related documentation updated");
   }
 
   return criteria;
@@ -103,7 +103,7 @@ function deriveDoneWhenFromGoal(goal: string): string[] {
 
 export function generateMissionDraft(options: InitOptions): InitResult {
   if (!options.goal || options.goal.trim() === "") {
-    throw new Error("goal은 필수입니다");
+    throw new Error("goal is required");
   }
 
   const context = detectProjectContext(options.projectDir);

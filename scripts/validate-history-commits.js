@@ -55,7 +55,10 @@ function execGit(projectDir, args) {
 }
 
 function lines(text) {
-  return text.split("\n").map((line) => line.trim()).filter(Boolean);
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function unique(items) {
@@ -119,14 +122,14 @@ function collectReferencedCommits(projectDir, history) {
         resolved = resolveCommit(projectDir, sha);
       } catch {
         errors.push(
-          `[${entry.change_id}] related_commits에 존재하지 않는 commit이 있습니다: ${sha}`,
+          `[${entry.change_id}] related_commits contains non-existent commit: ${sha}`,
         );
         continue;
       }
 
       if (resolvedByCommit.has(resolved)) {
         errors.push(
-          `[${entry.change_id}] related_commits 중복 commit: ${sha} (이미 ${resolvedByCommit.get(resolved)}에 기록됨)`,
+          `[${entry.change_id}] duplicate commit in related_commits: ${sha} (already recorded in ${resolvedByCommit.get(resolved)})`,
         );
       } else {
         resolvedByCommit.set(resolved, entry.change_id);
@@ -135,7 +138,7 @@ function collectReferencedCommits(projectDir, history) {
       const timestamp = getCommitTimestamp(projectDir, resolved);
       if (timestamp < previousTimestamp) {
         errors.push(
-          `[${entry.change_id}] related_commits 순서는 오래된 커밋 → 최신 커밋이어야 합니다: ${entry.related_commits.join(", ")}`,
+          `[${entry.change_id}] related_commits must be ordered oldest → newest: ${entry.related_commits.join(", ")}`,
         );
         break;
       }
@@ -163,7 +166,9 @@ function collectRelevantGitCommits(projectDir, trackingSince) {
     }
 
     const changedFiles = getCommitChangedFiles(projectDir, sha);
-    return !(sha === headCommit && changedFiles.includes("mission-history.yaml"));
+    return !(
+      sha === headCommit && changedFiles.includes("mission-history.yaml")
+    );
   });
 }
 
@@ -184,7 +189,11 @@ function collectStagedFiles(projectDir) {
 export function validateHistoryCommits(projectDir) {
   const history = loadHistory(projectDir);
   if (!history) {
-    return { valid: true, errors: [], warnings: ["mission-history.yaml 없음"] };
+    return {
+      valid: true,
+      errors: [],
+      warnings: ["mission-history.yaml not found"],
+    };
   }
 
   const errors = [];
@@ -201,7 +210,9 @@ export function validateHistoryCommits(projectDir) {
 
   for (const sha of relevantGitCommits) {
     if (!referencedCommits.has(sha)) {
-      errors.push(`history에 기록되지 않은 관련 commit: ${getCommitLabel(projectDir, sha)}`);
+      errors.push(
+        `Relevant commit not recorded in history: ${getCommitLabel(projectDir, sha)}`,
+      );
     }
   }
 
@@ -210,12 +221,12 @@ export function validateHistoryCommits(projectDir) {
   const historyStaged = stagedFiles.includes("mission-history.yaml");
   if (impactfulStagedFiles.length > 0 && !historyStaged) {
     errors.push(
-      `계약/구조 관련 staged 변경이 있지만 mission-history.yaml이 함께 staged되지 않았습니다: ${impactfulStagedFiles.join(", ")}`,
+      `Impactful staged changes found but mission-history.yaml is not staged: ${impactfulStagedFiles.join(", ")}`,
     );
   }
 
   if (relevantGitCommits.length === 0) {
-    warnings.push("검사 대상 commit이 없습니다.");
+    warnings.push("No relevant commits to validate.");
   }
 
   return { valid: errors.length === 0, errors, warnings };
@@ -227,14 +238,14 @@ function main() {
   try {
     execGit(projectDir, ["rev-parse", "--is-inside-work-tree"]);
   } catch {
-    console.log("Git 저장소가 아니므로 history commit 검증을 건너뜁니다.");
+    console.log("Not a git repository — skipping history commit validation.");
     process.exit(0);
   }
 
   try {
     const result = validateHistoryCommits(projectDir);
     if (!result.valid) {
-      console.error("mission-history commit 검증 실패:");
+      console.error("mission-history commit validation failed:");
       result.errors.forEach((error) => console.error(`- ${error}`));
       process.exit(1);
     }
@@ -242,14 +253,17 @@ function main() {
     if (result.warnings.length > 0) {
       result.warnings.forEach((warning) => console.log(`WARN: ${warning}`));
     }
-    console.log("mission-history commit 검증 통과");
+    console.log("mission-history commit validation passed");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`mission-history commit 검증 중 오류: ${message}`);
+    console.error(`mission-history commit validation error: ${message}`);
     process.exit(1);
   }
 }
 
-if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === new URL(`file://${process.argv[1]}`).href
+) {
   main();
 }

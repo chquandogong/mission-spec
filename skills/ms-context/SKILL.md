@@ -1,8 +1,8 @@
 ---
 name: ms-context
 description: >
-  Mission Spec 자산을 종합하여 AI 에이전트를 위한 프로젝트 컨텍스트 프롬프트를 생성합니다.
-  "컨텍스트 줘", "프로젝트 요약", "새 에이전트 브리핑" 등의 요청에 트리거됩니다.
+  Synthesizes Mission Spec assets into a project context prompt for AI agents.
+  Triggered by requests like "give me context", "project summary", "new agent briefing".
 user-invocable: true
 allowed-tools:
   - Read
@@ -12,19 +12,21 @@ allowed-tools:
   - Grep
 ---
 
-# ms-context — AI 에이전트 컨텍스트 프롬프트 생성
+[English](SKILL.md) | [한국어](SKILL.ko.md) | [中文](SKILL.zh.md)
 
-## 동작
+# ms-context — AI Agent Context Prompt Generation
 
-1. `mission.yaml`을 읽고 목표, 제약, 완료 조건을 추출합니다.
-2. `design_refs`가 있으면 설계 문서 위치를 포함합니다.
-3. `mission-history.yaml`에서 진화 요약과 최신 변경을 추출합니다.
-4. `.mission/decisions/MDR-*.md`에서 핵심 결정 제목을 수집합니다.
-5. `.mission/architecture/ARCHITECTURE_CURRENT.yaml`에서 모듈 구조를 테이블로 렌더합니다.
-6. `.mission/interfaces/API_REGISTRY.yaml`에서 공개 API 목록을 추출합니다.
-7. 모든 정보를 하나의 마크다운으로 조합하여 출력합니다.
+## Behavior
 
-## 실행 방법
+1. Reads `mission.yaml` and extracts goal, constraints, and completion criteria.
+2. Includes design document locations from `design_refs` if available.
+3. Extracts evolution summary and latest changes from `mission-history.yaml`.
+4. Collects key decision titles from `.mission/decisions/MDR-*.md`.
+5. Renders module structure as a table from `.mission/architecture/ARCHITECTURE_CURRENT.yaml`.
+6. Extracts public API list from `.mission/interfaces/API_REGISTRY.yaml`.
+7. Combines all information into a single markdown output.
+
+## How to Run
 
 ```bash
 node -e "
@@ -34,23 +36,23 @@ console.log(c.markdown);
 "
 ```
 
-## 출력 형식
+## Output Format
 
 ```markdown
 # Project Context
 
-## Mission: 미션 제목
+## Mission: Mission Title
 
-**Goal:** 미션 목표
+**Goal:** Mission goal
 **Version:** 1.7.0
 
 ### Constraints
 
-- 제약 조건 1
+- Constraint 1
 
 ### Done When
 
-- 완료 조건 1
+- Completion criterion 1
 
 ## Design References
 
@@ -58,7 +60,7 @@ console.log(c.markdown);
 
 ## Evolution Summary
 
-**Current Phase:** architecture-assetization — 아키텍처 지식의 자산화
+**Current Phase:** architecture-assetization — Architecture knowledge assetization
 **Total Revisions:** 7
 
 ## Key Decisions (MDR)
@@ -76,9 +78,9 @@ console.log(c.markdown);
 - `evaluateMission(projectDir: string) => EvalResult`
 ```
 
-## 주의
+## Notes
 
-- `mission.yaml`이 없으면 에러를 반환합니다.
-- 각 선택 섹션(history, architecture, API 등)은 해당 파일이 없으면 자동으로 생략됩니다.
-- 출력은 새 AI 에이전트의 시스템 프롬프트 또는 첫 번째 메시지로 사용할 수 있습니다.
-- 반환값의 `sections` 배열로 어떤 섹션이 포함되었는지 확인할 수 있습니다.
+- Returns an error if `mission.yaml` is missing.
+- Each optional section (history, architecture, API, etc.) is automatically omitted if the corresponding file is missing.
+- The output can be used as a system prompt or first message for a new AI agent.
+- The `sections` array in the return value indicates which sections were included.

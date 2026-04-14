@@ -1,4 +1,4 @@
-// done_when 조건 평가 엔진 (rule-based + automated command, v1.2)
+// done_when criterion evaluation engine (rule-based + automated command, v1.2)
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { execSync } from "node:child_process";
@@ -10,16 +10,16 @@ export interface CriterionResult {
   reason: string;
 }
 
-// 파일 존재 패턴: "X 파일 존재", "X 존재", "X file exists" 등
+// File existence pattern: "X 파일 존재", "X 존재", "X file exists", etc.
 const FILE_EXISTENCE_PATTERN = /^(.+?)\s*(?:파일\s*)?존재$/;
 const FILE_EXISTENCE_EN = /^(.+?)\s+(?:file\s+)?exists?$/i;
 
-// 테스트 관련 패턴
+// Test-related pattern
 const TEST_PATTERN = /테스트\s*통과|test.*pass|tests?\s+pass/i;
 
-// LLM/주관 평가의 외부 판정 오버라이드 로드.
-// `.mission/evals/<name>.result.yaml` 이 존재하면 그 결과를 사용.
-// 형식: { passed: bool, reason?: string, evaluated_by?: string, evaluated_at?: string }
+// Load external override for LLM/subjective evaluations.
+// If `.mission/evals/<name>.result.yaml` exists, use that result.
+// Format: { passed: bool, reason?: string, evaluated_by?: string, evaluated_at?: string }
 function loadLlmEvalOverride(
   projectDir: string,
   evalName: string,
@@ -41,10 +41,10 @@ function loadLlmEvalOverride(
     if (!data || typeof data.passed !== "boolean") {
       return {
         passed: false,
-        reason: `오버라이드 파일 형식 오류 (${resultPath}): 'passed: true|false' 필수`,
+        reason: `Override file format error (${resultPath}): 'passed: true|false' required`,
       };
     }
-    const parts: string[] = [data.passed ? "판정: PASS" : "판정: FAIL"];
+    const parts: string[] = [data.passed ? "Verdict: PASS" : "Verdict: FAIL"];
     if (typeof data.evaluated_by === "string")
       parts.push(`by ${data.evaluated_by}`);
     if (typeof data.evaluated_at === "string")
@@ -54,7 +54,7 @@ function loadLlmEvalOverride(
   } catch (err) {
     return {
       passed: false,
-      reason: `오버라이드 파일 파싱 실패 (${resultPath}): ${(err as Error).message}`,
+      reason: `Override file parse error (${resultPath}): ${(err as Error).message}`,
     };
   }
 }
@@ -69,7 +69,7 @@ export function evaluateCriterion(
     pass_criteria?: string;
   }>,
 ): CriterionResult {
-  // 0. evals 배열에 명시적인 자동화 명령 또는 LLM 검증이 있는지 확인
+  // 0. Check if evals array has an explicit automated command or LLM evaluation
   if (evals) {
     const llmEval = evals.find(
       (e) =>
@@ -84,7 +84,7 @@ export function evaluateCriterion(
       return {
         criterion,
         passed: false,
-        reason: `LLM 검증 대기 (pass_criteria: ${llmEval.pass_criteria}) — .mission/evals/${criterion}.result.yaml 에 판정을 기록하세요`,
+        reason: `Awaiting LLM evaluation (pass_criteria: ${llmEval.pass_criteria}) — record verdict in .mission/evals/${criterion}.result.yaml`,
       };
     }
 
@@ -97,19 +97,19 @@ export function evaluateCriterion(
         return {
           criterion,
           passed: true,
-          reason: `자동화 명령 성공: ${matchingEval.command}`,
+          reason: `Automated command succeeded: ${matchingEval.command}`,
         };
       } catch (error) {
         return {
           criterion,
           passed: false,
-          reason: `자동화 명령 실패 (${(error as Error).message}): ${matchingEval.command}`,
+          reason: `Automated command failed (${(error as Error).message}): ${matchingEval.command}`,
         };
       }
     }
   }
 
-  // 1. 파일 존재 체크
+  // 1. File existence check
   const fileMatch =
     criterion.match(FILE_EXISTENCE_PATTERN) ??
     criterion.match(FILE_EXISTENCE_EN);
@@ -120,25 +120,25 @@ export function evaluateCriterion(
     return {
       criterion,
       passed: exists,
-      reason: exists ? `${fileName} 존재 확인` : `${fileName} 미발견`,
+      reason: exists ? `${fileName} found` : `${fileName} not found`,
     };
   }
 
-  // 2. 테스트 관련 (rule-based: 명시적 명령이 없으면 수동 확인 권고)
+  // 2. Test-related (rule-based: recommend manual check if no explicit command)
   if (TEST_PATTERN.test(criterion)) {
     return {
       criterion,
       passed: false,
       reason:
-        "수동 확인 필요: npm test 실행 결과를 확인하세요 (또는 mission.yaml에 automated eval 추가)",
+        "Manual verification required: check npm test results (or add automated eval to mission.yaml)",
     };
   }
 
-  // 3. 기타: 자동 평가 불가
+  // 3. Fallback: cannot auto-evaluate
   return {
     criterion,
     passed: false,
-    reason: "자동 평가 불가 — 수동 확인 필요",
+    reason: "Cannot auto-evaluate — manual verification required",
   };
 }
 

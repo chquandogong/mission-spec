@@ -1,4 +1,4 @@
-// YAML/JSON 파싱 + 스키마 검증 유틸리티
+// YAML/JSON parsing + schema validation utility
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
