@@ -1,0 +1,132 @@
+# Mission Spec — API / Interface Registry
+# 외부와 맺고 있는 모든 계약(public exports, skill surface, file format contracts)을 한 곳에 기록합니다.
+# Last updated: 2026-04-14 | Version: 1.6.0
+
+# ── 1. Public Library API (src/index.ts → package.json exports) ──
+
+public_api:
+  entry: "src/index.ts"
+  package_exports:
+    ".":
+      types: "./dist/index.d.ts"
+      import: "./dist/index.js"
+    "./commands/init":
+      types: "./dist/commands/init.d.ts"
+      import: "./dist/commands/init.js"
+    "./commands/eval":
+      types: "./dist/commands/eval.d.ts"
+      import: "./dist/commands/eval.js"
+    "./commands/status":
+      types: "./dist/commands/status.d.ts"
+      import: "./dist/commands/status.js"
+    "./commands/report":
+      types: "./dist/commands/report.d.ts"
+      import: "./dist/commands/report.js"
+
+  functions:
+    - name: "validateMission"
+      signature: "(data: unknown) => ValidationResult"
+      source: "src/schema/validator.ts"
+    - name: "validateHistory"
+      signature: "(data: unknown) => ValidationResult"
+      source: "src/schema/validator.ts"
+    - name: "parseMissionFile"
+      signature: "(filePath: string) => unknown"
+      source: "src/core/parser.ts"
+    - name: "loadAndValidateMission"
+      signature: "(projectDir: string) => MissionDocument"
+      source: "src/core/parser.ts"
+    - name: "generateMissionDraft"
+      signature: "(options: InitOptions) => InitResult"
+      source: "src/commands/init.ts"
+    - name: "evaluateMission"
+      signature: "(projectDir: string) => EvalResult"
+      source: "src/commands/eval.ts"
+    - name: "getMissionStatus"
+      signature: "(projectDir: string) => StatusResult"
+      source: "src/commands/status.ts"
+    - name: "generateMissionReport"
+      signature: "(projectDir: string) => ReportResult"
+      source: "src/commands/report.ts"
+    - name: "loadHistory"
+      signature: "(projectDir: string) => MissionHistory | null"
+      source: "src/core/history.ts"
+    - name: "getLatestEntry"
+      signature: "(history: MissionHistory) => HistoryEntry | null"
+      source: "src/core/history.ts"
+    - name: "getCurrentPhase"
+      signature: "(history: MissionHistory) => EvolutionPhase | null"
+      source: "src/core/history.ts"
+
+# ── 2. Skill Surface (Claude Code Plugin) ──
+
+skill_surface:
+  plugin_metadata: ".claude-plugin/plugin.json"
+  marketplace_metadata: ".claude-plugin/marketplace.json"
+  skills:
+    - id: "ms-init"
+      path: "skills/ms-init/SKILL.md"
+      invocation: "/mission-spec:ms-init"
+    - id: "ms-eval"
+      path: "skills/ms-eval/SKILL.md"
+      invocation: "/mission-spec:ms-eval"
+    - id: "ms-status"
+      path: "skills/ms-status/SKILL.md"
+      invocation: "/mission-spec:ms-status"
+    - id: "ms-report"
+      path: "skills/ms-report/SKILL.md"
+      invocation: "/mission-spec:ms-report"
+
+# ── 3. Schema IDs ──
+
+schemas:
+  - id: "https://mission-spec.dev/schema/v1/mission.schema.json"
+    path: "src/schema/mission.schema.json"
+    purpose: "mission.yaml 구조 정의"
+  - id: "https://mission-spec.dev/schema/v1/mission-history.schema.json"
+    path: "src/schema/mission-history.schema.json"
+    purpose: "mission-history.yaml 구조 정의"
+
+# ── 4. File Format Contracts ──
+
+file_contracts:
+  - pattern: "mission.yaml"
+    schema: "mission.schema.json"
+    required: true
+    description: "프로젝트의 task contract 정의"
+
+  - pattern: "mission-history.yaml"
+    schema: "mission-history.schema.json"
+    required: false
+    description: "변경 이력 원장 (Living Asset Registry)"
+
+  - pattern: ".mission/evals/<name>.result.yaml"
+    schema: null
+    required: false
+    description: "llm-eval/llm-judge 오버라이드 판정 파일"
+    fields:
+      - "passed: boolean (필수)"
+      - "reason?: string"
+      - "evaluated_by?: string"
+      - "evaluated_at?: string"
+
+  - pattern: ".mission/snapshots/<date>_v<version>_mission.yaml"
+    schema: "mission.schema.json"
+    required: false
+    description: "mission.yaml 버전별 스냅샷 (pre-commit 훅으로 자동 생성)"
+    dedup_rule: "같은 version의 스냅샷이 이미 있으면 생성하지 않음"
+
+  - pattern: ".mission/decisions/MDR-NNN-<topic>.md"
+    schema: null
+    required: false
+    description: "Mission Decision Record (ADR 패턴)"
+
+# ── 5. Hook Contracts ──
+
+hooks:
+  - trigger: "pre-commit"
+    path: ".githooks/pre-commit"
+    activation: "git config core.hooksPath .githooks"
+    behavior: "npm run snapshot 실행 후 .mission/snapshots/ 스테이징"
+    side_effects:
+      - ".mission/snapshots/<date>_v<version>_mission.yaml 생성 (신규 버전일 때만)"
