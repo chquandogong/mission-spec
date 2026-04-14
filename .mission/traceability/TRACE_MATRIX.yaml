@@ -1,0 +1,191 @@
+# Mission Spec — Traceability Matrix
+# requirement(done_when) → eval → code(module) → test(file) 매핑
+# Last updated: 2026-04-14 | Version: 1.6.0
+
+# ── done_when 기준 추적 ──
+
+requirements:
+  - criterion: "skills/ms-init/SKILL.md 존재"
+    eval_type: "file-existence (rule-based)"
+    eval_name: null
+    code:
+      - "src/core/evaluator.ts (FILE_EXISTENCE_PATTERN)"
+    artifact: "skills/ms-init/SKILL.md"
+    tests:
+      - "tests/commands/eval.test.ts: marks file-existence checks"
+
+  - criterion: "skills/ms-eval/SKILL.md 존재"
+    eval_type: "file-existence (rule-based)"
+    eval_name: null
+    code:
+      - "src/core/evaluator.ts (FILE_EXISTENCE_PATTERN)"
+    artifact: "skills/ms-eval/SKILL.md"
+    tests:
+      - "tests/commands/eval.test.ts: marks file-existence checks"
+
+  - criterion: "skills/ms-status/SKILL.md 존재"
+    eval_type: "file-existence (rule-based)"
+    eval_name: null
+    code:
+      - "src/core/evaluator.ts (FILE_EXISTENCE_PATTERN)"
+    artifact: "skills/ms-status/SKILL.md"
+    tests:
+      - "tests/commands/eval.test.ts: marks file-existence checks"
+
+  - criterion: "skills/ms-report/SKILL.md 존재"
+    eval_type: "file-existence (rule-based)"
+    eval_name: null
+    code:
+      - "src/core/evaluator.ts (FILE_EXISTENCE_PATTERN)"
+    artifact: "skills/ms-report/SKILL.md"
+    tests:
+      - "tests/commands/eval.test.ts: marks file-existence checks"
+
+  - criterion: ".claude-plugin/plugin.json 존재"
+    eval_type: "file-existence (rule-based)"
+    eval_name: null
+    code:
+      - "src/core/evaluator.ts (FILE_EXISTENCE_PATTERN)"
+    artifact: ".claude-plugin/plugin.json"
+    tests:
+      - "tests/commands/eval.test.ts: marks file-existence checks"
+
+  - criterion: "README.md 존재"
+    eval_type: "file-existence (rule-based)"
+    eval_name: null
+    code:
+      - "src/core/evaluator.ts (FILE_EXISTENCE_PATTERN)"
+    artifact: "README.md"
+    tests:
+      - "tests/commands/eval.test.ts: marks file-existence checks"
+
+  - criterion: "schema_validation_passes"
+    eval_type: "automated"
+    eval_name: "schema_validation_passes"
+    command: "node scripts/validate-schema.js"
+    code:
+      - "scripts/validate-schema.js"
+      - "src/schema/validator.ts"
+      - "src/schema/mission.schema.json"
+    tests:
+      - "tests/schema.test.ts (28 tests)"
+      - "tests/commands/eval.test.ts: runs automated eval"
+
+  - criterion: "command_test"
+    eval_type: "automated"
+    eval_name: "command_test"
+    command: "npm test"
+    code:
+      - "src/commands/*.ts"
+      - "src/core/*.ts"
+      - "src/schema/validator.ts"
+    tests:
+      - "tests/ (전체 93 tests)"
+
+  - criterion: "cross_platform_verifies"
+    eval_type: "automated"
+    eval_name: "cross_platform_verifies"
+    command: "node scripts/convert-platforms.js --verify"
+    code:
+      - "scripts/convert-platforms.js"
+      - "src/adapters/platforms.ts"
+    tests:
+      - "tests/platforms.test.ts (14 tests)"
+
+# ── eval 전용 항목 (done_when에 직접 연결되지 않는 것) ──
+
+standalone_evals:
+  - eval_name: "dogfood_test"
+    eval_type: "manual"
+    description: "evaluateMission('.') 실행하여 done_when 충족 확인"
+    code:
+      - "src/commands/eval.ts"
+    tests:
+      - "tests/commands/eval.test.ts"
+
+  - eval_name: "architecture_doc_freshness"
+    eval_type: "llm-eval"
+    pass_criteria: "design_refs.architecture가 가리키는 문서가 현재 소스코드와 일치"
+    override_file: ".mission/evals/architecture_doc_freshness.result.yaml"
+    design_ref: "docs/internal/ARCHITECTURE.md"
+    code:
+      - "src/core/evaluator.ts (loadLlmEvalOverride)"
+    tests:
+      - "tests/commands/eval.test.ts: llm-eval override tests (4 cases)"
+
+# ── MDR → code/history 매핑 ──
+
+decision_trace:
+  - decision: "MDR-001-task-contract-only"
+    enforced_in:
+      - "mission.yaml: constraints[0]"
+      - "src/core/evaluator.ts: no orchestration logic"
+    related_history: ["MSC-2026-04-02-001"]
+
+  - decision: "MDR-002-ms-prefix-adoption"
+    enforced_in:
+      - "skills/ms-*/SKILL.md: name field"
+      - "README.md: skill invocation paths"
+    related_history: ["MSC-2026-04-03-001"]
+
+  - decision: "MDR-003-minimal-dependencies"
+    enforced_in:
+      - "package.json: dependencies (ajv + yaml only)"
+      - "mission.yaml: constraints[3]"
+    related_history: ["MSC-2026-04-02-001"]
+
+  - decision: "MDR-004-done-when-eval-linking"
+    enforced_in:
+      - "src/core/evaluator.ts: eval.name === criterion matching"
+      - "mission.yaml: done_when + evals alignment"
+    related_history: ["MSC-2026-04-07-002"]
+
+# ── 테스트 파일 → 모듈 매핑 ──
+
+test_coverage:
+  - test_file: "tests/schema.test.ts"
+    cases: 31
+    covers: [validator]
+    categories:
+      [
+        "mission schema validation",
+        "history schema validation",
+        "design_refs",
+        "llm-eval type",
+      ]
+
+  - test_file: "tests/commands/init.test.ts"
+    cases: 9
+    covers: [init]
+    categories: ["draft generation", "context detection", "constraint handling"]
+
+  - test_file: "tests/commands/eval.test.ts"
+    cases: 16
+    covers: [eval, evaluator]
+    categories:
+      ["file-existence", "automated eval", "llm-eval override", "schema error"]
+
+  - test_file: "tests/commands/status.test.ts"
+    cases: 8
+    covers: [status]
+    categories: ["progress", "constraints", "markdown", "history fallback"]
+
+  - test_file: "tests/commands/report.test.ts"
+    cases: 10
+    covers: [report, reporter]
+    categories: ["PASS/FAIL", "metadata", "recent changes", "history fallback"]
+
+  - test_file: "tests/platforms.test.ts"
+    cases: 14
+    covers: [platforms]
+    categories: ["cursor", "codex", "opencode", "multiline", "escaping"]
+
+  - test_file: "tests/scripts/snapshot.test.ts"
+    cases: 2
+    covers: []
+    categories: ["snapshot creation", "version dedup"]
+
+  - test_file: "tests/index.test.ts"
+    cases: 1
+    covers: []
+    categories: ["root export verification"]
