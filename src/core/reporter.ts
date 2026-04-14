@@ -2,6 +2,13 @@
 import type { CriterionResult } from "./evaluator.js";
 import type { HistoryEntry } from "./history.js";
 
+export interface TraceEntry {
+  criterion: string;
+  eval_type: string;
+  code: string[];
+  tests: string[];
+}
+
 export interface ReportData {
   title: string;
   goal: string;
@@ -14,6 +21,7 @@ export interface ReportData {
   timestamp: string;
   recentChanges?: HistoryEntry[];
   historyWarning?: string;
+  traceability?: TraceEntry[];
 }
 
 export function renderReport(data: ReportData): string {
@@ -56,6 +64,17 @@ export function renderReport(data: ReportData): string {
         lines.push(`- Modified: ${modified.join(", ")}`);
       }
       lines.push("");
+    });
+  }
+
+  if (data.traceability && data.traceability.length > 0) {
+    lines.push("", "## Traceability", "");
+    lines.push("| Requirement | Eval Type | Code | Tests |");
+    lines.push("|---|---|---|---|");
+    data.traceability.forEach((t) => {
+      lines.push(
+        `| ${t.criterion} | ${t.eval_type} | ${t.code.join(", ")} | ${t.tests.join(", ")} |`,
+      );
     });
   }
 

@@ -1,7 +1,10 @@
 // ms-report — run report 생성
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { parse } from "yaml";
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
-import { renderReport } from "../core/reporter.js";
+import { renderReport, type TraceEntry } from "../core/reporter.js";
 import { loadHistory, type HistoryEntry } from "../core/history.js";
 
 export interface ReportResult {
@@ -30,6 +33,36 @@ export function generateMissionReport(projectDir: string): ReportResult {
     historyWarning = `History unavailable: ${message}`;
   }
 
+  let traceability: TraceEntry[] | undefined;
+  const tracePath = join(
+    projectDir,
+    ".mission",
+    "traceability",
+    "TRACE_MATRIX.yaml",
+  );
+  if (existsSync(tracePath)) {
+    try {
+      const traceData = parse(readFileSync(tracePath, "utf-8")) as {
+        requirements?: Array<{
+          criterion: string;
+          eval_type: string;
+          code?: string[];
+          tests?: string[];
+        }>;
+      };
+      if (traceData?.requirements) {
+        traceability = traceData.requirements.map((r) => ({
+          criterion: r.criterion,
+          eval_type: r.eval_type,
+          code: r.code ?? [],
+          tests: r.tests ?? [],
+        }));
+      }
+    } catch {
+      // TRACE_MATRIX parse failure is non-fatal
+    }
+  }
+
   const markdown = renderReport({
     title: m.title,
     goal: m.goal.trim(),
@@ -42,6 +75,7 @@ export function generateMissionReport(projectDir: string): ReportResult {
     timestamp,
     recentChanges,
     historyWarning,
+    traceability,
   });
 
   return {
