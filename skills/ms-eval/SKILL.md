@@ -78,3 +78,4 @@ evaluated_at: "2026-04-13"
 - 스키마가 유효하지 않으면 에러를 반환합니다.
 - `evals[].name`과 `done_when`이 연결되지 않으면 automated eval은 실행되지 않습니다.
 - `llm-eval` / `llm-judge` 타입은 오버라이드 파일이 기록될 때까지 pending 상태로 표시됩니다.
+- `architecture_doc_freshness` eval (v1.7.0+)을 통해 `design_refs`가 가리키는 설계 문서의 최신성을 검증할 수 있습니다.

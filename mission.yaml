@@ -61,6 +61,9 @@ mission:
       type: "automated"
       command: "node scripts/convert-platforms.js --verify"
       pass_criteria: "Cursor, Codex, OpenCode 포맷 변환 성공"
+    - name: "architecture_doc_freshness"
+      type: "llm-eval"
+      pass_criteria: "design_refs.architecture가 가리키는 문서의 디렉토리 구조, 스키마 설명, 모듈 구성이 현재 소스코드와 일치"
 
   budget_hint:
     max_tokens_per_session: 500000
