@@ -1,0 +1,85 @@
+# Mission Spec — Module Dependency Graph
+# 모듈 간 import 의존 관계를 방향성 그래프로 표현합니다.
+# ARCHITECTURE_CURRENT.yaml의 depends_on 필드와 동기화됩니다.
+# Last updated: 2026-04-14 | Version: 1.6.0
+
+# 읽는 법: edges[].from 모듈이 edges[].to 모듈을 import한다.
+# 예: { from: report, to: parser } = report.ts imports parser.ts
+
+nodes:
+  - id: validator
+    path: "src/schema/validator.ts"
+    layer: schema
+  - id: parser
+    path: "src/core/parser.ts"
+    layer: core
+  - id: evaluator
+    path: "src/core/evaluator.ts"
+    layer: core
+  - id: history
+    path: "src/core/history.ts"
+    layer: core
+  - id: reporter
+    path: "src/core/reporter.ts"
+    layer: core
+  - id: init
+    path: "src/commands/init.ts"
+    layer: commands
+  - id: eval
+    path: "src/commands/eval.ts"
+    layer: commands
+  - id: status
+    path: "src/commands/status.ts"
+    layer: commands
+  - id: report
+    path: "src/commands/report.ts"
+    layer: commands
+  - id: platforms
+    path: "src/adapters/platforms.ts"
+    layer: adapters
+
+edges:
+  # core → schema
+  - from: parser
+    to: validator
+  - from: history
+    to: validator
+
+  # commands → core
+  - from: init
+    to: validator
+  - from: eval
+    to: parser
+  - from: eval
+    to: evaluator
+  - from: status
+    to: parser
+  - from: status
+    to: eval
+  - from: status
+    to: history
+  - from: report
+    to: parser
+  - from: report
+    to: eval
+  - from: report
+    to: reporter
+  - from: report
+    to: history
+
+  # core → core (type-only)
+  - from: reporter
+    to: evaluator
+    type: type-only
+  - from: reporter
+    to: history
+    type: type-only
+
+# 레이어 규칙:
+# commands → core → schema (단방향)
+# adapters는 독립 (의존 없음)
+# core 내부에서 reporter → evaluator, history는 타입 참조만
+layer_rules:
+  - "commands/ → core/ → schema/ (단방향, 역방향 의존 금지)"
+  - "adapters/ 는 다른 src/ 모듈에 의존하지 않음"
+  - "core/ 내부의 의존은 type-only import만 허용"
