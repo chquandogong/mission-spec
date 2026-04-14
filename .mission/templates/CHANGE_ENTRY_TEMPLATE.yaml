@@ -48,7 +48,7 @@
   risk: "" # [권장] 위험도 평가
 
   # 추적
-  related_commits: [] # [권장]
+  related_commits: [] # [사실상 필수] commit-backed 프로젝트에서는 비워두지 말 것. 7~40자 lowercase SHA, 오래된 커밋 → 최신 커밋 순
   related_decisions: [] # [권장] 관련 MDR ID
   snapshot_after: "" # [권장] .mission/snapshots/ 경로
   follow_up: [] # [권장] 후속 조치

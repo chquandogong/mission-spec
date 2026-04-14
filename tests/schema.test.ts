@@ -469,4 +469,60 @@ describe("validateHistory", () => {
     });
     expect(result.valid).toBe(false);
   });
+
+  it("rejects empty related_commits when the field is present", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "enhancement",
+          persistence: "permanent",
+          intent: "test",
+          changes: { added: [], modified: [], removed: [] },
+          done_when_delta: { added: [], modified: [], removed: [] },
+          impact_scope: {},
+          breaking: false,
+          related_commits: [],
+        },
+      ],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("related_commits"))).toBe(true);
+  });
+
+  it("rejects related_commits entries with invalid sha format", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "enhancement",
+          persistence: "permanent",
+          intent: "test",
+          changes: { added: [], modified: [], removed: [] },
+          done_when_delta: { added: [], modified: [], removed: [] },
+          impact_scope: {},
+          breaking: false,
+          related_commits: ["not-a-sha"],
+        },
+      ],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("related_commits"))).toBe(true);
+  });
 });

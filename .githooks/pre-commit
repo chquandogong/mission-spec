@@ -5,3 +5,4 @@ npm run snapshot --silent
 if [ -d .mission/snapshots ]; then
   git add .mission/snapshots
 fi
+npm run validate:history-commits --silent

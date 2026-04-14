@@ -13,9 +13,9 @@ entries:
       runtime: "ESM"
     results:
       npm_test:
-        passed: 103
+        passed: 109
         failed: 0
-        files: 9
+        files: 10
       npm_build: "success"
       validate_schema: "3 fixtures passed"
       convert_platforms_verify: "all conversions passed"

@@ -22,10 +22,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "delivery"
     persistence: "permanent"
-    intent: "Architecture Assetization — 3-모델 교차 검증 합의에 따라 아키텍처 지식을 machine-readable 자산으로 포착"
-    decision: "Tier 1(Capture Stabilization): design_refs 스키마 필드, architecture_doc_freshness llm-eval, architecture_delta history 필드. Tier 2(Registry Layer): Architecture Registry, Dependency Graph, API/Interface Registry, Traceability Matrix."
-    triggered_by: "3-모델(Gemini, Claude Opus 4.6, Codex) 독립 분석 + 2라운드 교차 검증 → 아키텍처 정보 부재가 재현성의 핵심 갭임을 만장일치 식별"
-    issue_or_context: "Living Asset Registry(v1.5.0)가 '변경 이력'을 자산화했으나, '아키텍처 지식'(모듈 구조, 의존 그래프, API 시그니처, 컴포넌트 프로토콜)은 코드에만 존재하여 재현 불가"
+    intent: "Architecture Assetization 완료 — 캡처/레지스트리/소비 계층을 닫아 Mission 자산만으로 현재 구조와 작업 맥락을 빠르게 복원할 수 있게 정리"
+    decision: "v1.7.0에는 Tier 1(design_refs, architecture_doc_freshness, architecture_delta), Tier 2(Architecture/Dependency/API/Traceability registry), Tier 3(ms-context, Rebuild Playbook, Traceability Report, Verification Evidence Ledger)를 모두 포함한다. design_refs가 가리키는 내부 문서는 machine-readable registry와 함께 동기화 상태를 유지한다."
+    triggered_by: "3-모델(Gemini, Claude Opus 4.6, Codex) 독립 분석 + 2라운드 교차 검증으로 아키텍처 정보 부재가 재현성의 핵심 갭임을 식별했고, 이후 구현/문서 감사에서 history와 design_refs 문서의 stale 상태를 추가 확인"
+    issue_or_context: "Living Asset Registry(v1.5.0)가 '변경 이력'은 자산화했지만, 새 AI 에이전트가 구조/API/검증 상태를 한 번에 복원하려면 아키텍처 지식 capture와 consumption 계층, 그리고 design_refs 문서 동기화가 더 필요했음"
     changes:
       added:
         - "design_refs 스키마 필드 (mission.schema.json, DesignRefs definition)"
@@ -33,17 +33,28 @@ timeline:
         - "architecture_doc_freshness eval (mission.yaml, llm-eval 타입)"
         - ".mission/architecture/ARCHITECTURE_CURRENT.yaml (11 모듈 registry)"
         - ".mission/architecture/DEPENDENCY_GRAPH.yaml (14 edges directed graph)"
-        - ".mission/interfaces/API_REGISTRY.yaml (11 functions, 4 skills, 5 file contracts)"
-        - ".mission/traceability/TRACE_MATRIX.yaml (9 requirements, 4 MDR traces, 8 test files)"
+        - ".mission/interfaces/API_REGISTRY.yaml (12 functions, 5 skills, 5 file contracts)"
+        - ".mission/traceability/TRACE_MATRIX.yaml (9 requirements, 4 MDR traces, 10 test files)"
+        - "src/commands/context.ts + generateContext public API + ./commands/context subpath export"
+        - "skills/ms-context/SKILL.md"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md"
+        - ".mission/evidence/VERIFICATION_LOG.yaml"
+        - ".mission/evals/architecture_doc_freshness.result.yaml"
+        - "scripts/validate-history-commits.js"
+        - "tests/scripts/validate-history-commits.test.ts"
         - "ArchitectureDelta, ModuleEntry, InterfaceChange TypeScript types"
       modified:
         - "mission.yaml: design_refs 추가, architecture_doc_freshness eval 추가"
         - "src/core/parser.ts: MissionDocument에 design_refs 필드"
         - "src/core/history.ts: ArchitectureDelta 관련 타입 추가"
-        - "README.md: design_refs 문서, 현재 범위 업데이트"
-        - "skills/ms-eval/SKILL.md: architecture_doc_freshness 언급"
+        - "src/commands/report.ts + src/core/reporter.ts: TRACE_MATRIX 기반 Traceability 표 렌더링"
+        - "README.md: ms-context, design_refs, Living Asset Registry 범위 업데이트"
+        - "docs/internal/ARCHITECTURE.md + docs/internal/CLAUDE.md: v1.7.0 구조 기준으로 동기화"
+        - "skills/ms-eval/SKILL.md + skills/ms-report/SKILL.md: architecture freshness / traceability 문서화"
+        - ".mission/CURRENT_STATE.md, ARCHITECTURE_CURRENT.yaml, DEPENDENCY_GRAPH.yaml, API_REGISTRY.yaml: Tier 3 완료 상태 반영"
+        - ".githooks/pre-commit + CHANGE_ENTRY_TEMPLATE + versioning docs: history commit validation 연결"
       removed: []
-    changed_sections: [title, version, design_refs, lineage]
+    changed_sections: [title, version, evals, artifacts, design_refs, lineage]
     done_when_delta:
       added: []
       modified: []
@@ -51,21 +62,24 @@ timeline:
     impact_scope:
       schema: true
       skills: true
-      api: false
+      api: true
       tests: true
       docs: true
-      runtime: false
+      runtime: true
     breaking: false
-    risk: "low — 모든 추가 필드는 optional, 기존 mission.yaml/history.yaml 호환 유지"
-    related_commits: []
+    risk: "low — 신규 자산과 API는 대부분 optional이며, 기존 mission.yaml/history.yaml 호환 유지. 다만 문서/registry 동기화 운영 부담은 증가"
+    related_commits: ["ff7b76d", "47d8f0c", "c64ac59", "96c597a", "13e67cc", "3f90a5d", "878fee6", "210a444", "f7cced0", "f2a5151", "c193919", "d031863", "a34ff47", "f473350"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-14_v1.7.0_mission.yaml"
     follow_up:
-      - "Tier 3: ms-context 명령어 (AI agent onboarding prompt 자동 생성)"
-      - "Tier 3: Reconstruction Playbook (.mission/reconstruction/REBUILD_PLAYBOOK.md)"
-      - "Tier 3: Traceability Report 자동 생성 (ms-report 확장)"
+      - "Architecture Registry 버전 간 diff 자동 생성기"
+      - "ms-context 출력을 clipboard/파일로 직접 내보내는 UX"
+      - "CI/CD에서 VERIFICATION_LOG 자동 갱신"
     architecture_delta:
-      modules_added: []
+      modules_added:
+        - path: "src/commands/context.ts"
+          role: "Mission Spec 자산을 합성해 새 AI 에이전트용 프로젝트 컨텍스트 프롬프트 생성"
+          depends_on: ["parser", "history"]
       interfaces_changed:
         - module: "src/schema/mission.schema.json"
           added_fields: ["design_refs (DesignRefs)"]
@@ -85,6 +99,18 @@ timeline:
               "ArchitectureDelta",
             ]
           reason: "architecture_delta 타입 정의"
+        - module: "src/index.ts"
+          added_fields: ["generateContext(projectDir): ContextResult"]
+          reason: "루트 public API에서 컨텍스트 생성기 노출"
+        - module: "package.json"
+          added_fields: ["./commands/context export"]
+          reason: "subpath import로 ms-context 명령 표면 노출"
+        - module: "src/commands/report.ts"
+          added_fields: ["TRACE_MATRIX.yaml 로드 + traceability 전달"]
+          reason: "리포트에 요구사항-코드-테스트 연결 정보 포함"
+        - module: "src/core/reporter.ts"
+          added_fields: ["## Traceability markdown table renderer"]
+          reason: "TRACE_MATRIX를 사람이 바로 읽을 수 있는 보고서 형식으로 출력"
 
   - change_id: "MSC-2026-04-13-001"
     semantic_version: "1.6.0"
@@ -130,7 +156,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — 기존 mission.yaml/history.yaml과 호환, 신규 기능은 opt-in"
-    related_commits: []
+    related_commits: ["84539f0", "7e3b715", "79761fb", "2e4a2fb", "4433407"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-13_v1.6.0_mission.yaml"
     follow_up:
@@ -248,7 +274,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — 메타데이터 추가, 기존 기능 변경 없음"
-    related_commits: ["1f6f8b4", "8e97379", "6551158", "900f4a9", "89f767f"]
+    related_commits: ["c975f05", "8687510", "1f6f8b4", "8e97379", "6551158", "900f4a9", "89f767f"]
     related_decisions: ["MDR-004-done-when-eval-linking"]
     snapshot_after: ".mission/snapshots/2026-04-07_v1.4.0_mission.yaml"
     follow_up: []
@@ -441,7 +467,7 @@ evolution_summary:
       versions: ["1.7.0"]
       date_range: "2026-04-14"
       theme: "아키텍처 지식의 자산화"
-      description: "3-모델 교차 검증 합의 기반. design_refs + architecture_delta 스키마 확장, Architecture/Dependency/API Registry + Traceability Matrix로 구조 정보를 machine-readable 자산화"
+      description: "3-모델 교차 검증 합의 기반. design_refs + architecture_delta 스키마 확장, Architecture/Dependency/API/Traceability registry, ms-context, Rebuild Playbook, Verification Evidence Ledger까지 포함해 구조 정보의 capture와 consumption을 함께 자산화"
 
   identity_evolution:
     - version: "1.0.0"

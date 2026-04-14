@@ -1,0 +1,4 @@
+passed: true
+reason: "2026-04-14 기준 docs/internal/ARCHITECTURE.md 와 docs/internal/CLAUDE.md를 v1.7.0 codebase, registry, test count에 맞게 동기화함"
+evaluated_by: "codex"
+evaluated_at: "2026-04-14"

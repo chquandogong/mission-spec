@@ -68,7 +68,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/schema/mission.schema.json"
     tests:
-      - "tests/schema.test.ts (28 tests)"
+      - "tests/schema.test.ts (33 tests)"
       - "tests/commands/eval.test.ts: runs automated eval"
 
   - criterion: "command_test"
@@ -80,7 +80,7 @@ requirements:
       - "src/core/*.ts"
       - "src/schema/validator.ts"
     tests:
-      - "tests/ (전체 93 tests)"
+      - "tests/ (전체 109 tests)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -144,7 +144,7 @@ decision_trace:
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
-    cases: 33
+    cases: 35
     covers: [validator]
     categories:
       [
@@ -211,3 +211,14 @@ test_coverage:
     cases: 1
     covers: []
     categories: ["root export verification"]
+
+  - test_file: "tests/scripts/validate-history-commits.test.ts"
+    cases: 4
+    covers: []
+    categories:
+      [
+        "git log coverage",
+        "related_commits omission",
+        "pre-commit staged check",
+        "history staged together",
+      ]

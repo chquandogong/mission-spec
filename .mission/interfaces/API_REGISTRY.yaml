@@ -136,6 +136,6 @@ hooks:
   - trigger: "pre-commit"
     path: ".githooks/pre-commit"
     activation: "git config core.hooksPath .githooks"
-    behavior: "npm run snapshot 실행 후 .mission/snapshots/ 스테이징"
+    behavior: "npm run snapshot 실행 후 .mission/snapshots/ 스테이징, 이어서 npm run validate:history-commits로 history 누락 검사"
     side_effects:
       - ".mission/snapshots/<date>_v<version>_mission.yaml 생성 (신규 버전일 때만)"

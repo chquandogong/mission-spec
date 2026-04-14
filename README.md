@@ -257,6 +257,13 @@ git config core.hooksPath .githooks
 
 스냅샷 스크립트는 버전 기반 dedup을 수행 — 같은 `version`의 스냅샷이 이미 있으면 생성하지 않습니다.
 
+또한 `npm run validate:history-commits`로 `mission-history.yaml`의 `related_commits`와 실제 Git 이력을 대조할 수 있습니다. 현재 pre-commit 훅은 다음 두 가지를 함께 수행합니다.
+
+- 새 버전 snapshot 생성 및 스테이징
+- contract 관련 staged 변경이 있는데 `mission-history.yaml`이 빠졌는지 검사
+
+이 검증은 이미 커밋된 관련 commit이 history에 누락됐는지도 잡아냅니다. 단, `mission-history.yaml`을 함께 수정한 consolidation commit 자체는 self-reference 문제를 피하기 위해 예외 처리합니다.
+
 ## Cross-Platform 변환
 
 ```bash
