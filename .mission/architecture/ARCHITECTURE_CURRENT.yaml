@@ -110,12 +110,21 @@ modules:
 
   - id: report
     path: "src/commands/report.ts"
-    responsibility: "완료 리포트 생성 (eval + history + reporter)"
+    responsibility: "완료 리포트 생성 (eval + history + reporter + traceability)"
     depends_on: [parser, eval, reporter, history]
     exports:
       - "generateMissionReport(projectDir): ReportResult"
     types:
       - "ReportResult"
+
+  - id: context
+    path: "src/commands/context.ts"
+    responsibility: "AI 에이전트를 위한 프로젝트 컨텍스트 프롬프트 생성"
+    depends_on: [parser, history]
+    exports:
+      - "generateContext(projectDir): ContextResult"
+    types:
+      - "ContextResult"
 
   - id: platforms
     path: "src/adapters/platforms.ts"

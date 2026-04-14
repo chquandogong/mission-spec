@@ -34,6 +34,9 @@ nodes:
   - id: report
     path: "src/commands/report.ts"
     layer: commands
+  - id: context
+    path: "src/commands/context.ts"
+    layer: commands
   - id: platforms
     path: "src/adapters/platforms.ts"
     layer: adapters
@@ -64,6 +67,10 @@ edges:
     to: eval
   - from: report
     to: reporter
+  - from: context
+    to: parser
+  - from: context
+    to: history
   - from: report
     to: history
 

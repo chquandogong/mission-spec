@@ -57,6 +57,9 @@ public_api:
     - name: "getCurrentPhase"
       signature: "(history: MissionHistory) => EvolutionPhase | null"
       source: "src/core/history.ts"
+    - name: "generateContext"
+      signature: "(projectDir: string) => ContextResult"
+      source: "src/commands/context.ts"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 
@@ -76,6 +79,9 @@ skill_surface:
     - id: "ms-report"
       path: "skills/ms-report/SKILL.md"
       invocation: "/mission-spec:ms-report"
+    - id: "ms-context"
+      path: "skills/ms-context/SKILL.md"
+      invocation: "/mission-spec:ms-context"
 
 # ── 3. Schema IDs ──
 

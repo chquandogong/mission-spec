@@ -58,12 +58,18 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 - [x] `mission-history.yaml` JSON Schema + `validateHistory()` public API
 - [x] ms-status/ms-report graceful fallback
 
-## 다음 변경 후보 (Tier 3: Consumption Layer)
+## Tier 3 구현 완료 (v1.7.0)
 
-- `ms-context` 명령어 — 새 에이전트를 위한 시스템 프롬프트 자동 생성
-- Reconstruction Playbook — 빈 프로젝트에서 자산만으로 재구현하는 가이드
-- Traceability Report 자동 생성 — ms-report에서 TRACE_MATRIX 기반 표 렌더링
-- Verification Evidence Ledger — 검증 시점/환경/결과 기록 (CI/CD 연동)
+- [x] `ms-context` 명령어 — AI 에이전트를 위한 시스템 프롬프트 자동 생성
+- [x] Reconstruction Playbook — `.mission/reconstruction/REBUILD_PLAYBOOK.md`
+- [x] Traceability Report 자동 생성 — ms-report에서 TRACE_MATRIX 기반 표 렌더링
+- [x] Verification Evidence Ledger — `.mission/evidence/VERIFICATION_LOG.yaml`
+
+## 다음 변경 후보
+
+- Architecture Diff 자동 생성기 (Architecture Registry 버전 간 비교)
+- `ms-context` 출력을 clipboard/파일로 직접 내보내는 UX
+- CI/CD에서 VERIFICATION_LOG 자동 갱신
 
 ## 자기 검증
 
