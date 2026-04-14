@@ -1,6 +1,6 @@
 # Mission Spec — API / Interface Registry
 # 외부와 맺고 있는 모든 계약(public exports, skill surface, file format contracts)을 한 곳에 기록합니다.
-# Last updated: 2026-04-14 | Version: 1.6.0
+# Last updated: 2026-04-14 | Version: 1.7.0
 
 # ── 1. Public Library API (src/index.ts → package.json exports) ──
 
@@ -22,6 +22,9 @@ public_api:
     "./commands/report":
       types: "./dist/commands/report.d.ts"
       import: "./dist/commands/report.js"
+    "./commands/context":
+      types: "./dist/commands/context.d.ts"
+      import: "./dist/commands/context.js"
 
   functions:
     - name: "validateMission"

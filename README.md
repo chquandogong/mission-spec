@@ -99,6 +99,16 @@ const report = generateMissionReport(".");
 console.log(report.markdown);
 ```
 
+### AI 에이전트 컨텍스트 생성 (`ms-context`)
+
+```typescript
+import { generateContext } from "mission-spec";
+
+const ctx = generateContext(".");
+console.log(ctx.markdown); // mission + history + architecture + API 통합 프롬프트
+console.log(ctx.sections); // ["mission", "design_refs", "history", "decisions", "architecture", "api"]
+```
+
 필요하면 subpath import도 사용할 수 있습니다:
 
 ```typescript

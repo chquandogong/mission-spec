@@ -1,7 +1,7 @@
 # Mission Spec — Architecture Registry
 # 현재 모듈 구조, 책임, 의존관계를 machine-readable로 기록합니다.
 # mission-history.yaml의 architecture_delta와 연동: delta는 변경 추적, 이 파일은 현재 상태.
-# Last updated: 2026-04-14 | Version: 1.6.0
+# Last updated: 2026-04-14 | Version: 1.7.0
 
 system:
   name: "mission-spec"

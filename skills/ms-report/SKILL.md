@@ -84,6 +84,20 @@ console.log('Report saved to mission-report.md');
 - Modified: ms-status, ms-report, ms-init, ...
 ```
 
+## Traceability 섹션 (v1.7.0+)
+
+`.mission/traceability/TRACE_MATRIX.yaml`이 프로젝트 루트에 존재하면, 리포트에 Traceability 표가 자동 포함됩니다:
+
+```markdown
+## Traceability
+
+| Requirement              | Eval Type | Code                       | Tests                |
+| ------------------------ | --------- | -------------------------- | -------------------- |
+| schema_validation_passes | automated | scripts/validate-schema.js | tests/schema.test.ts |
+```
+
+TRACE_MATRIX가 없으면 이 섹션은 자동으로 생략됩니다.
+
 ## 주의
 
 - 리포트에는 타임스탬프가 포함되어 각 실행을 구분할 수 있습니다.

@@ -90,12 +90,19 @@ mission:
 
   artifacts:
     - "mission-spec.schema.json"
+    - "mission-history.schema.json"
     - "package.json"
     - "src/commands/*.ts"
+    - "src/core/*.ts"
     - "src/schema/*.ts"
     - "tests/**/*.test.ts"
     - "README.md"
     - ".claude-plugin/plugin.json"
+    - ".mission/architecture/*.yaml"
+    - ".mission/interfaces/*.yaml"
+    - ".mission/traceability/*.yaml"
+    - ".mission/reconstruction/*.md"
+    - ".mission/evidence/*.yaml"
 
   design_refs:
     architecture: "docs/internal/ARCHITECTURE.md"

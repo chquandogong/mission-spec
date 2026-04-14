@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-14 | Version: 1.6.0
+# Last updated: 2026-04-14 | Version: 1.7.0
 
 # ── done_when 기준 추적 ──
 
@@ -144,7 +144,7 @@ decision_trace:
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
-    cases: 31
+    cases: 33
     covers: [validator]
     categories:
       [
@@ -152,6 +152,7 @@ test_coverage:
         "history schema validation",
         "design_refs",
         "llm-eval type",
+        "architecture_delta",
       ]
 
   - test_file: "tests/commands/init.test.ts"
@@ -171,9 +172,16 @@ test_coverage:
     categories: ["progress", "constraints", "markdown", "history fallback"]
 
   - test_file: "tests/commands/report.test.ts"
-    cases: 10
+    cases: 12
     covers: [report, reporter]
-    categories: ["PASS/FAIL", "metadata", "recent changes", "history fallback"]
+    categories:
+      [
+        "PASS/FAIL",
+        "metadata",
+        "recent changes",
+        "history fallback",
+        "traceability",
+      ]
 
   - test_file: "tests/platforms.test.ts"
     cases: 14
@@ -184,6 +192,20 @@ test_coverage:
     cases: 2
     covers: []
     categories: ["snapshot creation", "version dedup"]
+
+  - test_file: "tests/commands/context.test.ts"
+    cases: 8
+    covers: [context]
+    categories:
+      [
+        "mission section",
+        "design_refs",
+        "architecture",
+        "MDR",
+        "API",
+        "minimal",
+        "error",
+      ]
 
   - test_file: "tests/index.test.ts"
     cases: 1
