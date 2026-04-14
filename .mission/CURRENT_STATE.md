@@ -1,20 +1,20 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-14 | Version: 1.7.0
+> Last updated: 2026-04-15 | Version: 1.8.0
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.7 — Architecture Assetization
-- **Phase:** architecture-assetization
+- **Title:** Mission Spec v1.8 — Internationalization
+- **Phase:** internationalization
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01
 
 ## 현재 목표
 
 Mission Spec을 core library와 Claude Code skill bundle로 구현.
-누구나 쉽게 설치하여 사용할 수 있는 portable한 task contract 도구.
+누구나 쉽게 설치하여 사용할 수 있는 portable한 task contract 도구로 유지.
 mission.yaml의 변경 이력을 Living Asset Registry로 관리.
-아키텍처 지식을 machine-readable 자산으로 포착.
+문서 접근성은 다국어로 확장하되, 런타임/스키마/메타데이터는 일관된 영어 표면으로 유지.
 
 ## 핵심 제약 (활성)
 
@@ -41,7 +41,15 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 
 - (없음)
 
-## 최근 구현 (v1.7.0)
+## 최근 구현 (v1.8.0)
+
+- [x] `README.md`를 영어 기본 문서로 재작성하고 `README.ko.md`, `README.zh.md` 추가
+- [x] 5개 skill 문서에 `SKILL.ko.md`, `SKILL.zh.md` 추가
+- [x] 런타임 메시지, 스키마 설명, 패키지 메타데이터를 영어로 통일
+- [x] `ms-init`의 한국어 입력 감지 정규식은 유지하여 기존 한국어 프롬프트 호환성 보존
+- [x] `mission-history.yaml`, snapshot, 상태/검증 메타데이터를 `v1.8.0` 기준으로 동기화
+
+## 이전 구현 (v1.7.0)
 
 - [x] `design_refs` 스키마 필드 — 설계 문서 위치 포인터
 - [x] `architecture_doc_freshness` llm-eval — 설계 문서 stale 자동 감지
@@ -50,22 +58,7 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 - [x] Dependency Graph (`.mission/architecture/DEPENDENCY_GRAPH.yaml`)
 - [x] API/Interface Registry (`.mission/interfaces/API_REGISTRY.yaml`)
 - [x] Traceability Matrix (`.mission/traceability/TRACE_MATRIX.yaml`)
-
-## 이전 구현 (v1.6.0)
-
-- [x] pre-commit hook으로 snapshot 자동 생성
-- [x] LLM/주관 평가 타입 (`llm-eval` + `llm-judge`) 및 오버라이드
-- [x] `mission-history.yaml` JSON Schema + `validateHistory()` public API
-- [x] ms-status/ms-report graceful fallback
-
-## Tier 3 구현 완료 (v1.7.0)
-
-- [x] `ms-context` 명령어 — AI 에이전트를 위한 시스템 프롬프트 자동 생성
-- [x] Reconstruction Playbook — `.mission/reconstruction/REBUILD_PLAYBOOK.md`
-- [x] Traceability Report 자동 생성 — ms-report에서 TRACE_MATRIX 기반 표 렌더링
-- [x] Verification Evidence Ledger — `.mission/evidence/VERIFICATION_LOG.yaml`
-- [x] Architecture Diff 자동 생성기 — `npm run arch-diff [ref]` + `diffArchitectures()` API
-- [x] History commit validation — `npm run validate:history-commits` + pre-commit 연동
+- [x] `ms-context`, Reconstruction Playbook, Verification Evidence Ledger, Architecture Diff, history commit validation
 
 ## 다음 변경 후보
 
@@ -80,3 +73,4 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 - [x] 특정 버전을 다시 꺼내 재실행할 수 있는가?
 - [x] 임시 조치인지 영구 정책인지 구분되는가?
 - [x] 코드를 읽지 않고도 모듈 구조를 알 수 있는가? (v1.7.0+)
+- [x] 한국어/영어/중국어 사용자 모두 설치 문서를 따라갈 수 있는가? (v1.8.0+)

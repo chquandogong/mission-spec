@@ -13,10 +13,10 @@ meta:
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
-  - change_id: "MSC-2026-04-14-002"
+  - change_id: "MSC-2026-04-15-001"
     semantic_version: "1.8.0"
     change_sequence: 12
-    date: "2026-04-14"
+    date: "2026-04-15"
     author: "Dr. QUAN"
     contributors: ["Claude Opus 4.6"]
     change_type: "enhancement"
@@ -60,7 +60,9 @@ timeline:
       tests: true
     breaking: false
     risk: "low — no API changes, only string translations and new documentation files"
+    related_commits: ["b55e7b8"]
     related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-15_v1.8.0_mission.yaml"
 
   - change_id: "MSC-2026-04-14-001"
     semantic_version: "1.7.0"
@@ -142,6 +144,7 @@ timeline:
         "80bad04",
         "83d078c",
         "344579f",
+        "0ec62b7",
       ]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-14_v1.7.0_mission.yaml"
