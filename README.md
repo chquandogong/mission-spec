@@ -262,7 +262,7 @@ git config core.hooksPath .githooks
 - 새 버전 snapshot 생성 및 스테이징
 - contract 관련 staged 변경이 있는데 `mission-history.yaml`이 빠졌는지 검사
 
-이 검증은 이미 커밋된 관련 commit이 history에 누락됐는지도 잡아냅니다. 단, `mission-history.yaml`을 함께 수정한 consolidation commit 자체는 self-reference 문제를 피하기 위해 예외 처리합니다.
+이 검증은 이미 커밋된 관련 commit이 history에 누락됐는지도 잡아냅니다. 단, self-reference 문제를 피하기 위해 `mission-history.yaml`을 **처음 도입한 bootstrap commit 1건**과, **현재 HEAD가 `mission-history.yaml`을 함께 수정한 경우**만 예외 처리합니다. 이후 다른 commit이 쌓이면, 그 이전 code+history 동시 commit도 다시 검사 대상이 됩니다.
 
 ## Cross-Platform 변환
 

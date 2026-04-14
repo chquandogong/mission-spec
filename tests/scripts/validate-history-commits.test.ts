@@ -174,4 +174,121 @@ describe("validate-history-commits", () => {
     const result = runValidator();
     expect(result.status).toBe(0);
   });
+
+  it("allows the latest HEAD commit to change code and mission-history together", () => {
+    commitAll("initial history-backed commit");
+
+    appendFileSync(join(tempDir, "src", "core.ts"), "export const headOnly = 4;\n");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "history-validation-test",
+          tracking_since: "2026-04-14",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-04-14-001",
+            semantic_version: "1.0.0",
+            date: "2026-04-14",
+            author: "tester",
+            change_type: "enhancement",
+            persistence: "permanent",
+            intent: "head commit updates code and history together",
+            changes: {
+              added: ["src/core.ts"],
+              modified: ["mission-history.yaml"],
+              removed: [],
+            },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    git(["add", "src/core.ts", "mission-history.yaml"]);
+    git(["commit", "-m", "feat: code and history together", "--quiet"]);
+
+    const result = runValidator();
+    expect(result.status).toBe(0);
+  });
+
+  it("fails once a code+history commit is no longer HEAD and is still missing from related_commits", () => {
+    commitAll("initial history-backed commit");
+
+    appendFileSync(join(tempDir, "src", "core.ts"), "export const headOnly = 4;\n");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "history-validation-test",
+          tracking_since: "2026-04-14",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-04-14-001",
+            semantic_version: "1.0.0",
+            date: "2026-04-14",
+            author: "tester",
+            change_type: "enhancement",
+            persistence: "permanent",
+            intent: "head commit updates code and history together",
+            changes: {
+              added: ["src/core.ts"],
+              modified: ["mission-history.yaml"],
+              removed: [],
+            },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    git(["add", "src/core.ts", "mission-history.yaml"]);
+    const sameCommitSha = commitAll("feat: code and history together");
+
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "history-validation-test",
+          tracking_since: "2026-04-14",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-04-14-001",
+            semantic_version: "1.0.0",
+            date: "2026-04-14",
+            author: "tester",
+            change_type: "enhancement",
+            persistence: "permanent",
+            intent: "later history-only follow-up",
+            changes: {
+              added: ["src/core.ts"],
+              modified: ["mission-history.yaml"],
+              removed: [],
+            },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    git(["add", "mission-history.yaml"]);
+    commitAll("docs: history-only follow-up");
+
+    const result = runValidator();
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("history에 기록되지 않은 관련 commit");
+    expect(result.stderr).toContain(sameCommitSha);
+  });
 });

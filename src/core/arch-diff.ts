@@ -60,6 +60,17 @@ function buildDepEdges(modules: ArchModule[]): Set<string> {
   return edges;
 }
 
+function assertGitRefExists(projectDir: string, ref: string): void {
+  try {
+    execFileSync("git", ["rev-parse", "--verify", `${ref}^{commit}`], {
+      cwd: projectDir,
+      stdio: "ignore",
+    });
+  } catch {
+    throw new Error(`Invalid git ref: ${ref}`);
+  }
+}
+
 export function diffArchitectures(
   oldData: unknown,
   newData: unknown,
@@ -200,8 +211,14 @@ export function diffArchitectureFromGit(
   }
   const currentData = parse(readFileSync(currentPath, "utf-8"));
 
+  assertGitRefExists(projectDir, ref);
+
   let oldData: unknown = { modules: [] };
   try {
+    execFileSync("git", ["cat-file", "-e", `${ref}:${ARCH_REGISTRY_PATH}`], {
+      cwd: projectDir,
+      stdio: "ignore",
+    });
     const oldContent = execFileSync(
       "git",
       ["show", `${ref}:${ARCH_REGISTRY_PATH}`],
@@ -209,7 +226,7 @@ export function diffArchitectureFromGit(
     );
     oldData = parse(oldContent);
   } catch {
-    // ref doesn't have the file — treat as empty (all modules are "added")
+    // ref is valid but doesn't have the file — treat as empty
   }
 
   return diffArchitectures(oldData, currentData, ref, "current");

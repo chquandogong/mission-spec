@@ -13,7 +13,7 @@ entries:
       runtime: "ESM"
     results:
       npm_test:
-        passed: 116
+        passed: 119
         failed: 0
         files: 11
       npm_build: "success"
@@ -24,7 +24,7 @@ entries:
         criteria_passed: 9
         criteria_total: 9
         status: "mission complete"
-    notes: "Tier 1-3 로드맵 + Architecture Diff 완료 후 최종 검증"
+    notes: "Tier 1-3 로드맵 + Architecture Diff 완료 후 최종 검증, invalid-ref 및 bootstrap + HEAD self-reference 예외 보정 포함"
 
   - version: "1.6.0"
     date: "2026-04-13"

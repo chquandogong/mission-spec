@@ -80,7 +80,7 @@ requirements:
       - "src/core/*.ts"
       - "src/schema/validator.ts"
     tests:
-      - "tests/ (전체 109 tests)"
+      - "tests/ (전체 119 tests)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -208,7 +208,7 @@ test_coverage:
       ]
 
   - test_file: "tests/core/arch-diff.test.ts"
-    cases: 7
+    cases: 8
     covers: [arch-diff]
     categories:
       [
@@ -219,6 +219,7 @@ test_coverage:
         "no diff",
         "empty old",
         "null modules",
+        "invalid git ref",
       ]
 
   - test_file: "tests/index.test.ts"
@@ -227,7 +228,7 @@ test_coverage:
     categories: ["root export verification"]
 
   - test_file: "tests/scripts/validate-history-commits.test.ts"
-    cases: 4
+    cases: 6
     covers: []
     categories:
       [
@@ -235,4 +236,6 @@ test_coverage:
         "related_commits omission",
         "pre-commit staged check",
         "history staged together",
+        "bootstrap and head history-touching exceptions",
+        "deferred detection after later commit",
       ]

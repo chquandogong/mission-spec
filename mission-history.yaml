@@ -34,7 +34,7 @@ timeline:
         - ".mission/architecture/ARCHITECTURE_CURRENT.yaml (11 모듈 registry)"
         - ".mission/architecture/DEPENDENCY_GRAPH.yaml (14 edges directed graph)"
         - ".mission/interfaces/API_REGISTRY.yaml (12 functions, 5 skills, 5 file contracts)"
-        - ".mission/traceability/TRACE_MATRIX.yaml (9 requirements, 4 MDR traces, 10 test files)"
+        - ".mission/traceability/TRACE_MATRIX.yaml (9 requirements, 4 MDR traces, 11 test files)"
         - "src/commands/context.ts + generateContext public API + ./commands/context subpath export"
         - "skills/ms-context/SKILL.md"
         - ".mission/reconstruction/REBUILD_PLAYBOOK.md"
@@ -45,17 +45,20 @@ timeline:
         - "ArchitectureDelta, ModuleEntry, InterfaceChange TypeScript types"
         - "src/core/arch-diff.ts + diffArchitectures/diffArchitectureFromGit public API"
         - "scripts/architecture-diff.js (CLI: npm run arch-diff [ref])"
-        - "tests/core/arch-diff.test.ts (7 tests)"
+        - "tests/core/arch-diff.test.ts (8 tests)"
       modified:
         - "mission.yaml: design_refs 추가, architecture_doc_freshness eval 추가"
         - "src/core/parser.ts: MissionDocument에 design_refs 필드"
         - "src/core/history.ts: ArchitectureDelta 관련 타입 추가"
         - "src/commands/report.ts + src/core/reporter.ts: TRACE_MATRIX 기반 Traceability 표 렌더링"
         - "README.md: ms-context, design_refs, Living Asset Registry 범위 업데이트"
+        - "README.md: history validator의 bootstrap + HEAD self-reference 예외 규칙 명시"
         - "docs/internal/ARCHITECTURE.md + docs/internal/CLAUDE.md: v1.7.0 구조 기준으로 동기화"
         - "skills/ms-eval/SKILL.md + skills/ms-report/SKILL.md: architecture freshness / traceability 문서화"
         - ".mission/CURRENT_STATE.md, ARCHITECTURE_CURRENT.yaml, DEPENDENCY_GRAPH.yaml, API_REGISTRY.yaml: Tier 3 완료 상태 반영"
         - ".githooks/pre-commit + CHANGE_ENTRY_TEMPLATE + versioning docs: history commit validation 연결"
+        - "scripts/validate-history-commits.js: mission-history bootstrap commit과 현재 HEAD의 history-touching commit만 self-reference 예외 처리"
+        - "src/core/arch-diff.ts: invalid git ref는 empty-old fallback이 아니라 명시적 오류로 처리"
       removed: []
     changed_sections: [title, version, evals, artifacts, design_refs, lineage]
     done_when_delta:
@@ -89,6 +92,7 @@ timeline:
         "f473350",
         "80bad04",
         "83d078c",
+        "344579f",
       ]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-14_v1.7.0_mission.yaml"
@@ -223,7 +227,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — optional 필드 추가, 기존 mission.yaml 호환 유지"
-    related_commits: ["03bfb9c", "187a016"]
+    related_commits: ["03bfb9c", "187a016", "69d545c"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-08_v1.5.0_mission.yaml"
     follow_up: []

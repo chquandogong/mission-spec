@@ -84,6 +84,27 @@ function getCommitChangedFiles(projectDir, sha) {
   return lines(execGit(projectDir, ["show", "--name-only", "--format=", sha]));
 }
 
+function getHeadCommit(projectDir) {
+  try {
+    return execGit(projectDir, ["rev-parse", "--verify", "HEAD"]);
+  } catch {
+    return null;
+  }
+}
+
+function getHistoryBootstrapCommit(projectDir) {
+  const commits = lines(
+    execGit(projectDir, [
+      "log",
+      "--diff-filter=A",
+      "--format=%H",
+      "--",
+      "mission-history.yaml",
+    ]),
+  );
+  return commits[0] ?? null;
+}
+
 function collectReferencedCommits(projectDir, history) {
   const errors = [];
   const resolvedByCommit = new Map();
@@ -133,10 +154,16 @@ function collectRelevantGitCommits(projectDir, trackingSince) {
   args.push("--", ...COMMITTED_RELEVANT_PATHS);
 
   const shas = unique(lines(execGit(projectDir, args)));
+  const headCommit = getHeadCommit(projectDir);
+  const historyBootstrapCommit = getHistoryBootstrapCommit(projectDir);
 
   return shas.filter((sha) => {
+    if (sha === historyBootstrapCommit) {
+      return false;
+    }
+
     const changedFiles = getCommitChangedFiles(projectDir, sha);
-    return !changedFiles.includes("mission-history.yaml");
+    return !(sha === headCommit && changedFiles.includes("mission-history.yaml"));
   });
 }
 

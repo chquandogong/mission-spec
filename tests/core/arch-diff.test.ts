@@ -1,5 +1,17 @@
-import { describe, it, expect } from "vitest";
-import { diffArchitectures } from "../../src/core/arch-diff.js";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import {
+  mkdtempSync,
+  writeFileSync,
+  rmSync,
+  mkdirSync,
+} from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
+import {
+  diffArchitectures,
+  diffArchitectureFromGit,
+} from "../../src/core/arch-diff.js";
 
 describe("diffArchitectures", () => {
   it("detects added modules", () => {
@@ -133,5 +145,40 @@ describe("diffArchitectures", () => {
     );
     expect(result.hasDiff).toBe(true);
     expect(result.modules.added).toHaveLength(1);
+  });
+});
+
+let tempDir: string;
+
+function git(args: string[]) {
+  return execFileSync("git", args, {
+    cwd: tempDir,
+    encoding: "utf-8",
+  }).trim();
+}
+
+describe("diffArchitectureFromGit", () => {
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), "ms-arch-diff-"));
+    git(["init", "--quiet"]);
+    git(["config", "user.name", "Test User"]);
+    git(["config", "user.email", "test@example.com"]);
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      "modules:\n  - id: parser\n    path: src/core/parser.ts\n    responsibility: parse\n",
+    );
+    git(["add", "."]);
+    git(["commit", "-m", "initial architecture", "--quiet"]);
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it("throws on invalid git ref instead of pretending the old registry was empty", () => {
+    expect(() => diffArchitectureFromGit(tempDir, "does-not-exist")).toThrow(
+      /Invalid git ref: does-not-exist/,
+    );
   });
 });
