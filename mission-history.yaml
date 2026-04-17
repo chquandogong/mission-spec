@@ -52,7 +52,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — docs-only change, 3종 README 병렬 갱신 유지 (MDR-002 trilingual discipline); 251/251 full suite green; 모든 validator green. 새 bullet text에 오타 있다면 외부 adopter에게 혼란 — 자체 교정 루프(registry:check는 CURRENT_STATE + REBUILD_PLAYBOOK만 커버, README 미검증)의 잔여 사각지대. Semantic version: patch per MDR-006 §PATCH 6 (docs/README 업데이트, no consumer surface change)."
-    related_commits: []
+    related_commits: ["438f2ae"]
     related_decisions: ["MDR-002-ms-prefix-adoption"]
     snapshot_after: ".mission/snapshots/2026-04-18_v1.16.12_mission.yaml"
     follow_up:
