@@ -63,7 +63,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — all additions are opt-in / additive. Reconstruction verifier's heuristic may false-negative (miss some path references); tightened to require slash to avoid false-positive noise."
-    related_commits: []
+    related_commits: ["64fd680"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.14.0_mission.yaml"
     follow_up:
