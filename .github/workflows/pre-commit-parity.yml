@@ -51,3 +51,19 @@ jobs:
             or the generator regressed."
             exit 1
           }
+
+      - name: Build dist/ for architecture extractor
+        run: npm run build
+
+      - name: Verify architecture extraction is deterministic
+        run: |
+          npm run arch:sync --silent
+          git diff --exit-code .mission/architecture/ARCHITECTURE_COMPUTED.yaml || {
+            echo "::error::Running arch:sync produced unstaged changes. \
+            src/ changed without regenerating ARCHITECTURE_COMPUTED.yaml, \
+            or the extractor regressed."
+            exit 1
+          }
+
+      - name: Verify ARCHITECTURE_CURRENT.yaml is in sync with src/
+        run: npm run arch:verify

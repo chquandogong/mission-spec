@@ -470,7 +470,7 @@ describe("validateHistory", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("rejects empty related_commits when the field is present", () => {
+  it("accepts empty related_commits (transient — for the commit that introduces the entry itself, backfilled by a follow-on)", () => {
     const result = validateHistory({
       meta: {
         mission_id: "m",
@@ -494,8 +494,7 @@ describe("validateHistory", () => {
         },
       ],
     });
-    expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes("related_commits"))).toBe(true);
+    expect(result.valid).toBe(true);
   });
 
   it("rejects related_commits entries with invalid sha format", () => {

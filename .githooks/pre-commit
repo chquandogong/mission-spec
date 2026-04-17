@@ -7,4 +7,10 @@ if [ -d .mission/snapshots ]; then
 fi
 npm run changelog --silent
 git add CHANGELOG.md
+# Regenerate architecture snapshot (derived from src/) and enforce current registry sync.
+if [ -d dist/core ]; then
+  npm run arch:sync --silent
+  git add .mission/architecture/ARCHITECTURE_COMPUTED.yaml
+  npm run arch:verify --silent
+fi
 npm run validate:history-commits --silent

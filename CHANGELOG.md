@@ -6,6 +6,28 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.10.0] - 2026-04-17
+_Architecture drift — automate what was manual. Extract module list, dependency edges, and public API surface from src/ so ARCHITECTURE_CURRENT.yaml cannot silently fall out of sync with code._
+
+### Added
+
+- src/core/architecture-extractor.ts (regex-based extractor, deterministic sort)
+- scripts/generate-architecture.js (default write / --check / --verify-current)
+- tests/core/architecture-extractor.test.ts (8 tests: modules, layer, import resolution, external-skip, d.ts/test.ts exclusion, re-exports, public_api, determinism)
+- tests/scripts/generate-architecture.test.ts (6 tests: default mode, --check pass/fail, --verify-current pass/fail/path-mismatch)
+- .mission/architecture/ARCHITECTURE_COMPUTED.yaml (auto-generated baseline, 14 modules)
+
+### Changed
+
+- .mission/architecture/ARCHITECTURE_CURRENT.yaml: added architecture-extractor and index modules (surfaced by verify-current)
+- .mission/architecture/DEPENDENCY_GRAPH.yaml: added architecture-extractor and index nodes
+- .mission/interfaces/API_REGISTRY.yaml: added extractArchitecture public function
+- src/index.ts: export extractArchitecture + related types
+- package.json: add arch:sync, arch:check, arch:verify scripts; version 1.9.0 → 1.10.0
+- .githooks/pre-commit: auto-run arch:sync + arch:verify after build exists
+- .github/workflows/pre-commit-parity.yml: build dist/, verify arch:sync determinism, run arch:verify
+- mission.yaml: title and version bumped to v1.10.0
+
 ## [1.9.0] - 2026-04-17
 _Governance hardening — close the gaps between the v1.8 Living Asset Registry and a shippable open-source project (CI, license, contributor path, coverage floor)_
 

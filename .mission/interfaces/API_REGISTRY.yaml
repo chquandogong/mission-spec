@@ -1,6 +1,6 @@
 # Mission Spec — API / Interface Registry
 # 외부와 맺고 있는 모든 계약(public exports, skill surface, file format contracts)을 한 곳에 기록합니다.
-# Last updated: 2026-04-14 | Version: 1.7.0
+# Last updated: 2026-04-17 | Version: 1.10.0
 
 # ── 1. Public Library API (src/index.ts → package.json exports) ──
 
@@ -69,6 +69,9 @@ public_api:
     - name: "diffArchitectureFromGit"
       signature: "(projectDir: string, ref?: string) => ArchDiffResult"
       source: "src/core/arch-diff.ts"
+    - name: "extractArchitecture"
+      signature: "(projectDir: string) => ExtractedArchitecture"
+      source: "src/core/architecture-extractor.ts"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 

@@ -1,7 +1,9 @@
-# Mission Spec — Architecture Registry
+# Mission Spec — Architecture Registry (hand-curated)
 # 현재 모듈 구조, 책임, 의존관계를 machine-readable로 기록합니다.
 # mission-history.yaml의 architecture_delta와 연동: delta는 변경 추적, 이 파일은 현재 상태.
-# Last updated: 2026-04-14 | Version: 1.7.0
+# 자동 검증: `npm run arch:verify` 로 src/ 와 이 파일의 모듈 목록 + depends_on 동기 확인.
+# 파생 파일: .mission/architecture/ARCHITECTURE_COMPUTED.yaml (src/ 에서 자동 추출).
+# Last updated: 2026-04-17 | Version: 1.10.0
 
 system:
   name: "mission-spec"
@@ -146,6 +148,36 @@ modules:
       - "convertToCursor(mission): string"
       - "convertToCodex(mission): string"
       - "convertToOpenCode(mission): string"
+
+  - id: architecture-extractor
+    path: "src/core/architecture-extractor.ts"
+    responsibility: "src/ AST 추출로 모듈/의존/exports/public_api 결정성 있게 스냅샷"
+    depends_on: []
+    exports:
+      - "extractArchitecture(projectDir): ExtractedArchitecture"
+    types:
+      - "ExtractedArchitecture"
+      - "ExtractedModule"
+      - "ExtractedEdge"
+
+  - id: index
+    path: "src/index.ts"
+    responsibility: "public API 재수출 허브 (barrel export) — package.json exports가 가리키는 진입점"
+    depends_on:
+      [
+        validator,
+        parser,
+        init,
+        eval,
+        status,
+        report,
+        context,
+        arch-diff,
+        history,
+        architecture-extractor,
+      ]
+    exports:
+      - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor"
 
 data_flow:
   pipeline: "parse → validate → evaluate → render"

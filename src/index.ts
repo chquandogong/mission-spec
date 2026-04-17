@@ -11,6 +11,12 @@ export {
   diffArchitectures,
   diffArchitectureFromGit,
 } from "./core/arch-diff.js";
+export { extractArchitecture } from "./core/architecture-extractor.js";
+export type {
+  ExtractedArchitecture,
+  ExtractedModule,
+  ExtractedEdge,
+} from "./core/architecture-extractor.js";
 export {
   loadHistory,
   getLatestEntry,
