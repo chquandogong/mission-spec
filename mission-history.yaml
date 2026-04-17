@@ -54,7 +54,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — 기본 registry:check 동작은 unchanged (--verify-live는 opt-in); 기존 pre-commit/CI는 fast 경로 유지, 비용 증가 없음; 24/24 verify-registry + 254/254 full suite green; real-project dry-run on v1.16.12 HEAD에서 --verify-live가 `livePassed: 9`를 정확히 리포트. Edge case: dist/ 없거나 evaluateMission 실패 시 silent skip (livePassed=null) — 의도적 graceful (fixture-only test 상황). Semantic version: patch per MDR-006 §PATCH 1 (existing validator drift-range 확장, no consumer surface change — --verify-live는 script CLI flag 추가이므로 §MINOR 후보로 논란 가능; 선택: new public API는 아니고 기존 script의 optional 동작이라 §PATCH 1로 분류)."
-    related_commits: []
+    related_commits: ["810c053"]
     related_decisions:
       [
         "MDR-004-done-when-eval-linking",
