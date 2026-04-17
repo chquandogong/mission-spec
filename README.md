@@ -33,6 +33,7 @@ After installation, the following skills are available:
 - `/mission-spec:ms-status` — Mission progress summary
 - `/mission-spec:ms-report` — Generate run report (markdown)
 - `/mission-spec:ms-context` — Generate project context prompt for AI agents (v1.7.0+)
+- `/mission-spec:ms-decide` — Generate Mission Decision Record (MDR) draft from a natural-language decision description (v1.14.0+)
 
 ### Method 2: Install from Source
 
@@ -116,6 +117,15 @@ Subpath imports are also available:
 ```typescript
 import { evaluateMission } from "mission-spec/commands/eval";
 ```
+
+Migration scripts require an explicit target schema version:
+
+```bash
+npm run migrate:dry-run -- <toVersion>
+npm run migrate:apply -- <toVersion>
+```
+
+No migrators are registered yet; the registry remains empty until schema v2 is defined.
 
 ## mission.yaml Format
 
@@ -272,11 +282,14 @@ This validation also catches already-committed relevant commits missing from his
 node scripts/convert-platforms.js mission.yaml
 ```
 
-Generated files:
+Generated files (v1.14.0+ — 6 platforms):
 
-- `.cursorrules` - For Cursor
-- `AGENTS.md` - For Codex
-- `opencode.toml` - For OpenCode
+- `.cursorrules` — Cursor
+- `AGENTS.md` — Codex
+- `opencode.toml` — OpenCode
+- `.clinerules` — Cline (v1.14.0+)
+- `.continuerules` — Continue (v1.14.0+)
+- `.aider.conf.yml` + `.aider-mission.md` — Aider (v1.14.0+)
 
 Verify-only mode:
 
@@ -295,14 +308,20 @@ npm run build
 ## Current Scope
 
 - Providing: schema validation, mission draft generation, rule-based evaluation, status/report generation
-- Providing: cross-platform conversion for Cursor, Codex, OpenCode
-- Providing: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`
+- Providing: cross-platform conversion for Cursor, Codex, OpenCode, Cline, Continue, Aider (v1.14.0+)
+- Providing: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`, `ms-context`, `ms-decide`
+- Providing: CLI — `npx mission-spec <context|status|eval|report>` (v1.12.0+)
 - Providing: Living Asset Registry — `lineage` schema, `mission-history.yaml` change ledger, MDR, snapshots
 - Providing: History API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`, `validateHistory()`
 - Providing: LLM/subjective evaluation override (`llm-eval`, `llm-judge` + `.mission/evals/<name>.result.yaml`)
 - Providing: Snapshot automation (`npm run snapshot`, `.githooks/pre-commit`)
 - Providing: `design_refs` schema field + `architecture_delta` history field (v1.7.0+)
 - Providing: Architecture Registry, Dependency Graph, API Registry, Traceability Matrix (under `.mission/`)
+- Providing: Architecture/plugin drift detectors — `extractArchitecture()`, `validatePlugin()`, `arch:sync`/`check`/`verify` (v1.10.0+, v1.11.0+)
+- Providing: MDR authoring helper — `ms-decide` skill + `generateMdrDraft()` (v1.14.0+)
+- Providing: Schema migration infrastructure — `detectSchemaVersion()`, `registerMigration()`, `migrateMission()` + CLI wrappers `npm run migrate:dry-run -- <toVersion>` / `npm run migrate:apply -- <toVersion>` (v1.14.0+, registry empty until schema v2)
+- Providing: Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]` (v1.14.0+)
+- Providing: Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml` (v1.9.0+, v1.13.0+)
 - Not included: GitHub/PR integration runtime, separate orchestration framework, SaaS/UI
 
 ## Design Principles

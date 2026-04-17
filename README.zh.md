@@ -33,6 +33,7 @@
 - `/mission-spec:ms-status` — 任务进度摘要
 - `/mission-spec:ms-report` — 生成运行报告（Markdown）
 - `/mission-spec:ms-context` — 为 AI 代理生成项目上下文提示（v1.7.0+）
+- `/mission-spec:ms-decide` — 从自然语言决策描述生成 MDR（Mission Decision Record）草稿（v1.14.0+）
 
 ### 方式 2：从源码安装
 
@@ -116,6 +117,15 @@ console.log(ctx.sections); // ["mission", "design_refs", "history", "decisions",
 ```typescript
 import { evaluateMission } from "mission-spec/commands/eval";
 ```
+
+Migration 脚本必须显式传入目标 schema 版本：
+
+```bash
+npm run migrate:dry-run -- <toVersion>
+npm run migrate:apply -- <toVersion>
+```
+
+目前还没有注册任何 migrator；在定义 schema v2 之前，registry 会保持为空。
 
 ## mission.yaml 格式
 
@@ -272,11 +282,14 @@ git config core.hooksPath .githooks
 node scripts/convert-platforms.js mission.yaml
 ```
 
-生成文件：
+生成文件（v1.14.0+ — 6 个平台）：
 
-- `.cursorrules` - Cursor 用
-- `AGENTS.md` - Codex 用
-- `opencode.toml` - OpenCode 用
+- `.cursorrules` — Cursor 用
+- `AGENTS.md` — Codex 用
+- `opencode.toml` — OpenCode 用
+- `.clinerules` — Cline 用（v1.14.0+）
+- `.continuerules` — Continue 用（v1.14.0+）
+- `.aider.conf.yml` + `.aider-mission.md` — Aider 用（v1.14.0+）
 
 仅验证模式：
 
@@ -295,14 +308,20 @@ npm run build
 ## 当前范围
 
 - 提供中：Schema 验证、任务草案生成、基于规则的评估、状态/报告生成
-- 提供中：Cursor、Codex、OpenCode 跨平台转换
-- 提供中：Claude Code 技能文件 `ms-init`、`ms-eval`、`ms-status`、`ms-report`
+- 提供中：跨平台转换 — Cursor、Codex、OpenCode、Cline、Continue、Aider（v1.14.0+）
+- 提供中：Claude Code 技能文件 `ms-init`、`ms-eval`、`ms-status`、`ms-report`、`ms-context`、`ms-decide`
+- 提供中：CLI — `npx mission-spec <context|status|eval|report>`（v1.12.0+）
 - 提供中：Living Asset Registry — `lineage` Schema、`mission-history.yaml` 变更台账、MDR、快照
 - 提供中：History API — `loadHistory()`、`getCurrentPhase()`、`getLatestEntry()`、`validateHistory()`
 - 提供中：LLM/主观评估覆盖（`llm-eval`、`llm-judge` + `.mission/evals/<name>.result.yaml`）
 - 提供中：快照自动化（`npm run snapshot`、`.githooks/pre-commit`）
 - 提供中：`design_refs` Schema 字段 + `architecture_delta` history 字段（v1.7.0+）
 - 提供中：Architecture Registry、Dependency Graph、API Registry、Traceability Matrix（`.mission/` 下）
+- 提供中：Architecture/plugin drift detector — `extractArchitecture()`、`validatePlugin()`、`arch:sync`/`check`/`verify`（v1.10.0+、v1.11.0+）
+- 提供中：MDR 撰写助手 — `ms-decide` 技能 + `generateMdrDraft()`（v1.14.0+）
+- 提供中：Schema 迁移基础设施 — `detectSchemaVersion()`、`registerMigration()`、`migrateMission()` + CLI wrapper `npm run migrate:dry-run -- <toVersion>` / `npm run migrate:apply -- <toVersion>`（v1.14.0+，schema v2 之前 registry 为空）
+- 提供中：Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]`（v1.14.0+）
+- 提供中：Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml`（v1.9.0+、v1.13.0+）
 - 不包含：GitHub/PR 集成运行时、独立编排框架、SaaS/UI
 
 ## 设计原则

@@ -33,6 +33,7 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 - `/mission-spec:ms-status` — 미션 진행 상황 요약
 - `/mission-spec:ms-report` — run report 생성 (markdown)
 - `/mission-spec:ms-context` — AI 에이전트를 위한 프로젝트 컨텍스트 프롬프트 생성 (v1.7.0+)
+- `/mission-spec:ms-decide` — 자연어 결정 설명으로부터 MDR(Mission Decision Record) 초안 생성 (v1.14.0+)
 
 ### 방법 2: 소스에서 설치
 
@@ -116,6 +117,15 @@ console.log(ctx.sections); // ["mission", "design_refs", "history", "decisions",
 ```typescript
 import { evaluateMission } from "mission-spec/commands/eval";
 ```
+
+Migration 스크립트는 목표 schema 버전을 명시해야 합니다:
+
+```bash
+npm run migrate:dry-run -- <toVersion>
+npm run migrate:apply -- <toVersion>
+```
+
+아직 등록된 migrator는 없으며, schema v2가 정의될 때까지 registry는 비어 있습니다.
 
 ## mission.yaml 형식
 
@@ -272,11 +282,14 @@ git config core.hooksPath .githooks
 node scripts/convert-platforms.js mission.yaml
 ```
 
-생성 파일:
+생성 파일 (v1.14.0+ — 6개 플랫폼):
 
-- `.cursorrules` - Cursor용
-- `AGENTS.md` - Codex용
-- `opencode.toml` - OpenCode용
+- `.cursorrules` — Cursor용
+- `AGENTS.md` — Codex용
+- `opencode.toml` — OpenCode용
+- `.clinerules` — Cline용 (v1.14.0+)
+- `.continuerules` — Continue용 (v1.14.0+)
+- `.aider.conf.yml` + `.aider-mission.md` — Aider용 (v1.14.0+)
 
 검증만 수행하려면:
 
@@ -295,14 +308,20 @@ npm run build
 ## 현재 범위
 
 - 제공 중: schema validation, mission draft generation, rule-based evaluation, status/report generation
-- 제공 중: cross-platform conversion for Cursor, Codex, OpenCode
-- 제공 중: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`
+- 제공 중: cross-platform conversion for Cursor, Codex, OpenCode, Cline, Continue, Aider (v1.14.0+)
+- 제공 중: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`, `ms-context`, `ms-decide`
+- 제공 중: CLI — `npx mission-spec <context|status|eval|report>` (v1.12.0+)
 - 제공 중: Living Asset Registry — `lineage` 스키마, `mission-history.yaml` 변경 원장, MDR, 스냅샷
 - 제공 중: history API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`, `validateHistory()`
 - 제공 중: LLM/주관 평가 오버라이드 (`llm-eval`, `llm-judge` + `.mission/evals/<name>.result.yaml`)
 - 제공 중: 스냅샷 자동화 (`npm run snapshot`, `.githooks/pre-commit`)
 - 제공 중: `design_refs` 스키마 필드 + `architecture_delta` history 필드 (v1.7.0+)
 - 제공 중: Architecture Registry, Dependency Graph, API Registry, Traceability Matrix (`.mission/` 하위)
+- 제공 중: Architecture/plugin drift detector — `extractArchitecture()`, `validatePlugin()`, `arch:sync`/`check`/`verify` (v1.10.0+, v1.11.0+)
+- 제공 중: MDR 작성 보조 — `ms-decide` skill + `generateMdrDraft()` (v1.14.0+)
+- 제공 중: Schema migration 인프라 — `detectSchemaVersion()`, `registerMigration()`, `migrateMission()` + CLI wrapper `npm run migrate:dry-run -- <toVersion>` / `npm run migrate:apply -- <toVersion>` (v1.14.0+, schema v2까지 registry 비어있음)
+- 제공 중: Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]` (v1.14.0+)
+- 제공 중: Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml` (v1.9.0+, v1.13.0+)
 - 미포함: GitHub/PR integration runtime, 별도 orchestration framework, SaaS/UI
 
 ## 설계 원칙

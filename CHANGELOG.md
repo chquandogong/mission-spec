@@ -6,6 +6,29 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.14.2] - 2026-04-17
+_Close D-1 through D-5 from PROJECT_REVIEW_V1.14.1_2026-04-17 — Living Asset Registry descriptive-layer freshness, discovery-surface accuracy, and MDR-005 formalization of the meta-tooling boundary._
+
+### Added
+
+- .mission/decisions/MDR-005-meta-tooling-expansion-within-task-contract-scope.md (authored via generateMdrDraft() — first ms-decide dogfooding)
+- docs/PROJECT_REVIEW_V1.14.1_2026-04-17.md (baseline review reframed from v1.8 → v1.14.1, introduces D-section with 5 open items)
+- docs/claude-code/PROJECT_REVIEW_V1.14.1_2026-04-17.md (Claude Rev.2 — Codex reflection incorporated)
+- docs/codex/PROJECT_REVIEW_V1.14.1_2026-04-17.md (Codex independent review)
+- docs/gemini/review.md (Gemini surface-level review — kept as D-4 evidence, not as technical input)
+
+### Changed
+
+- README.md + README.ko.md + README.zh.md: skill list extended (+ ms-decide); Cross-Platform section listing 6 platforms with version tags; Current Scope covering CLI + MDR helper + drift detectors + migration + reconstruction verifier + release pipeline; Migration-script usage snippet added by maintainer
+- .claude-plugin/marketplace.json: plugin description reworded to include 6 skills + CLI + 6 platforms + reconstruction verifier + all v1.14.0+ surfaces
+- .mission/interfaces/API_REGISTRY.yaml: package_exports["./commands/decide"] added (was missing despite package.json having it since v1.14.0); Version header 1.14.0 → 1.14.2
+- .mission/CURRENT_STATE.md: Version 1.14.1 → 1.14.2; Title line synced; recent-implementation section already covers v1.14.1 Unicode fix + MDR-005 + D-section close-out
+- .mission/evidence/VERIFICATION_LOG.yaml: Version header 1.14.1 → 1.14.2
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: Version 1.7.0 → 1.14.2; module count 11 → 18 registry / 19 files; public API 11 → 22; skills 4 → 6; directory structure reflects 5 new core modules + 2 new commands + 3 extra adapters; 6-platform conversion replaces original 3; new Phase 6 (Meta-tooling) section added; verification phase expanded to 7+ axes; MDR-005 added to required reading
+- .mission/traceability/TRACE_MATRIX.yaml: Version 1.7.0 → 1.14.2; schema.test.ts 33 → 35 cases; command_test aggregate 119 → 200; platforms.test.ts 14 → 21; MDR-005 decision_trace entry added (enforced_in: integrity verifiers / living-asset maintainers / distribution surface); test_coverage regenerated for current 19-file baseline
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped; key_decisions extended with MDR-005 reference
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.1 → 1.14.2; mission.yaml title + lineage.total_revisions updated
+
 ## [1.14.1] - 2026-04-17
 _Fix ms-decide slug generation so it works on Korean/Chinese/Japanese titles — the exact case this trilingual project is most likely to hit._
 

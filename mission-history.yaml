@@ -4,15 +4,81 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.14.1 — Unicode Slugify Fix"
+  mission_title: "Mission Spec v1.14.2 — Registry Freshness Sync & MDR-005"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 16
-  latest_version: "1.14.1"
+  total_revisions: 17
+  latest_version: "1.14.2"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-009"
+    semantic_version: "1.14.2"
+    change_sequence: 21
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7", "Codex"]
+    change_type: "meta-tooling"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close D-1 through D-5 from PROJECT_REVIEW_V1.14.1_2026-04-17 — Living Asset Registry descriptive-layer freshness, discovery-surface accuracy, and MDR-005 formalization of the meta-tooling boundary."
+    decision: |
+      Documentation and metadata-only release. No code changes. Five manual corrections grouped into one patch:
+      (1) README.md/ko.md/zh.md + marketplace.json extended to list 6 skills (+ ms-decide) and 6 platforms (+ Cline/Continue/Aider) + the CLI entry.
+      (2) MDR-005 authored via generateMdrDraft() — first real-world dogfooding of ms-decide on its own project — formalizing the boundary between MDR-001 "Task Contract Only" and the v1.9–v1.14 meta-tooling expansion. Allowed: integrity verifiers / living-asset maintainers / distribution surface. Forbidden: orchestration / runtime / SaaS.
+      (3) API_REGISTRY.yaml.package_exports synced with package.json ("./commands/decide" added — had been missing since v1.14.0).
+      (4) .mission/{CURRENT_STATE,VERIFICATION_LOG,API_REGISTRY}.yaml Version headers bumped to 1.14.2 (manual this release; automation is D-3 follow-up).
+      (5) .mission/reconstruction/REBUILD_PLAYBOOK.md + .mission/traceability/TRACE_MATRIX.yaml headers and embedded counts refreshed from v1.7.0 baseline (11 modules / 11 public API / 4 skills / 119 tests / 3 platforms) to current v1.14.2 (18 modules registry / 19 src .ts files / 22 public API / 6 skills / 200 tests / 6 platforms). TRACE_MATRIX test_coverage regenerated for the current 19-file baseline.
+    triggered_by: "Rev.2 of docs/claude-code/PROJECT_REVIEW_V1.14.1_2026-04-17.md after Codex cross-review surfaced five stale points Claude Rev.1 had missed. Gemini's surface-level review (no mention of ms-decide, no mention of the 3 new platforms) accepted as real-time evidence of the D-4 discoverability gap. The 3-vendor adversarial review loop produced an 8-item edit-distance between Rev.1 and Rev.2 — R-1 obligation empirically confirmed."
+    issue_or_context: "Post-v1.14.1 cross-review across Claude/Codex/Gemini revealed that while code-side automation was sound (arch:verify, plugin:verify, test:coverage all green), the .mission/ descriptive assets and user-facing discovery surfaces (README, marketplace.json) had drifted. Auto-detection of these drift classes (D-1/D-2/D-3 scripts) is deferred to a later release; this entry closes the manual portion and formalizes the meta-tooling boundary via MDR-005."
+    changes:
+      added:
+        - ".mission/decisions/MDR-005-meta-tooling-expansion-within-task-contract-scope.md (authored via generateMdrDraft() — first ms-decide dogfooding)"
+        - "docs/PROJECT_REVIEW_V1.14.1_2026-04-17.md (baseline review reframed from v1.8 → v1.14.1, introduces D-section with 5 open items)"
+        - "docs/claude-code/PROJECT_REVIEW_V1.14.1_2026-04-17.md (Claude Rev.2 — Codex reflection incorporated)"
+        - "docs/codex/PROJECT_REVIEW_V1.14.1_2026-04-17.md (Codex independent review)"
+        - "docs/gemini/review.md (Gemini surface-level review — kept as D-4 evidence, not as technical input)"
+      modified:
+        - "README.md + README.ko.md + README.zh.md: skill list extended (+ ms-decide); Cross-Platform section listing 6 platforms with version tags; Current Scope covering CLI + MDR helper + drift detectors + migration + reconstruction verifier + release pipeline; Migration-script usage snippet added by maintainer"
+        - ".claude-plugin/marketplace.json: plugin description reworded to include 6 skills + CLI + 6 platforms + reconstruction verifier + all v1.14.0+ surfaces"
+        - '.mission/interfaces/API_REGISTRY.yaml: package_exports["./commands/decide"] added (was missing despite package.json having it since v1.14.0); Version header 1.14.0 → 1.14.2'
+        - ".mission/CURRENT_STATE.md: Version 1.14.1 → 1.14.2; Title line synced; recent-implementation section already covers v1.14.1 Unicode fix + MDR-005 + D-section close-out"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: Version header 1.14.1 → 1.14.2"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: Version 1.7.0 → 1.14.2; module count 11 → 18 registry / 19 files; public API 11 → 22; skills 4 → 6; directory structure reflects 5 new core modules + 2 new commands + 3 extra adapters; 6-platform conversion replaces original 3; new Phase 6 (Meta-tooling) section added; verification phase expanded to 7+ axes; MDR-005 added to required reading"
+        - ".mission/traceability/TRACE_MATRIX.yaml: Version 1.7.0 → 1.14.2; schema.test.ts 33 → 35 cases; command_test aggregate 119 → 200; platforms.test.ts 14 → 21; MDR-005 decision_trace entry added (enforced_in: integrity verifiers / living-asset maintainers / distribution surface); test_coverage regenerated for current 19-file baseline"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped; key_decisions extended with MDR-005 reference"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.1 → 1.14.2; mission.yaml title + lineage.total_revisions updated"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "README and marketplace surfaces now faithfully describe the current skill/platform/CLI surface — prerequisite for any honest downstream review"
+        - "Living Asset Registry's own descriptive layer (playbook + traceability) is no longer frozen at v1.7.0 baseline"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "none — descriptive layer only; no code path altered; all drift detectors (arch:verify, plugin:verify, validate-history-commits) continue to pass; all 200 tests green."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.14.2_mission.yaml"
+    follow_up:
+      - "D-1 automation: scripts/verify-registry.js — content-level freshness for REBUILD_PLAYBOOK + TRACE_MATRIX + CURRENT_STATE + VERIFICATION_LOG (numbers, not just paths)"
+      - "D-2 automation: extend arch:verify to compare package.json.exports ↔ API_REGISTRY.yaml.package_exports"
+      - "D-3 automation: scripts/bump-metadata.js + pre-commit hook for version-header sync across .mission/*"
+      - "R-2: promote the 3-vendor review cycle from ad-hoc to quarterly cadence; log each round in docs/*/PROJECT_REVIEW_V*.md"
+      - "R-3 pattern established: Rev.2 findings → this history entry → MDR-005; future cycles follow the same feedback loop"
+      - "Reconstruction verifier --cold-build integration into release workflow (original v1.14 follow-up, still open)"
+      - "Adoption advocacy (C-4): at least one external mission.yaml adopter before v2.0 or the project stays a reference implementation only"
+
   - change_id: "MSC-2026-04-17-008"
     semantic_version: "1.14.1"
     change_sequence: 20
@@ -53,7 +119,8 @@ timeline:
     breaking: false
     risk: "low — fix only; no existing MDR filename changes since v1.14.0 was only released minutes before this patch."
     related_commits: ["d703802"]
-    related_decisions: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.14.1_mission.yaml"
     follow_up:
       - "Consider the same Unicode-slugify treatment for any future generators that derive filenames from user text"
@@ -1032,3 +1099,8 @@ key_decisions:
     rationale: "self-dogfooding, evaluateMission('.')으로 자동 평가 가능"
     status: "active"
     mdr: "MDR-004-done-when-eval-linking"
+  - decision: "meta-tooling expansion은 task-contract scope 안에서만 허용"
+    version: "1.14.1"
+    rationale: "무결성 검증기, Living Asset Registry 유지도구, 배포 표면은 허용하되 orchestration/runtime은 계속 범위 밖"
+    status: "active"
+    mdr: "MDR-005-meta-tooling-expansion-within-task-contract-scope"

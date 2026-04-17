@@ -1,10 +1,10 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-17 | Version: 1.14.0
+# Last updated: 2026-04-17 | Version: 1.14.2
 
 entries:
-  - version: "1.14.0"
+  - version: "1.14.1"
     date: "2026-04-17"
     verified_by: "Codex"
     environment:
@@ -23,7 +23,7 @@ entries:
       plugin_verify: "Plugin manifest and skills structure are valid."
       convert_platforms_verify: "all platform conversions verified successfully"
       verify_reconstruction_references: "11 paths checked, all exist (cold-build skipped)"
-    notes: "v1.14.0 권위 메타데이터 동기화 및 ms-decide Unicode slug 회귀 검증."
+    notes: "v1.14.1 Unicode slug 회귀 검증, `.mission/` 권위 메타데이터 재동기화, migration 사용 문구 정정."
 
   - version: "1.8.0"
     date: "2026-04-15"
