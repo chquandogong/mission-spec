@@ -50,7 +50,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — CI-only change, no src/ or scripts/ edits; cold-build verified locally (223/223 tests, ~60s overhead); gate skipped only if reconstruction:cold-build script itself is absent (it is not); existing arch:verify / plugin:verify / metadata:check / registry:check pipeline remained green before and after. Semantic version judgment: patch (CI workflow surface only, no npm-published artifact behaviour change) — this release is itself the clearest test case for the still-open E-3 SemVer-policy MDR."
-    related_commits: []
+    related_commits: ["798cb19"]
     related_decisions:
       ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.16.1_mission.yaml"
