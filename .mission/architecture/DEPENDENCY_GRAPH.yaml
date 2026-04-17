@@ -49,6 +49,15 @@ nodes:
   - id: plugin-validator
     path: "src/core/plugin-validator.ts"
     layer: core
+  - id: decide
+    path: "src/commands/decide.ts"
+    layer: commands
+  - id: migration
+    path: "src/core/migration.ts"
+    layer: core
+  - id: reconstruction-verifier
+    path: "src/core/reconstruction-verifier.ts"
+    layer: core
   - id: index
     path: "src/index.ts"
     layer: root

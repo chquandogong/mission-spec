@@ -19,6 +19,24 @@ export type {
 } from "./core/architecture-extractor.js";
 export { validatePlugin } from "./core/plugin-validator.js";
 export type { PluginValidationResult } from "./core/plugin-validator.js";
+export { generateMdrDraft } from "./commands/decide.js";
+export type { DecideOptions, DecideResult } from "./commands/decide.js";
+export {
+  detectSchemaVersion,
+  migrateMission,
+  registerMigration,
+  listMigrations,
+} from "./core/migration.js";
+export type {
+  SchemaVersion,
+  MigrationFn,
+  MigrationResult,
+} from "./core/migration.js";
+export { verifyReconstructionReferences } from "./core/reconstruction-verifier.js";
+export type {
+  ReconstructionResult,
+  ReconstructionOptions,
+} from "./core/reconstruction-verifier.js";
 export {
   loadHistory,
   getLatestEntry,

@@ -26,37 +26,48 @@ try {
   };
 
   // Dynamic import for ESM compatibility
-  const { convertToCursor, convertToCodex, convertToOpenCode } =
-    await import("../dist/adapters/platforms.js");
+  const {
+    convertToCursor,
+    convertToCodex,
+    convertToOpenCode,
+    convertToCline,
+    convertToContinue,
+    convertToAider,
+  } = await import("../dist/adapters/platforms.js");
 
   const cursor = convertToCursor(mission);
   const codex = convertToCodex(mission);
   const opencode = convertToOpenCode(mission);
+  const cline = convertToCline(mission);
+  const continueRules = convertToContinue(mission);
+  const aider = convertToAider(mission);
 
   if (verify) {
     let ok = true;
-    if (!cursor.includes(mission.title)) {
-      console.error("Cursor: missing title");
-      ok = false;
+    const firstGoalLine = mission.goal.split("\n")[0];
+    const mustContain = [
+      ["Cursor", cursor],
+      ["Codex", codex],
+      ["OpenCode", opencode],
+      ["Cline", cline],
+      ["Continue", continueRules],
+      ["Aider (context)", aider.context],
+    ];
+    for (const [name, content] of mustContain) {
+      if (!content.includes(mission.title)) {
+        console.error(`${name}: missing title`);
+        ok = false;
+      }
+      if (!content.includes(firstGoalLine)) {
+        console.error(`${name}: missing goal`);
+        ok = false;
+      }
     }
-    if (!cursor.includes(mission.goal.split("\n")[0])) {
-      console.error("Cursor: missing goal");
-      ok = false;
-    }
-    if (!codex.includes(mission.title)) {
-      console.error("Codex: missing title");
-      ok = false;
-    }
-    if (!codex.includes(mission.goal.split("\n")[0])) {
-      console.error("Codex: missing goal");
-      ok = false;
-    }
-    if (!opencode.includes(mission.title)) {
-      console.error("OpenCode: missing title");
-      ok = false;
-    }
-    if (!opencode.includes(mission.goal.split("\n")[0])) {
-      console.error("OpenCode: missing goal");
+    if (
+      !aider.conf.includes("read:") ||
+      !aider.conf.includes(aider.referencedContextPath)
+    ) {
+      console.error("Aider: conf does not reference context file");
       ok = false;
     }
     // Check that OpenCode doesn't have bare newlines inside double-quoted strings
@@ -89,7 +100,13 @@ try {
     writeFileSync(".cursorrules", cursor);
     writeFileSync("AGENTS.md", codex);
     writeFileSync("opencode.toml", opencode);
-    console.log("Generated: .cursorrules, AGENTS.md, opencode.toml");
+    writeFileSync(".clinerules", cline);
+    writeFileSync(".continuerules", continueRules);
+    writeFileSync(".aider.conf.yml", aider.conf);
+    writeFileSync(aider.referencedContextPath, aider.context);
+    console.log(
+      "Generated: .cursorrules, AGENTS.md, opencode.toml, .clinerules, .continuerules, .aider.conf.yml, .aider-mission.md",
+    );
   }
 } catch (err) {
   console.error(`Error: ${err.message}`);

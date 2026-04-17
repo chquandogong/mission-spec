@@ -33,6 +33,14 @@ modules:
     exports:
       - ContextResult
       - generateContext
+  - id: decide
+    path: src/commands/decide.ts
+    layer: commands
+    depends_on: []
+    exports:
+      - DecideOptions
+      - DecideResult
+      - generateMdrDraft
   - id: eval
     path: src/commands/eval.ts
     layer: commands
@@ -74,36 +82,52 @@ modules:
       - arch-diff
       - architecture-extractor
       - context
+      - decide
       - eval
       - history
       - init
+      - migration
       - parser
       - plugin-validator
+      - reconstruction-verifier
       - report
       - status
       - validator
     exports:
+      - DecideOptions
+      - DecideResult
       - ExtractedArchitecture
       - ExtractedEdge
       - ExtractedModule
+      - MigrationFn
+      - MigrationResult
       - PluginValidationResult
+      - ReconstructionOptions
+      - ReconstructionResult
+      - SchemaVersion
       - ValidationResult
+      - detectSchemaVersion
       - diffArchitectureFromGit
       - diffArchitectures
       - evaluateMission
       - extractArchitecture
       - generateContext
+      - generateMdrDraft
       - generateMissionDraft
       - generateMissionReport
       - getCurrentPhase
       - getLatestEntry
       - getMissionStatus
+      - listMigrations
       - loadAndValidateMission
       - loadHistory
+      - migrateMission
       - parseMissionFile
+      - registerMigration
       - validateHistory
       - validateMission
       - validatePlugin
+      - verifyReconstructionReferences
   - id: init
     path: src/commands/init.ts
     layer: commands
@@ -114,6 +138,20 @@ modules:
       - InitResult
       - ProjectContext
       - generateMissionDraft
+  - id: migration
+    path: src/core/migration.ts
+    layer: core
+    depends_on: []
+    exports:
+      - MigrationFn
+      - MigrationResult
+      - MissionDocLike
+      - SchemaVersion
+      - detectSchemaVersion
+      - listMigrations
+      - migrateMission
+      - registerMigration
+      - resetMigrationsForTest
   - id: parser
     path: src/core/parser.ts
     layer: core
@@ -128,8 +166,12 @@ modules:
     layer: adapters
     depends_on: []
     exports:
+      - AiderArtifacts
       - MissionSpec
+      - convertToAider
+      - convertToCline
       - convertToCodex
+      - convertToContinue
       - convertToCursor
       - convertToOpenCode
   - id: plugin-validator
@@ -139,6 +181,14 @@ modules:
     exports:
       - PluginValidationResult
       - validatePlugin
+  - id: reconstruction-verifier
+    path: src/core/reconstruction-verifier.ts
+    layer: core
+    depends_on: []
+    exports:
+      - ReconstructionOptions
+      - ReconstructionResult
+      - verifyReconstructionReferences
   - id: report
     path: src/commands/report.ts
     layer: commands
@@ -196,15 +246,21 @@ edges:
   - from: index
     to: context
   - from: index
+    to: decide
+  - from: index
     to: eval
   - from: index
     to: history
   - from: index
     to: init
   - from: index
+    to: migration
+  - from: index
     to: parser
   - from: index
     to: plugin-validator
+  - from: index
+    to: reconstruction-verifier
   - from: index
     to: report
   - from: index
@@ -235,25 +291,38 @@ edges:
     to: parser
 public_api:
   functions:
+    - detectSchemaVersion
     - diffArchitectureFromGit
     - diffArchitectures
     - evaluateMission
     - extractArchitecture
     - generateContext
+    - generateMdrDraft
     - generateMissionDraft
     - generateMissionReport
     - getCurrentPhase
     - getLatestEntry
     - getMissionStatus
+    - listMigrations
     - loadAndValidateMission
     - loadHistory
+    - migrateMission
     - parseMissionFile
+    - registerMigration
     - validateHistory
     - validateMission
     - validatePlugin
+    - verifyReconstructionReferences
   types:
+    - DecideOptions
+    - DecideResult
     - ExtractedArchitecture
     - ExtractedEdge
     - ExtractedModule
+    - MigrationFn
+    - MigrationResult
     - PluginValidationResult
+    - ReconstructionOptions
+    - ReconstructionResult
+    - SchemaVersion
     - ValidationResult

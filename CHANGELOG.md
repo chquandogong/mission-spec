@@ -6,6 +6,30 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.14.0] - 2026-04-17
+_Close the C-series from PROJECT_REVIEW_V1.8.0_2026-04-17 — long-term items: MDR authoring skill, platform breadth, schema migration infrastructure, reconstruction verification, adoption advisory._
+
+### Added
+
+- src/commands/decide.ts + tests/commands/decide.test.ts (9 tests: numbering, dedup, slugify, defaults, overrides)
+- skills/ms-decide/SKILL.md + SKILL.ko.md + SKILL.zh.md (trilingual)
+- src/adapters/platforms.ts: convertToCline, convertToContinue, convertToAider (+7 tests)
+- src/core/migration.ts + tests/core/migration.test.ts (11 tests: version detection, identity, chained steps, throw-on-path, throw-on-fn-error, immutability, listMigrations)
+- scripts/migrate-mission.js CLI (dry-run by default, --apply to overwrite)
+- src/core/reconstruction-verifier.ts + tests (7 tests: happy, missing, prose-exemption, fenced-exemption, missing-playbook, custom-path, dedup)
+- scripts/verify-reconstruction.js CLI (fast reference check; --cold-build for temp-dir ci+build+test)
+- README 'Who uses Mission Spec' section (C-4 scaffold for human-driven adoption tracking)
+
+### Changed
+
+- src/index.ts: exported generateMdrDraft + 5 migration functions + verifyReconstructionReferences + 3 new platform converters
+- package.json: bin entry kept; added migrate:dry-run/apply, reconstruction:verify/cold-build scripts; version 1.13.1 → 1.14.0; new ./commands/decide subpath export
+- scripts/convert-platforms.js: generates 7 files total (3 originals + 3 new + .aider-mission.md); --verify covers all 6 platforms
+- .mission/architecture/ARCHITECTURE_CURRENT.yaml: 4 new modules (decide, migration, reconstruction-verifier) + expanded platforms entry; surfaced by arch:verify
+- .mission/architecture/DEPENDENCY_GRAPH.yaml: mirrored new nodes
+- .mission/interfaces/API_REGISTRY.yaml: ms-decide skill registered; 5 migration functions + generateMdrDraft + verifyReconstructionReferences added; 4 new file_contracts (.clinerules, .continuerules, .aider.conf.yml, .aider-mission.md)
+- mission.yaml: title and version bumped to v1.14.0
+
 ## [1.13.1] - 2026-04-17
 _Tighten drift detection to be symmetric and harden the npm publish path against releases from non-main refs._
 

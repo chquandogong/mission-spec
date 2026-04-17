@@ -313,6 +313,12 @@ npm run build
 4. **Minimal Dependencies** — Node.js + Ajv + yaml
 5. **TDD First** — Tests lock down the current scope
 
+## Who uses Mission Spec
+
+This is an early-stage tool. If your project uses `mission.yaml` as a durable task contract, open a PR adding your project name + one-line use case below — adoption signals drive priority more than feature requests.
+
+- _(your project here)_
+
 ## License
 
 MIT

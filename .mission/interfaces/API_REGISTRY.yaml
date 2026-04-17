@@ -75,6 +75,24 @@ public_api:
     - name: "validatePlugin"
       signature: "(projectDir: string) => PluginValidationResult"
       source: "src/core/plugin-validator.ts"
+    - name: "generateMdrDraft"
+      signature: "(options: DecideOptions) => DecideResult"
+      source: "src/commands/decide.ts"
+    - name: "detectSchemaVersion"
+      signature: "(doc: unknown) => SchemaVersion"
+      source: "src/core/migration.ts"
+    - name: "migrateMission"
+      signature: "(doc: MissionDocLike, from: SchemaVersion | undefined, to: SchemaVersion) => MigrationResult"
+      source: "src/core/migration.ts"
+    - name: "registerMigration"
+      signature: "(from: SchemaVersion, to: SchemaVersion, fn: MigrationFn) => void"
+      source: "src/core/migration.ts"
+    - name: "listMigrations"
+      signature: "() => { from: SchemaVersion; to: SchemaVersion }[]"
+      source: "src/core/migration.ts"
+    - name: "verifyReconstructionReferences"
+      signature: "(projectDir: string, options?: ReconstructionOptions) => ReconstructionResult"
+      source: "src/core/reconstruction-verifier.ts"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 
@@ -97,6 +115,9 @@ skill_surface:
     - id: "ms-context"
       path: "skills/ms-context/SKILL.md"
       invocation: "/mission-spec:ms-context"
+    - id: "ms-decide"
+      path: "skills/ms-decide/SKILL.md"
+      invocation: "/mission-spec:ms-decide"
 
 # ── 3. Schema IDs ──
 
@@ -111,6 +132,26 @@ schemas:
 # ── 4. File Format Contracts ──
 
 file_contracts:
+  - pattern: ".clinerules"
+    schema: null
+    required: false
+    description: "Cline 에이전트용 markdown 규칙 파일 (convert-platforms 로 생성)"
+
+  - pattern: ".continuerules"
+    schema: null
+    required: false
+    description: "Continue 에이전트용 markdown 규칙 파일 (convert-platforms 로 생성)"
+
+  - pattern: ".aider.conf.yml"
+    schema: null
+    required: false
+    description: "Aider YAML 설정, read: 로 .aider-mission.md 지정 (convert-platforms 로 생성)"
+
+  - pattern: ".aider-mission.md"
+    schema: null
+    required: false
+    description: "Aider 컨텍스트 파일 (convert-platforms 로 생성)"
+
   - pattern: "mission.yaml"
     schema: "mission.schema.json"
     required: true

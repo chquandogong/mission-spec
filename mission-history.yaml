@@ -4,15 +4,73 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.13.1 — Stricter Drift & Publish Ref Guards"
+  mission_title: "Mission Spec v1.14 — MDR Skill, Platform Breadth, Migration & Reconstruction"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 14
-  latest_version: "1.13.1"
+  total_revisions: 15
+  latest_version: "1.14.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-007"
+    semantic_version: "1.14.0"
+    change_sequence: 19
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "Close the C-series from PROJECT_REVIEW_V1.8.0_2026-04-17 — long-term items: MDR authoring skill, platform breadth, schema migration infrastructure, reconstruction verification, adoption advisory."
+    decision: "Four non-breaking additions bundled as one minor release. (1) src/commands/decide.ts + skills/ms-decide/ for MDR draft generation. (2) 3 new platform adapters (Cline, Continue, Aider) taking the count from 3 to 6. (3) src/core/migration.ts with registerMigration/migrateMission/detectSchemaVersion — empty initially, machinery for future v2 schema. (4) src/core/reconstruction-verifier.ts that validates REBUILD_PLAYBOOK.md references + optional --cold-build mode that runs npm ci/build/test in a temp dir. Added a 'Who uses Mission Spec' scaffold to README for C-4 (adoption tracking cannot be automated — requires human advocacy)."
+    triggered_by: "PROJECT_REVIEW_V1.8.0_2026-04-17 C-1, C-2, C-3, C-4, C-5"
+    issue_or_context: "B-series closed all short/mid-term automation gaps. C-series tackles the long-term: giving users (a) a skill to write MDRs consistently, (b) coverage for more agent harnesses, (c) a migration path when schema breaks, and (d) evidence that the Living Asset Registry can actually be used to reconstruct the project, not just narrate it."
+    changes:
+      added:
+        - "src/commands/decide.ts + tests/commands/decide.test.ts (9 tests: numbering, dedup, slugify, defaults, overrides)"
+        - "skills/ms-decide/SKILL.md + SKILL.ko.md + SKILL.zh.md (trilingual)"
+        - "src/adapters/platforms.ts: convertToCline, convertToContinue, convertToAider (+7 tests)"
+        - "src/core/migration.ts + tests/core/migration.test.ts (11 tests: version detection, identity, chained steps, throw-on-path, throw-on-fn-error, immutability, listMigrations)"
+        - "scripts/migrate-mission.js CLI (dry-run by default, --apply to overwrite)"
+        - "src/core/reconstruction-verifier.ts + tests (7 tests: happy, missing, prose-exemption, fenced-exemption, missing-playbook, custom-path, dedup)"
+        - "scripts/verify-reconstruction.js CLI (fast reference check; --cold-build for temp-dir ci+build+test)"
+        - "README 'Who uses Mission Spec' section (C-4 scaffold for human-driven adoption tracking)"
+      modified:
+        - "src/index.ts: exported generateMdrDraft + 5 migration functions + verifyReconstructionReferences + 3 new platform converters"
+        - "package.json: bin entry kept; added migrate:dry-run/apply, reconstruction:verify/cold-build scripts; version 1.13.1 → 1.14.0; new ./commands/decide subpath export"
+        - "scripts/convert-platforms.js: generates 7 files total (3 originals + 3 new + .aider-mission.md); --verify covers all 6 platforms"
+        - ".mission/architecture/ARCHITECTURE_CURRENT.yaml: 4 new modules (decide, migration, reconstruction-verifier) + expanded platforms entry; surfaced by arch:verify"
+        - ".mission/architecture/DEPENDENCY_GRAPH.yaml: mirrored new nodes"
+        - ".mission/interfaces/API_REGISTRY.yaml: ms-decide skill registered; 5 migration functions + generateMdrDraft + verifyReconstructionReferences added; 4 new file_contracts (.clinerules, .continuerules, .aider.conf.yml, .aider-mission.md)"
+        - "mission.yaml: title and version bumped to v1.14.0"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "MDR authoring automated via ms-decide skill"
+        - "6-platform coverage (was 3)"
+        - "schema migration infrastructure available (empty registry until schema v2)"
+        - "reconstruction playbook reference integrity auto-verified"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — all additions are opt-in / additive. Reconstruction verifier's heuristic may false-negative (miss some path references); tightened to require slash to avoid false-positive noise."
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.14.0_mission.yaml"
+    follow_up:
+      - "Seed a few real adopter entries in README once pilots exist (C-4)"
+      - "Register first real migrator when a v2 schema decision lands"
+      - "Consider wiring reconstruction:verify into pre-commit-parity CI (cheap, Level-1 only)"
+
   - change_id: "MSC-2026-04-17-006"
     semantic_version: "1.13.1"
     change_sequence: 18

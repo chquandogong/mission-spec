@@ -1,87 +1,90 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   convertToCursor,
   convertToCodex,
   convertToOpenCode,
+  convertToCline,
+  convertToContinue,
+  convertToAider,
   type MissionSpec,
-} from '../src/adapters/platforms.js';
+} from "../src/adapters/platforms.js";
 
 const sampleMission: MissionSpec = {
-  title: 'Test Mission',
-  goal: 'Implement feature X',
-  done_when: ['feature X works', 'all tests pass'],
-  constraints: ['no breaking changes'],
+  title: "Test Mission",
+  goal: "Implement feature X",
+  done_when: ["feature X works", "all tests pass"],
+  constraints: ["no breaking changes"],
 };
 
-describe('convertToCursor', () => {
-  it('generates Cursor rules format', () => {
+describe("convertToCursor", () => {
+  it("generates Cursor rules format", () => {
     const result = convertToCursor(sampleMission);
-    expect(result).toContain('Test Mission');
-    expect(result).toContain('Implement feature X');
-    expect(result).toContain('feature X works');
-    expect(result).toContain('no breaking changes');
+    expect(result).toContain("Test Mission");
+    expect(result).toContain("Implement feature X");
+    expect(result).toContain("feature X works");
+    expect(result).toContain("no breaking changes");
   });
 
-  it('uses .cursorrules filename convention', () => {
+  it("uses .cursorrules filename convention", () => {
     const result = convertToCursor(sampleMission);
-    expect(typeof result).toBe('string');
+    expect(typeof result).toBe("string");
   });
 });
 
-describe('convertToCodex', () => {
-  it('generates Codex instructions format (markdown)', () => {
+describe("convertToCodex", () => {
+  it("generates Codex instructions format (markdown)", () => {
     const result = convertToCodex(sampleMission);
-    expect(result).toContain('Test Mission');
-    expect(result).toContain('Implement feature X');
-    expect(result).toContain('feature X works');
+    expect(result).toContain("Test Mission");
+    expect(result).toContain("Implement feature X");
+    expect(result).toContain("feature X works");
   });
 
-  it('includes done_when as checklist', () => {
+  it("includes done_when as checklist", () => {
     const result = convertToCodex(sampleMission);
-    expect(result).toContain('- [ ]');
+    expect(result).toContain("- [ ]");
   });
 });
 
-describe('convertToOpenCode', () => {
-  it('generates OpenCode format (TOML-like config)', () => {
+describe("convertToOpenCode", () => {
+  it("generates OpenCode format (TOML-like config)", () => {
     const result = convertToOpenCode(sampleMission);
-    expect(result).toContain('Test Mission');
-    expect(result).toContain('Implement feature X');
+    expect(result).toContain("Test Mission");
+    expect(result).toContain("Implement feature X");
   });
 });
 
-describe('handles multiline goal', () => {
+describe("handles multiline goal", () => {
   const multiline: MissionSpec = {
-    title: 'Multiline Mission',
-    goal: 'Line one.\nLine two.\nLine three.',
-    done_when: ['done'],
+    title: "Multiline Mission",
+    goal: "Line one.\nLine two.\nLine three.",
+    done_when: ["done"],
   };
 
-  it('OpenCode uses TOML multiline string for multiline goal', () => {
+  it("OpenCode uses TOML multiline string for multiline goal", () => {
     const result = convertToOpenCode(multiline);
     // Must NOT produce goal = "line1\nline2" (invalid TOML)
     expect(result).not.toMatch(/goal = "[^"]*\n/);
     // Must use triple-quote multiline
     expect(result).toContain('"""');
-    expect(result).toContain('Line one.');
-    expect(result).toContain('Line two.');
+    expect(result).toContain("Line one.");
+    expect(result).toContain("Line two.");
   });
 
-  it('Cursor preserves multiline goal', () => {
+  it("Cursor preserves multiline goal", () => {
     const result = convertToCursor(multiline);
-    expect(result).toContain('Line one.');
-    expect(result).toContain('Line two.');
+    expect(result).toContain("Line one.");
+    expect(result).toContain("Line two.");
   });
 
-  it('Codex preserves multiline goal', () => {
+  it("Codex preserves multiline goal", () => {
     const result = convertToCodex(multiline);
-    expect(result).toContain('Line one.');
-    expect(result).toContain('Line two.');
+    expect(result).toContain("Line one.");
+    expect(result).toContain("Line two.");
   });
 });
 
-describe('handles TOML special characters', () => {
-  it('escapes double quotes in single-line strings', () => {
+describe("handles TOML special characters", () => {
+  it("escapes double quotes in single-line strings", () => {
     const mission: MissionSpec = {
       title: 'T "quoted"',
       goal: 'Say "hi"',
@@ -94,21 +97,21 @@ describe('handles TOML special characters', () => {
     expect(result).toContain('"check \\"value\\""');
   });
 
-  it('escapes backslashes in single-line strings', () => {
+  it("escapes backslashes in single-line strings", () => {
     const mission: MissionSpec = {
-      title: 'path\\to\\file',
-      goal: 'fix it',
-      done_when: ['done'],
+      title: "path\\to\\file",
+      goal: "fix it",
+      done_when: ["done"],
     };
     const result = convertToOpenCode(mission);
     expect(result).toContain('title = "path\\\\to\\\\file"');
   });
 
-  it('handles quotes inside multiline strings', () => {
+  it("handles quotes inside multiline strings", () => {
     const mission: MissionSpec = {
-      title: 'Test',
+      title: "Test",
       goal: 'Line "one"\nLine "two"',
-      done_when: ['done'],
+      done_when: ["done"],
     };
     const result = convertToOpenCode(mission);
     // Multiline triple-quote: quotes inside are OK without escaping
@@ -117,26 +120,88 @@ describe('handles TOML special characters', () => {
   });
 });
 
-describe('handles minimal mission', () => {
+describe("handles minimal mission", () => {
   const minimal: MissionSpec = {
-    title: 'Minimal',
-    goal: 'Do something',
-    done_when: ['done'],
+    title: "Minimal",
+    goal: "Do something",
+    done_when: ["done"],
   };
 
-  it('Cursor works without constraints', () => {
+  it("Cursor works without constraints", () => {
     const result = convertToCursor(minimal);
-    expect(result).toContain('Minimal');
-    expect(result).not.toContain('Constraints');
+    expect(result).toContain("Minimal");
+    expect(result).not.toContain("Constraints");
   });
 
-  it('Codex works without constraints', () => {
+  it("Codex works without constraints", () => {
     const result = convertToCodex(minimal);
-    expect(result).toContain('Minimal');
+    expect(result).toContain("Minimal");
   });
 
-  it('OpenCode works without constraints', () => {
+  it("OpenCode works without constraints", () => {
     const result = convertToOpenCode(minimal);
-    expect(result).toContain('Minimal');
+    expect(result).toContain("Minimal");
+  });
+});
+
+describe("convertToCline", () => {
+  it("produces a markdown rules file with title, goal, and done_when", () => {
+    const result = convertToCline(sampleMission);
+    expect(result).toContain("# Test Mission");
+    expect(result).toContain("Implement feature X");
+    expect(result).toContain("- feature X works");
+    expect(result).toContain("- no breaking changes");
+    expect(result).toContain("Generated by mission-spec");
+  });
+
+  it("omits Constraints when none provided", () => {
+    const result = convertToCline({
+      title: "Min",
+      goal: "do",
+      done_when: ["ok"],
+    });
+    expect(result).not.toContain("## Constraints");
+  });
+});
+
+describe("convertToContinue", () => {
+  it("renders done_when as a markdown checklist", () => {
+    const result = convertToContinue(sampleMission);
+    expect(result).toContain("# Test Mission");
+    expect(result).toContain("- [ ] feature X works");
+    expect(result).toContain("- [ ] all tests pass");
+  });
+
+  it("includes constraints section when provided", () => {
+    const result = convertToContinue(sampleMission);
+    expect(result).toContain("## Constraints");
+    expect(result).toContain("- no breaking changes");
+  });
+});
+
+describe("convertToAider", () => {
+  it("emits a conf + context pair with referenced path", () => {
+    const result = convertToAider(sampleMission);
+    expect(result.referencedContextPath).toBe(".aider-mission.md");
+    expect(result.conf).toContain("read:");
+    expect(result.conf).toContain("- .aider-mission.md");
+    expect(result.conf).toContain('"Test Mission"');
+  });
+
+  it("context file includes title, goal, and done_when", () => {
+    const result = convertToAider(sampleMission);
+    expect(result.context).toContain("# Test Mission");
+    expect(result.context).toContain("Implement feature X");
+    expect(result.context).toContain("- feature X works");
+  });
+
+  it("yaml-escapes double quotes in the title", () => {
+    const mission: MissionSpec = {
+      title: 'T "quoted"',
+      goal: "do",
+      done_when: ["ok"],
+    };
+    const result = convertToAider(mission);
+    expect(result.conf).toContain('"T \\"quoted\\""');
   });
 });

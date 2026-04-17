@@ -142,12 +142,17 @@ modules:
 
   - id: platforms
     path: "src/adapters/platforms.ts"
-    responsibility: "cross-platform 변환 (Cursor, Codex, OpenCode)"
+    responsibility: "cross-platform 변환 — 6개 대상 에이전트 포맷 생성 (Cursor, Codex, OpenCode, Cline, Continue, Aider)"
     depends_on: []
     exports:
       - "convertToCursor(mission): string"
       - "convertToCodex(mission): string"
       - "convertToOpenCode(mission): string"
+      - "convertToCline(mission): string"
+      - "convertToContinue(mission): string"
+      - "convertToAider(mission): AiderArtifacts"
+    types:
+      - "AiderArtifacts"
 
   - id: architecture-extractor
     path: "src/core/architecture-extractor.ts"
@@ -169,6 +174,40 @@ modules:
     types:
       - "PluginValidationResult"
 
+  - id: decide
+    path: "src/commands/decide.ts"
+    responsibility: "자연어 입력 → MDR-NNN-<slug>.md 초안 생성 (.mission/decisions/ 스캔으로 다음 번호 자동 할당)"
+    depends_on: []
+    exports:
+      - "generateMdrDraft(options: DecideOptions): DecideResult"
+    types:
+      - "DecideOptions"
+      - "DecideResult"
+
+  - id: migration
+    path: "src/core/migration.ts"
+    responsibility: "Schema version 간 마이그레이션 인프라 — 등록된 migrator 체인(BFS)으로 mission 문서를 목표 version 으로 업그레이드"
+    depends_on: []
+    exports:
+      - "detectSchemaVersion(doc): SchemaVersion"
+      - "registerMigration(from, to, fn): void"
+      - "migrateMission(doc, from?, to): MigrationResult"
+      - "listMigrations(): MigrationStep[]"
+    types:
+      - "SchemaVersion"
+      - "MigrationFn"
+      - "MigrationResult"
+
+  - id: reconstruction-verifier
+    path: "src/core/reconstruction-verifier.ts"
+    responsibility: "REBUILD_PLAYBOOK.md가 참조하는 repo 경로의 존재 여부 확인 (drift 자동 감지); CLI는 --cold-build로 temp dir 에서 ci+build+test 까지 수행"
+    depends_on: []
+    exports:
+      - "verifyReconstructionReferences(projectDir, options?): ReconstructionResult"
+    types:
+      - "ReconstructionResult"
+      - "ReconstructionOptions"
+
   - id: index
     path: "src/index.ts"
     responsibility: "public API 재수출 허브 (barrel export) — package.json exports가 가리키는 진입점"
@@ -185,6 +224,9 @@ modules:
         history,
         architecture-extractor,
         plugin-validator,
+        decide,
+        migration,
+        reconstruction-verifier,
       ]
     exports:
       - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor, core/plugin-validator"

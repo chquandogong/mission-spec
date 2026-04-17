@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.13.1",
+  "version": "1.14.0",
   "description": "Mission Spec — task contract layer for AI agent workflows",
   "type": "module",
   "main": "dist/index.js",
@@ -32,6 +32,10 @@
     "./commands/context": {
       "types": "./dist/commands/context.d.ts",
       "import": "./dist/commands/context.js"
+    },
+    "./commands/decide": {
+      "types": "./dist/commands/decide.d.ts",
+      "import": "./dist/commands/decide.js"
     }
   },
   "scripts": {
@@ -42,6 +46,10 @@
     "arch:check": "node scripts/generate-architecture.js --check",
     "arch:verify": "node scripts/generate-architecture.js --verify-current",
     "plugin:verify": "node scripts/validate-plugin.js",
+    "migrate:dry-run": "node scripts/migrate-mission.js",
+    "migrate:apply": "node scripts/migrate-mission.js --apply",
+    "reconstruction:verify": "node scripts/verify-reconstruction.js",
+    "reconstruction:cold-build": "node scripts/verify-reconstruction.js --cold-build",
     "changelog": "node scripts/generate-changelog.js",
     "build": "tsc && cp src/schema/*.schema.json dist/schema/",
     "test": "vitest run",
