@@ -6,6 +6,19 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.4] - 2026-04-17
+_Close E-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — formalize the SemVer grade rule for meta-tooling / scripts-only changes, retiring the case-by-case judgment that produced the v1.14.3-vs-v1.15.0 inconsistency and that v1.16.1 / .2 / .3 silently already followed._
+
+### Added
+
+- .mission/decisions/MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes.md (≈120 lines; dogfood scaffold via generateMdrDraft, body authored manually)
+
+### Changed
+
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.3 → 1.16.4; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped; this entry is the first written against MDR-006 with 'per MDR-006 §PATCH 6' grade
+- .mission/ Version headers auto-synced to 1.16.4 via metadata:sync (fifth real pre-commit invocation of D-3 machinery); Title line auto-synced to v1.16.4 via the new E-6 machinery from v1.16.3
+
 ## [1.16.3] - 2026-04-17
 _Close E-6 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — auto-sync CURRENT_STATE.md's Title line from mission.yaml.title via bump-metadata.js, promoting the v1.16.2 registry:check drift detector into a fix._
 
