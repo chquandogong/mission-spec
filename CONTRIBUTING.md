@@ -115,6 +115,22 @@ Non-obvious architectural decisions go under `.mission/decisions/MDR-00X-<slug>.
 - **Features**: `.github/ISSUE_TEMPLATE/feature_request.md`
 - For design-level changes that would alter scope, open a discussion first so it can be captured as an MDR rather than a late-stage PR revision.
 
+## Cutting a Release (maintainers)
+
+```bash
+# 1. Bump versions together (all four must agree — enforced by plugin:verify):
+#    mission.yaml, package.json, .claude-plugin/plugin.json, .claude-plugin/marketplace.json
+# 2. Add a mission-history.yaml entry for the new version
+# 3. Commit with standard pre-commit hooks (auto-generates CHANGELOG + snapshot)
+# 4. Tag and push
+git tag v1.X.Y
+git push origin main v1.X.Y
+```
+
+The tag push triggers `.github/workflows/release.yml`, which verifies the tag matches `package.json`, runs full CI (build/lint/test/coverage/platforms/plugin/arch), and publishes to npm with provenance attestation. Requires `NPM_TOKEN` secret in repo settings.
+
+To test the publish pipeline without actually publishing, use `Actions → release → Run workflow` with `dry_run: true`.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License (see `LICENSE`).

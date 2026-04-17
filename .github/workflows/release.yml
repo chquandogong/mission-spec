@@ -1,0 +1,101 @@
+name: release
+
+# Triggered by pushing a tag like v1.12.0. Verifies the tag matches package.json
+# version (prevents accidentally publishing the wrong version), runs the full
+# test suite, and publishes to npm with provenance.
+#
+# Prerequisites:
+#   - NPM_TOKEN secret configured in repo settings (npm automation token with
+#     2FA-skip permission, scoped to this package).
+#   - The tag must be pushed from main and exactly match "v<package.json.version>".
+#
+# Workflow to cut a release:
+#   1. Bump mission.yaml / package.json / plugin.json / marketplace.json version
+#      together (B-1 arch-verify and B-2 plugin-verify enforce coherence)
+#   2. Add a mission-history entry; commit with standard hooks
+#   3. git tag v1.12.0 && git push origin v1.12.0
+#   4. This workflow publishes automatically.
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "npm publish --dry-run"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # for npm provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+
+      - name: Verify tag matches package.json version
+        if: github.event_name == 'push'
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Tag and package.json version agree: $PKG_VERSION"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Cross-platform conversion verify
+        run: node scripts/convert-platforms.js --verify
+
+      - name: Plugin manifest verify
+        run: npm run plugin:verify
+
+      - name: Architecture registry verify
+        run: npm run arch:verify
+
+      - name: Publish to npm (dry run on manual trigger)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true'
+        run: npm publish --dry-run --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        if: |
+          github.event_name == 'push' ||
+          (github.event_name == 'workflow_dispatch' && inputs.dry_run == 'false')
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -4,15 +4,61 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.12 — CLI & English Heuristics"
+  mission_title: "Mission Spec v1.13 — Release Path & History i18n"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 12
-  latest_version: "1.12.0"
+  total_revisions: 13
+  latest_version: "1.13.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-005"
+    semantic_version: "1.13.0"
+    change_sequence: 17
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close the remaining B-series gaps — publish pipeline, historical entry i18n, and internal docs audit."
+    decision: "Add .github/workflows/release.yml triggered by v* tags that verifies tag ↔ package.json coherence, runs the full CI matrix, and publishes to npm with provenance. Extend mission-history schema with optional intent_ko/decision_ko fields and translate all prior Korean intent/decision values to English while preserving Korean as companion fields — no content loss. Add docs/internal/STATUS.md as a freshness audit pointing readers to authoritative registries; mark older notes as partially-stale without rewriting (they are gitignored and not shipped). Document the release cutting process in CONTRIBUTING.md."
+    triggered_by: "PROJECT_REVIEW_V1.8.0_2026-04-17 items B-3 (i18n), B-5 (docs/internal audit), B-6 (npm publish)"
+    changes:
+      added:
+        - ".github/workflows/release.yml (tag-triggered npm publish with provenance, pre-flight tag coherence check)"
+        - "docs/internal/STATUS.md (gitignored freshness audit, classifies older notes as historical)"
+      modified:
+        - "src/schema/mission-history.schema.json: added intent_ko + decision_ko optional fields with descriptions"
+        - "mission-history.yaml: translated intent/decision of v1.0.0–v1.7.0 entries to English; preserved Korean originals under intent_ko/decision_ko"
+        - "CONTRIBUTING.md: added 'Cutting a Release' section referencing release.yml and dry-run mode"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.12.0 → 1.13.0"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "npm publish release workflow exists and is verified"
+        - "mission-history intent/decision are English-first with Korean companion"
+      modified:
+        - "docs/internal/ freshness: audit file added, older notes classified (gitignored, not shipped)"
+      removed: []
+    impact_scope:
+      schema: true
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — release workflow is dormant until NPM_TOKEN is configured and a tag is pushed. i18n is additive (original Korean preserved)."
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.13.0_mission.yaml"
+    follow_up:
+      - "Configure NPM_TOKEN secret in GitHub and test release.yml with workflow_dispatch dry_run=true"
+      - "Consider translating triggered_by and issue_or_context fields in future i18n pass (lower priority)"
+
   - change_id: "MSC-2026-04-17-004"
     semantic_version: "1.12.0"
     change_sequence: 16
@@ -295,8 +341,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "delivery"
     persistence: "permanent"
-    intent: "Architecture Assetization 완료 — 캡처/레지스트리/소비 계층을 닫아 Mission 자산만으로 현재 구조와 작업 맥락을 빠르게 복원할 수 있게 정리"
-    decision: "v1.7.0에는 Tier 1(design_refs, architecture_doc_freshness, architecture_delta), Tier 2(Architecture/Dependency/API/Traceability registry), Tier 3(ms-context, Rebuild Playbook, Traceability Report, Verification Evidence Ledger)를 모두 포함한다. design_refs가 가리키는 내부 문서는 machine-readable registry와 함께 동기화 상태를 유지한다."
+    intent: "Architecture Assetization complete — close the capture/registry/consumption layers so the current structure and work context can be quickly reconstructed from Mission assets alone."
+    intent_ko: "Architecture Assetization 완료 — 캡처/레지스트리/소비 계층을 닫아 Mission 자산만으로 현재 구조와 작업 맥락을 빠르게 복원할 수 있게 정리"
+    decision: "v1.7.0 bundles Tier 1 (design_refs, architecture_doc_freshness, architecture_delta), Tier 2 (Architecture/Dependency/API/Traceability registries), and Tier 3 (ms-context, Rebuild Playbook, Traceability Report, Verification Evidence Ledger). Internal documents that design_refs points to are kept in sync with machine-readable registries."
+    decision_ko: "v1.7.0에는 Tier 1(design_refs, architecture_doc_freshness, architecture_delta), Tier 2(Architecture/Dependency/API/Traceability registry), Tier 3(ms-context, Rebuild Playbook, Traceability Report, Verification Evidence Ledger)를 모두 포함한다. design_refs가 가리키는 내부 문서는 machine-readable registry와 함께 동기화 상태를 유지한다."
     triggered_by: "3-모델(Gemini, Claude Opus 4.6, Codex) 독립 분석 + 2라운드 교차 검증으로 아키텍처 정보 부재가 재현성의 핵심 갭임을 식별했고, 이후 구현/문서 감사에서 history와 design_refs 문서의 stale 상태를 추가 확인"
     issue_or_context: "Living Asset Registry(v1.5.0)가 '변경 이력'은 자산화했지만, 새 AI 에이전트가 구조/API/검증 상태를 한 번에 복원하려면 아키텍처 지식 capture와 consumption 계층, 그리고 design_refs 문서 동기화가 더 필요했음"
     changes:
@@ -419,8 +467,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "delivery"
     persistence: "permanent"
-    intent: "Evaluator 확장성 + 스냅샷 자동화 — llm-eval 타입, 오버라이드 파일, mission-history 스키마, pre-commit 훅"
-    decision: "llm-eval eval 타입 추가 + .mission/evals/<name>.result.yaml 오버라이드로 LLM/주관 판정 기록. mission-history.yaml JSON Schema + validateHistory() public API. ms-status/ms-report는 history 스키마 오류 시 graceful fallback. snapshot 스크립트를 버전 기반 dedup + pre-commit 훅 연계."
+    intent: "Evaluator extensibility + snapshot automation — llm-eval type, override files, mission-history schema, pre-commit hook."
+    intent_ko: "Evaluator 확장성 + 스냅샷 자동화 — llm-eval 타입, 오버라이드 파일, mission-history 스키마, pre-commit 훅"
+    decision: "Added llm-eval eval type plus .mission/evals/<name>.result.yaml override to record LLM/subjective verdicts. Added mission-history.yaml JSON Schema and validateHistory() public API. ms-status/ms-report fall back gracefully on history schema errors. snapshot script now performs version-based dedup and is wired to the pre-commit hook."
+    decision_ko: "llm-eval eval 타입 추가 + .mission/evals/<name>.result.yaml 오버라이드로 LLM/주관 판정 기록. mission-history.yaml JSON Schema + validateHistory() public API. ms-status/ms-report는 history 스키마 오류 시 graceful fallback. snapshot 스크립트를 버전 기반 dedup + pre-commit 훅 연계."
     triggered_by: "v1.5.0 검토 과정에서 식별된 갭: LLM 판정 수단 부재, mission-history schema 미작성, snapshot 스크립트 스테이징 부작용, graceful fallback 필요"
     issue_or_context: "Living Asset Registry의 파일들은 만들었지만 스키마 검증/오버라이드/자동화 경로가 비어 있어 완전체가 아니었음"
     changes:
@@ -470,8 +520,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "delivery"
     persistence: "permanent"
-    intent: "Living Asset Registry 도입 — lineage 스키마, history 연동, 문서 정비"
-    decision: "lineage optional 필드 추가, ms-status/ms-report에서 mission-history.yaml 연동, ms-init에서 lineage 자동 생성"
+    intent: "Introduce the Living Asset Registry — lineage schema, history integration, documentation cleanup."
+    intent_ko: "Living Asset Registry 도입 — lineage 스키마, history 연동, 문서 정비"
+    decision: "Added optional lineage field, wired mission-history.yaml into ms-status/ms-report, and auto-generated lineage from ms-init."
+    decision_ko: "lineage optional 필드 추가, ms-status/ms-report에서 mission-history.yaml 연동, ms-init에서 lineage 자동 생성"
     triggered_by: "9개 제안 → 3개 최종안 → 확정안(MISSION_VERSIONING_DEFINITIVE.md) 기반 구현"
     issue_or_context: "mission.yaml 변경 이력의 의도/맥락/영향 범위가 git log에만 산재하여 자산 가치 미확보"
     changes:
@@ -515,8 +567,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "delivery"
     persistence: "permanent"
-    intent: "Claude Code marketplace 배포 준비, 제품 정체성을 portable task contract 도구로 확립"
-    decision: "title/goal/done_when을 기술 기준으로 전면 재작성, plugin metadata 추가"
+    intent: "Prepare for Claude Code marketplace distribution; establish the product identity as a portable task-contract tool."
+    intent_ko: "Claude Code marketplace 배포 준비, 제품 정체성을 portable task contract 도구로 확립"
+    decision: "Rewrote title/goal/done_when against technical criteria and added plugin metadata."
+    decision_ko: "title/goal/done_when을 기술 기준으로 전면 재작성, plugin metadata 추가"
     triggered_by: "marketplace 배포 결정"
     issue_or_context: "선언적 done_when이 자동 평가 불가, plugin 등록용 메타데이터 부재"
     changes:
@@ -595,8 +649,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "alignment"
     persistence: "permanent"
-    intent: "Codex/Gemini adversarial review 반영, 루트 API 정비"
-    decision: "루트 export 정비, automated eval 실행 로직 추가"
+    intent: "Incorporate the Codex/Gemini adversarial review; tidy the root API surface."
+    intent_ko: "Codex/Gemini adversarial review 반영, 루트 API 정비"
+    decision: "Cleaned up root exports and added automated eval execution logic."
+    decision_ko: "루트 export 정비, automated eval 실행 로직 추가"
     triggered_by: "Codex adversarial review + Gemini 크로스 리뷰"
     issue_or_context: "크로스 플랫폼 리뷰에서 API 노출 부족, eval 실행 미구현, TOML 문법 오류 발견"
     changes:
@@ -636,8 +692,10 @@ timeline:
     change_type: "refactor"
     motivation_type: "alignment"
     persistence: "permanent"
-    intent: "skill 이름 충돌 방지를 위한 ms-* prefix 및 /mission-spec: namespace 적용"
-    decision: "모든 skill ID에 ms-* prefix, 커맨드 참조를 /mission-spec:ms-* 형식으로 통일"
+    intent: "Apply ms-* prefix and /mission-spec: namespace to all skills to avoid name collisions."
+    intent_ko: "skill 이름 충돌 방지를 위한 ms-* prefix 및 /mission-spec: namespace 적용"
+    decision: "Added ms-* prefix to every skill ID and unified command references to /mission-spec:ms-* form."
+    decision_ko: "모든 skill ID에 ms-* prefix, 커맨드 참조를 /mission-spec:ms-* 형식으로 통일"
     triggered_by: "Claude Code marketplace에서 다른 플러그인과 skill 이름 충돌 가능성 발견"
     issue_or_context: "init, eval 등 일반적 skill 이름이 다른 플러그인과 충돌할 수 있는 구조"
     changes:
@@ -682,8 +740,10 @@ timeline:
     change_type: "enhancement"
     motivation_type: "delivery"
     persistence: "permanent"
-    intent: "최초 릴리스 — 스키마, 4개 커맨드, 크로스 플랫폼 변환"
-    decision: "task contract only 접근, 최소 의존성, TDD 기반 구현"
+    intent: "Initial release — schema, 4 commands, cross-platform conversion."
+    intent_ko: "최초 릴리스 — 스키마, 4개 커맨드, 크로스 플랫폼 변환"
+    decision: "Task-contract-only scope, minimal dependencies, TDD-based implementation."
+    decision_ko: "task contract only 접근, 최소 의존성, TDD 기반 구현"
     triggered_by: "프로젝트 시작"
     issue_or_context: "AI 에이전트 작업에 재사용 가능한 task contract 표준 부재"
     changes:

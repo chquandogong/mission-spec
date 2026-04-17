@@ -6,6 +6,21 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.13.0] - 2026-04-17
+_Close the remaining B-series gaps — publish pipeline, historical entry i18n, and internal docs audit._
+
+### Added
+
+- .github/workflows/release.yml (tag-triggered npm publish with provenance, pre-flight tag coherence check)
+- docs/internal/STATUS.md (gitignored freshness audit, classifies older notes as historical)
+
+### Changed
+
+- src/schema/mission-history.schema.json: added intent_ko + decision_ko optional fields with descriptions
+- mission-history.yaml: translated intent/decision of v1.0.0–v1.7.0 entries to English; preserved Korean originals under intent_ko/decision_ko
+- CONTRIBUTING.md: added 'Cutting a Release' section referencing release.yml and dry-run mode
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.12.0 → 1.13.0
+
 ## [1.12.0] - 2026-04-17
 _Ship a proper CLI (npx mission-spec <cmd>) and broaden ms-init heuristics to cover English-only inputs. Combined addresses B-4 and B-7 from the v1.8 review._
 
@@ -121,7 +136,7 @@ _Trilingual documentation (en/zh/ko) and English-only codebase — international
 - scripts/{validate-schema,convert-platforms,snapshot-mission}.js: comments and console messages to English
 
 ## [1.7.0] - 2026-04-14
-_Architecture Assetization 완료 — 캡처/레지스트리/소비 계층을 닫아 Mission 자산만으로 현재 구조와 작업 맥락을 빠르게 복원할 수 있게 정리_
+_Architecture Assetization complete — close the capture/registry/consumption layers so the current structure and work context can be quickly reconstructed from Mission assets alone._
 
 ### Added
 
@@ -160,7 +175,7 @@ _Architecture Assetization 완료 — 캡처/레지스트리/소비 계층을 �
 - src/core/arch-diff.ts: invalid git ref는 empty-old fallback이 아니라 명시적 오류로 처리
 
 ## [1.6.0] - 2026-04-13
-_Evaluator 확장성 + 스냅샷 자동화 — llm-eval 타입, 오버라이드 파일, mission-history 스키마, pre-commit 훅_
+_Evaluator extensibility + snapshot automation — llm-eval type, override files, mission-history schema, pre-commit hook._
 
 ### Added
 
@@ -182,7 +197,7 @@ _Evaluator 확장성 + 스냅샷 자동화 — llm-eval 타입, 오버라이드 
 - README.md: llm-eval + 스냅샷 훅 + validateHistory 가이드
 
 ## [1.5.0] - 2026-04-08
-_Living Asset Registry 도입 — lineage 스키마, history 연동, 문서 정비_
+_Introduce the Living Asset Registry — lineage schema, history integration, documentation cleanup._
 
 ### Added
 
@@ -200,7 +215,7 @@ _Living Asset Registry 도입 — lineage 스키마, history 연동, 문서 정�
 - README.md, SKILL 파일 전체 업데이트
 
 ## [1.4.0] - 2026-04-07
-_Claude Code marketplace 배포 준비, 제품 정체성을 portable task contract 도구로 확립_
+_Prepare for Claude Code marketplace distribution; establish the product identity as a portable task-contract tool._
 
 ### Added
 
@@ -217,7 +232,7 @@ _Claude Code marketplace 배포 준비, 제품 정체성을 portable task contra
 - artifacts: .claude-plugin/manifest.json → .claude-plugin/plugin.json
 
 ## [1.2.0] - 2026-04-07
-_Codex/Gemini adversarial review 반영, 루트 API 정비_
+_Incorporate the Codex/Gemini adversarial review; tidy the root API surface._
 
 ### Added
 
@@ -231,7 +246,7 @@ _Codex/Gemini adversarial review 반영, 루트 API 정비_
 - conditional required fields for eval types 보강
 
 ## [1.1.0] - 2026-04-03 — BREAKING
-_skill 이름 충돌 방지를 위한 ms-* prefix 및 /mission-spec: namespace 적용_
+_Apply ms-* prefix and /mission-spec: namespace to all skills to avoid name collisions._
 
 ### Changed
 
@@ -242,7 +257,7 @@ _skill 이름 충돌 방지를 위한 ms-* prefix 및 /mission-spec: namespace �
 - constraint: dependency 설명에 ajv, yaml 명시 추가
 
 ## [1.0.0] - 2026-04-02 — BREAKING
-_최초 릴리스 — 스키마, 4개 커맨드, 크로스 플랫폼 변환_
+_Initial release — schema, 4 commands, cross-platform conversion._
 
 ### Added
 

@@ -50,8 +50,22 @@
             "type": "string",
             "enum": ["permanent", "transient", "experimental"]
           },
-          "intent": { "type": "string" },
-          "decision": { "type": "string" },
+          "intent": {
+            "type": "string",
+            "description": "One-sentence reason in English. Optional Korean companion may be provided via intent_ko."
+          },
+          "intent_ko": {
+            "type": "string",
+            "description": "Optional Korean translation of intent (preserves nuance when the entry was drafted in Korean)."
+          },
+          "decision": {
+            "type": "string",
+            "description": "What approach was chosen and why, in English. Optional Korean companion may be provided via decision_ko."
+          },
+          "decision_ko": {
+            "type": "string",
+            "description": "Optional Korean translation of decision."
+          },
           "triggered_by": { "type": "string" },
           "issue_or_context": { "type": "string" },
           "changes": {
