@@ -136,6 +136,8 @@ function groundTruth() {
   };
 }
 
+// Korean-coupled by design — see MDR-007 (playbook language policy). Trigger
+// conditions for migrating to YAML-frontmatter claims are enumerated there.
 const PLAYBOOK_PATTERNS = [
   {
     label: "REBUILD_PLAYBOOK modules",

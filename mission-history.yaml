@@ -4,15 +4,68 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.4 — SemVer policy MDR-006 (E-3)"
+  mission_title: "Mission Spec v1.16.5 — Playbook language policy MDR-007 (E-2)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 24
-  latest_version: "1.16.4"
+  total_revisions: 25
+  latest_version: "1.16.5"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-017"
+    semantic_version: "1.16.5"
+    change_sequence: 29
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "decision"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close E-2 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — formalize the policy for REBUILD_PLAYBOOK.md language and PLAYBOOK_PATTERNS locale coupling in verify-registry.js, closing the final governance MDR of the v1.16 cycle."
+    decision: |
+      Authored MDR-007 'Playbook language policy and locale-coupling migration trigger' via generateMdrDraft (third dogfood of ms-decide on its own project after MDR-005, MDR-006). Decision is Hold+Trigger — keep REBUILD_PLAYBOOK.md Korean-only and PLAYBOOK_PATTERNS Korean-coupled through v1.x, because the current playbook body is Korean and the verifier actually catches drift. Four explicit migration triggers (T-1 non-Korean maintainer joins, T-2 external adopter asks for English playbook, T-3 any translation is proposed, T-4 any other .mission/ asset gets translated) each open MDR-008 with YAML-frontmatter-for-numeric-claims as the default migration path. v1.8.0 trilingual principle is scoped to consumer-facing artifacts (README, skills, marketplace); .mission/ is maintainer-facing and stays Korean-only by policy, not accident. One-line comment added to scripts/verify-registry.js above PLAYBOOK_PATTERNS pointing to MDR-007 so the next person considering translation finds this decision.
+    triggered_by: "v1.16.4 entry MSC-2026-04-17-016 follow_up E-2 (listed as 'the remaining governance MDR'); SNAPSHOT §5.3 Claude unique + Codex §6 concur."
+    issue_or_context: "E-2 is the third and final open governance gap. v1.16.4 closed E-3 with MDR-006 (scope: SemVer grade rule); v1.16.5 closes E-2 with MDR-007 (scope: locale / i18n policy for maintainer-facing artifacts). Three MDRs (005 scope, 006 grade, 007 locale) now codify the governance dimensions that were all pointed at by the 3-vendor v1.16.0 reviews. This leaves E-7 (test time concentration, code refactor) and E-4 (external adopter, non-code) as the remaining E-series items."
+    changes:
+      added:
+        - ".mission/decisions/MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger.md (≈110 lines; dogfood scaffold via generateMdrDraft, body authored manually)"
+      modified:
+        - "scripts/verify-registry.js: 2-line comment above PLAYBOOK_PATTERNS pointing to MDR-007 (no functional change)"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.4 → 1.16.5; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/ Version headers auto-synced to 1.16.5 via metadata:sync (sixth real pre-commit invocation of D-3 machinery); Title line auto-synced via E-6 machinery from v1.16.3"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "Locale coupling of PLAYBOOK_PATTERNS is now codified as MDR-007 Hold+Trigger — previously ad-hoc Korean coupling with no written policy"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — docs-only change + 2-line source comment; no functional change to any validator or script; 237/237 full suite green before and after; all validators (arch:verify, plugin:verify, metadata:check, registry:check, validate:history-commits) green. Semantic version: patch per MDR-006 §PATCH 6 (docs / MDR update — no consumer surface change) + §PATCH 1 (existing script comment addition, no behaviour change)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.5_mission.yaml"
+    follow_up:
+      - "E-7 test time refactor — 237 tests, verify-registry.test.ts still ~14s of ~24s suite. Fixture sharing via describe-level beforeAll."
+      - "E-4 external adopter 1+ — still the 3-vendor top risk, only non-code item remaining in E-series"
+      - "Tag and push v1.16.1 → v1.16.5 sequence (5 tags) to exercise the cold-build release gate for each"
+      - "Consider adding MDR-006 + MDR-007 entries to mission-history.yaml key_decisions index at bottom, alongside MDR-001~005 (not done this release to keep patch scope tight; candidate for E-7 bundle or next baseline review)"
+      - "Next 3-vendor adversarial review cycle — E-1 through E-6 now closed, E-3 and E-2 codified as MDRs; governance surface at its densest point in project history"
+
   - change_id: "MSC-2026-04-17-016"
     semantic_version: "1.16.4"
     change_sequence: 28

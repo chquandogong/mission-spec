@@ -6,6 +6,20 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.5] - 2026-04-17
+_Close E-2 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — formalize the policy for REBUILD_PLAYBOOK.md language and PLAYBOOK_PATTERNS locale coupling in verify-registry.js, closing the final governance MDR of the v1.16 cycle._
+
+### Added
+
+- .mission/decisions/MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger.md (≈110 lines; dogfood scaffold via generateMdrDraft, body authored manually)
+
+### Changed
+
+- scripts/verify-registry.js: 2-line comment above PLAYBOOK_PATTERNS pointing to MDR-007 (no functional change)
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.4 → 1.16.5; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped
+- .mission/ Version headers auto-synced to 1.16.5 via metadata:sync (sixth real pre-commit invocation of D-3 machinery); Title line auto-synced via E-6 machinery from v1.16.3
+
 ## [1.16.4] - 2026-04-17
 _Close E-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — formalize the SemVer grade rule for meta-tooling / scripts-only changes, retiring the case-by-case judgment that produced the v1.14.3-vs-v1.15.0 inconsistency and that v1.16.1 / .2 / .3 silently already followed._
 
