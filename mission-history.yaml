@@ -51,7 +51,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — CLI is additive; init heuristic expansion preserves Korean and uses word boundaries to avoid false matches"
-    related_commits: []
+    related_commits: ["2072b77"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.12.0_mission.yaml"
     follow_up:
