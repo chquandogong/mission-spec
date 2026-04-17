@@ -1,10 +1,10 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-17 | Version: 1.16.5
+> Last updated: 2026-04-17 | Version: 1.16.6
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.16.5 — Playbook language policy MDR-007 (E-2)
+- **Title:** Mission Spec v1.16.6 — Test concurrency (E-7)
 - **Phase:** governed portability
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01

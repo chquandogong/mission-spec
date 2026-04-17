@@ -6,6 +6,16 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.6] - 2026-04-17
+_Close E-7 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 §5.4 — reduce verify-registry.test.ts wall time from ~18s (serial subprocesses) to ~8s by switching to vitest's test.extend fixture pattern + describe.concurrent + async execFile._
+
+### Changed
+
+- tests/scripts/verify-registry.test.ts: migrated from shared `let tempDir` + beforeEach/afterEach to base.extend<{ fx: Fixture }> per-test fixture with writeFixture/writeStandardFixture/writePlaybook/writeTrace/writeMission/writeCurrentState helpers; runScript promisified; describe.concurrent enabled; all 14 test signatures now async with .rejects.toThrow for error paths
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.5 → 1.16.6; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped
+- .mission/ Version headers auto-synced to 1.16.6 via metadata:sync (seventh real pre-commit invocation of D-3 machinery); Title line auto-synced via v1.16.3 E-6 machinery
+
 ## [1.16.5] - 2026-04-17
 _Close E-2 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — formalize the policy for REBUILD_PLAYBOOK.md language and PLAYBOOK_PATTERNS locale coupling in verify-registry.js, closing the final governance MDR of the v1.16 cycle._
 

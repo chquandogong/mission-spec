@@ -4,15 +4,62 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.5 — Playbook language policy MDR-007 (E-2)"
+  mission_title: "Mission Spec v1.16.6 — Test concurrency (E-7)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 25
-  latest_version: "1.16.5"
+  total_revisions: 26
+  latest_version: "1.16.6"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-018"
+    semantic_version: "1.16.6"
+    change_sequence: 30
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close E-7 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 §5.4 — reduce verify-registry.test.ts wall time from ~18s (serial subprocesses) to ~8s by switching to vitest's test.extend fixture pattern + describe.concurrent + async execFile."
+    decision: |
+      Three-step refactor of tests/scripts/verify-registry.test.ts, no production code change. (1) Replaced the module-level `let tempDir: string` with a per-test fixture via `base.extend<{ fx: Fixture }>` so each concurrent test owns its own tempDir, writer helpers, and runScript callback — the shared-state race that killed the first `describe.concurrent` attempt is eliminated at the test-scope level, not patched. (2) Switched runScript from `execFileSync` to `promisify(execFile)` so subprocesses actually run in parallel instead of each one blocking the test worker thread synchronously. (3) Wrapped the block in `describe.concurrent` and flipped all 14 test function signatures to `async ({ fx }) => ...`. The sync `expect(() => fn()).toThrow(...)` assertions became `await expect(fn()).rejects.toThrow(...)`. generate-architecture and bump-metadata test files were NOT refactored — they were 3s serial each and the marginal benefit doesn't justify the test-scope churn while these refactors are still TDD-fresh. Measured wall time on this host: verify-registry.test.ts 18.1s → 8.2s (55% reduction); full suite 24s → 10.6s (56% reduction). Semantic version: patch per MDR-006 §PATCH 6 (test-only refactor — no source, script, or workflow change).
+    triggered_by: "v1.16.5 entry MSC-2026-04-17-017 follow_up E-7 (listed as '237 tests, verify-registry.test.ts still ~14s of ~24s suite'); first describe.concurrent attempt in this session produced 5 test failures from shared tempDir — test.extend fixture was the correct fix."
+    issue_or_context: "With the v1.16 cycle adding 8 new tests (3 E-5 in generate-architecture, 5 E-8 in verify-registry, 6 E-6 in bump-metadata), pre-commit wall time moved from ~16s (v1.16.0) to ~26s (v1.16.5). The underlying cause is that each test spawns a Node subprocess with a TypeScript compiler init, and serial execFileSync blocks the test worker. E-7 is the accumulated-interest bill from the E-5/E-8/E-6 extensions and closes that loop before the habit of adding subprocess tests compounds further."
+    changes:
+      added: []
+      modified:
+        - "tests/scripts/verify-registry.test.ts: migrated from shared `let tempDir` + beforeEach/afterEach to base.extend<{ fx: Fixture }> per-test fixture with writeFixture/writeStandardFixture/writePlaybook/writeTrace/writeMission/writeCurrentState helpers; runScript promisified; describe.concurrent enabled; all 14 test signatures now async with .rejects.toThrow for error paths"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.5 → 1.16.6; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/ Version headers auto-synced to 1.16.6 via metadata:sync (seventh real pre-commit invocation of D-3 machinery); Title line auto-synced via v1.16.3 E-6 machinery"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "Test suite wall time halved (~26s → ~11s); verify-registry.test.ts specifically dropped from ~18s to ~8s — pre-commit responsiveness no longer degrading with each new verify-registry case"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — test-only refactor, no production code or validator logic touched; all 237 tests pass (same count pre/post); concurrent execution exposed and fixed the shared-state race cleanly via test.extend (not papered over). Potential flakiness watch: if a future test relies on execFileSync-style synchronous stderr capture, it will need to use execFile's callback-style error object — current tests all use .rejects.toThrow which works. Semantic version: patch per MDR-006 §PATCH 6 (test-only refactor — no consumer surface change)."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.6_mission.yaml"
+    follow_up:
+      - "Apply same test.extend pattern to tests/scripts/generate-architecture.test.ts and tests/scripts/bump-metadata.test.ts if either grows past 5s wall time"
+      - "E-4 external adopter 1+ — only remaining E-series item; 7 of 8 closed in this session (E-1 v1.16.1, E-5+E-8 v1.16.2, E-6 v1.16.3, E-3 v1.16.4, E-2 v1.16.5, E-7 v1.16.6); E-4 is the non-code item and is the natural trigger for the next 3-vendor review cycle"
+      - "Tag and push v1.16.1 → v1.16.6 sequence (6 tags) to exercise the cold-build release gate"
+      - "Next 3-vendor adversarial review — with E-1 through E-3/E-7 all closed, the v1.16.6 HEAD is a clean baseline for the next cycle's review prompts"
+
   - change_id: "MSC-2026-04-17-017"
     semantic_version: "1.16.5"
     change_sequence: 29
