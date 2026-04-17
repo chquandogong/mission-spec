@@ -4,15 +4,70 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.8 — Internationalization"
+  mission_title: "Mission Spec v1.9 — Governance & Coverage"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 8
-  latest_version: "1.8.0"
+  total_revisions: 9
+  latest_version: "1.9.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-001"
+    semantic_version: "1.9.0"
+    change_sequence: 13
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Governance hardening — close the gaps between the v1.8 Living Asset Registry and a shippable open-source project (CI, license, contributor path, coverage floor)"
+    decision: "Add MIT LICENSE, CONTRIBUTING.md, GitHub issue/PR templates, two CI workflows (test matrix + pre-commit parity), a mission-history → CHANGELOG.md generator, and v8 coverage with 80/75 line-branch thresholds. No runtime deps added; @vitest/coverage-v8 is devDependency only (MDR-003 preserved)."
+    triggered_by: "PROJECT_REVIEW_V1.8.0_2026-04-17 identified governance gaps I-1, I-2, I-3, I-6 as the highest-leverage short-term fixes"
+    issue_or_context: "README claimed MIT but no LICENSE existed; no CI meant pre-commit was the only safety net; contributor onboarding was undocumented; coverage was anecdotal rather than enforced"
+    changes:
+      added:
+        - "LICENSE (MIT full text)"
+        - "CONTRIBUTING.md (dev workflow, mission-history conventions, PR checklist)"
+        - "CHANGELOG.md (generated from mission-history.yaml)"
+        - ".github/ISSUE_TEMPLATE/bug_report.md"
+        - ".github/ISSUE_TEMPLATE/feature_request.md"
+        - ".github/PULL_REQUEST_TEMPLATE.md"
+        - ".github/workflows/test.yml (Node 20 + 22 matrix, build + lint + test:coverage + platforms verify)"
+        - ".github/workflows/pre-commit-parity.yml (validate-history-commits + snapshot dedup check)"
+        - "scripts/generate-changelog.js (Keep-a-Changelog formatter, idempotent)"
+        - "tests/scripts/generate-changelog.test.ts (5 tests — format, BREAKING label, idempotency, missing history, empty subsections)"
+      modified:
+        - "package.json: add changelog and test:coverage scripts; add @vitest/coverage-v8 devDependency; version 1.8.0 → 1.9.0"
+        - "vitest.config.ts: v8 coverage provider, thresholds lines=80 / functions=80 / branches=75 / statements=80"
+        - "mission.yaml: title and version bumped to v1.9.0"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "LICENSE exists"
+        - "CI workflow present"
+        - "CONTRIBUTING.md exists"
+        - "coverage threshold enforced"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — no API or schema changes; CI may surface pre-existing coverage regressions but current baseline is 93%/87% statements/branches"
+    related_commits: ["2a969e7", "ff74c03", "1106646", "39adc45", "ebef0e4"]
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.9.0_mission.yaml"
+    follow_up:
+      - "B-1 to B-7 from PROJECT_REVIEW_V1.8.0_2026-04-17 (ARCHITECTURE auto-gen, plugin E2E, history normalization, ms-context CLI, docs/internal audit, npm publish, init heuristic EN coverage)"
+      - "Measure coverage trend over time and tighten thresholds once >90% is stable"
+
   - change_id: "MSC-2026-04-15-001"
     semantic_version: "1.8.0"
     change_sequence: 12

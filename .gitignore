@@ -3,6 +3,9 @@ dist/
 *.js.map
 .DS_Store
 
+# Coverage reports (generated)
+coverage/
+
 # Internal docs (not for public release)
 docs/
 CLAUDE.md
