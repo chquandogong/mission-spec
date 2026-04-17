@@ -6,6 +6,18 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.15] - 2026-04-18
+_사용자가 최종 일관성 검토에서 지목한 2 issue 해소: (1) 3 README 모두 Usage 섹션에 `ms-decide` 예시 누락 — 설치/Providing 섹션에만 언급됨, (2) README.md(영문) + README.zh.md(중문)에 verify-registry bullet의 한국어 조각(`완료 조건`, `최근 구현`)이 번역 없이 노출됨._
+
+### Changed
+
+- README.md (EN): Usage 섹션에 ms-decide 블록 신설; Registry freshness bullet Korean-literal clarifying note 추가
+- README.ko.md: Usage 섹션에 ms-decide 블록 신설; Registry freshness bullet 설명 확장 (Title + 완료 조건 + 최근 구현 + v1.16.13 --verify-live)
+- README.zh.md: Usage 섹션에 ms-decide 블록 신설; Registry freshness bullet Korean-literal clarifying note + v1.16.13 --verify-live 추가
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.14 → 1.16.15
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.15 via metadata:sync (16th D-3 invocation); CURRENT_STATE.md Title + 최근 구현 header via E-6 + F-4 machinery
+
 ## [1.16.14] - 2026-04-18
 _오늘 사이클(2026-04-17 저녁 ~ 2026-04-18 새벽) 종결 시점의 전체 validator + test 성공 증거를 `.mission/evidence/VERIFICATION_LOG.yaml`에 기록. Codex Rev.2 §5와 Claude Rev.1 F-5가 지적한 'VERIFICATION_LOG trailing 12 releases' gap을 닫는 evidence-only 릴리스._
 

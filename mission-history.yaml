@@ -4,15 +4,69 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.14 — VERIFICATION_LOG evidence close-out"
+  mission_title: "Mission Spec v1.16.15 — README ms-decide Usage + Korean fragment fix"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 34
-  latest_version: "1.16.14"
+  total_revisions: 35
+  latest_version: "1.16.15"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-008"
+    semantic_version: "1.16.15"
+    change_sequence: 39
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "documentation"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "사용자가 최종 일관성 검토에서 지목한 2 issue 해소: (1) 3 README 모두 Usage 섹션에 `ms-decide` 예시 누락 — 설치/Providing 섹션에만 언급됨, (2) README.md(영문) + README.zh.md(중문)에 verify-registry bullet의 한국어 조각(`완료 조건`, `최근 구현`)이 번역 없이 노출됨."
+    decision: |
+      3 README 병렬 수정. (1) Usage 섹션에 `ms-decide` 예시 블록 추가 (EN/KO/ZH 각 언어로) — generateMdrDraft 호출 예시, suggestedPath/nextMdrNumber/markdown 필드 설명, NFC slugify 삼국어 안정성 언급. ms-context 블록 바로 뒤 배치. (2) README.md (EN)의 Registry freshness verifier bullet에서 Korean literal strings `완료 조건 (N/M PASS)` + `최근 구현 (vA ~ vB)`를 유지하되 괄호 내 영문 설명(completion count heading / recent-releases heading) 추가 + MDR-007 'Korean labels kept Korean-only since .mission/ is maintainer-facing' 설명 명시. 한국어 literal은 verifier가 실제로 매치하는 그 문자열이므로 번역 불가(번역하면 문서가 코드와 모순); 외국인 독자를 위한 clarifying note로 해결. README.zh.md도 동일한 방식으로 한국어 literal + 중문 설명 병기. v1.16.13 `--verify-live` 모드도 Registry bullet에 포함되도록 한 줄 보강.
+    triggered_by: "사용자 피드백: 'readme 파일을 확인하고 업데이트 해줘, 스킬 설명이 빠진 것도 보이고, 영어 버전에 한글도 보여.' — v1.16.12 F-10 README refresh가 '스킬 설명 빠짐' 관점은 커버하지 못했음을 드러냄. 본 릴리스는 사용자 관점 최종 교차 확인."
+    issue_or_context: "v1.16.12 F-10 refresh는 'Providing: 리스트에 feature 추가' 관점에 머물러 Usage 섹션 ms-decide 커버리지를 빠뜨렸고, Korean literal strings 노출이 영어권/중문권 사용자에게 lost-in-translation 느낌이었음. 사용자가 외부 adopter 관점에서 본 것이 핵심 — self-review(Claude) + validator(registry:check)는 README 내용 정확성을 검증하지 않음. 본 release는 self-review 맹점이 또 한 번 드러난 사례(6번째 self-corrective loop trigger는 아니지만 같은 패턴)."
+    changes:
+      added: []
+      modified:
+        - "README.md (EN): Usage 섹션에 ms-decide 블록 신설; Registry freshness bullet Korean-literal clarifying note 추가"
+        - "README.ko.md: Usage 섹션에 ms-decide 블록 신설; Registry freshness bullet 설명 확장 (Title + 완료 조건 + 최근 구현 + v1.16.13 --verify-live)"
+        - "README.zh.md: Usage 섹션에 ms-decide 블록 신설; Registry freshness bullet Korean-literal clarifying note + v1.16.13 --verify-live 추가"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.14 → 1.16.15"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.15 via metadata:sync (16th D-3 invocation); CURRENT_STATE.md Title + 최근 구현 header via E-6 + F-4 machinery"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "README 3종의 Usage 섹션이 6 skill 전수 커버 (ms-init/eval/status/report/context/decide)"
+        - "영문/중문 README에서 Korean literal strings가 clarifying note로 맥락화됨 — 한국어 모르는 독자도 무엇이 인용된 것인지 이해 가능"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — docs-only change across 3 README files (MDR-002 trilingual discipline 유지); 254/254 full suite green; 모든 validator green. 사용자가 외부 adopter 관점에서 지적한 2 issue 모두 해소. Semantic version: patch per MDR-006 §PATCH 6 (docs/README 업데이트, no consumer surface change)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-002-ms-prefix-adoption",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.15_mission.yaml"
+    follow_up:
+      - "E-4 외부 adopter 1+ — 변함없이 3벤더 합의 최상위"
+      - "F-1 cold-build CI 실전 호출 (tag push)"
+      - "F-9 MDR-008 저장소 크기 원칙 후보"
+      - "Rev.5 3벤더 재리뷰 — v1.16.15가 baseline (v1.16.14 대비 docs 개선 반영)"
+      - "README 내용 자동 검증 축 — 현재 validator는 README 커버리지 없음, 본 릴리스의 누락이 자동 감지되지 않았음. MDR-008과 함께 검토 후보"
+
   - change_id: "MSC-2026-04-18-007"
     semantic_version: "1.16.14"
     change_sequence: 38

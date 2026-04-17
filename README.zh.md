@@ -112,6 +112,23 @@ console.log(ctx.markdown); // 统一提示：mission + history + architecture + 
 console.log(ctx.sections); // ["mission", "design_refs", "history", "decisions", "architecture", "api"]
 ```
 
+### 生成 MDR 草稿（`ms-decide`）
+
+```typescript
+import { generateMdrDraft } from "mission-spec";
+
+const result = generateMdrDraft({
+  title: "采用厂商中立的平台适配器",
+  projectDir: ".",
+});
+
+console.log(result.suggestedPath); // .mission/decisions/MDR-00N-...md
+console.log(result.nextMdrNumber); // 下一个 MDR 编号
+console.log(result.markdown); // Context / Decision / Rationale / Consequences / Alternatives 各节的脚手架
+```
+
+文件名通过 Unicode NFC + `/u` 标志进行 slugify，中文/韩文/日文标题也能稳定生成不冲突的文件名（v1.14.1+）。
+
 也支持子路径导入：
 
 ```typescript
@@ -323,7 +340,7 @@ npm run build
 - 提供中：Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]`（v1.14.0+）
 - 提供中：Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml`（v1.9.0+、v1.13.0+）
 - 提供中：`.mission/` 元数据自动同步 — `scripts/bump-metadata.js` 将 Version 头部和 CURRENT_STATE Title 行从 `mission.yaml` 自动同步（`npm run metadata:sync` / `metadata:check`，v1.15.0+、v1.16.3+ Title、v1.16.10+ CURRENT_STATE 专属 filename guard）
-- 提供中：Registry 新鲜度验证器 — `scripts/verify-registry.js` 通过 TypeScript AST 核对 `REBUILD_PLAYBOOK.md`、`TRACE_MATRIX.yaml`、`CURRENT_STATE.md` 的 Title/完成条件/`최근 구현` version range 与 live source（`npm run registry:check`，v1.16.0+、v1.16.2+ CURRENT_STATE、v1.16.9+ locale-tolerant Title + 최근 구현 range）
+- 提供中：Registry 新鲜度验证器 — `scripts/verify-registry.js` 通过 TypeScript AST 核对 `REBUILD_PLAYBOOK.md`、`TRACE_MATRIX.yaml`、`CURRENT_STATE.md`（Title 行、完成计数标题 `완료 조건 (N/M PASS)`、近期发布标题 `최근 구현 (vA ~ vB)` — 韩文标签由 MDR-007 locale 策略保留为韩文，因为 `.mission/` 是维护者面向资产）与 live source（`npm run registry:check`，v1.16.0+、v1.16.2+ CURRENT_STATE、v1.16.9+ locale-tolerant Title + version range、v1.16.13+ 可选 `--verify-live` 模式将声明的 PASS 与 `evaluateMission()` 结果机械对齐）
 - 提供中：Cold-build release gate — `reconstruction:verify --cold-build` 作为 release workflow 步骤运行，证明 tagged commit 可仅依赖源码重建（v1.16.1+）
 - 提供中：`arch:verify` deep-compare — `package.json.exports` 的嵌套 conditional exports 结构递归比较（v1.14.3+ key-set、v1.16.2+ value shape、v1.16.11+ nested depth）
 - 提供中：`plugin-validator` `package-lock.json` drift 检测 — 捕获 lockfile 停留在过去 release 版本的情况（v1.16.7+）

@@ -112,6 +112,23 @@ console.log(ctx.markdown); // Unified prompt: mission + history + architecture +
 console.log(ctx.sections); // ["mission", "design_refs", "history", "decisions", "architecture", "api"]
 ```
 
+### Draft a Mission Decision Record (`ms-decide`)
+
+```typescript
+import { generateMdrDraft } from "mission-spec";
+
+const result = generateMdrDraft({
+  title: "Adopt vendor-neutral platform adapter",
+  projectDir: ".",
+});
+
+console.log(result.suggestedPath); // .mission/decisions/MDR-00N-adopt-vendor-neutral-platform-adapter.md
+console.log(result.nextMdrNumber); // next available MDR number
+console.log(result.markdown); // scaffold with Context / Decision / Rationale / Consequences / Alternatives sections
+```
+
+Filenames are slugified with Unicode NFC + `/u` flag so Korean, Chinese, and Japanese titles produce stable, collision-free paths (v1.14.1+).
+
 Subpath imports are also available:
 
 ```typescript
@@ -323,7 +340,7 @@ npm run build
 - Providing: Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]` (v1.14.0+)
 - Providing: Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml` (v1.9.0+, v1.13.0+)
 - Providing: `.mission/` metadata auto-sync — `scripts/bump-metadata.js` syncs Version headers + CURRENT_STATE Title line from `mission.yaml` (`npm run metadata:sync` / `metadata:check`, v1.15.0+, v1.16.3+ Title, v1.16.10+ CURRENT_STATE-scoped filename guard)
-- Providing: Registry freshness verifier — `scripts/verify-registry.js` checks embedded numeric claims in `REBUILD_PLAYBOOK.md`, `TRACE_MATRIX.yaml`, `CURRENT_STATE.md` Title/완료 조건/`최근 구현` version range against live source via TypeScript AST (`npm run registry:check`, v1.16.0+, v1.16.2+ CURRENT_STATE, v1.16.9+ locale-tolerant Title + 최근 구현 range)
+- Providing: Registry freshness verifier — `scripts/verify-registry.js` checks embedded numeric claims in `REBUILD_PLAYBOOK.md`, `TRACE_MATRIX.yaml`, and `CURRENT_STATE.md` (Title line, completion count heading `완료 조건 (N/M PASS)`, and recent-releases heading `최근 구현 (vA ~ vB)` — Korean labels kept Korean-only per MDR-007, since `.mission/` is a maintainer-facing asset) against live source via TypeScript AST (`npm run registry:check`, v1.16.0+, v1.16.2+ CURRENT_STATE, v1.16.9+ locale-tolerant Title + version range, v1.16.13+ opt-in `--verify-live` mode ties claimed PASS to `evaluateMission()` result)
 - Providing: Cold-build release gate — `reconstruction:verify --cold-build` runs `npm ci + build + test` in a tmp dir as a release workflow step, proving the tagged commit rebuilds from source alone (v1.16.1+)
 - Providing: `arch:verify` deep-compare for nested conditional exports in `package.json.exports` (v1.14.3+ key-set, v1.16.2+ value shape, v1.16.11+ nested depth)
 - Providing: `plugin-validator` `package-lock.json` drift detection — catches lockfile version pinned to an older release (v1.16.7+)

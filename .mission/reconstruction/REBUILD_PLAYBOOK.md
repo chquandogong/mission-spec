@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-17 | Version: 1.16.14
+> Last updated: 2026-04-17 | Version: 1.16.15
 
 ## 전제 조건
 
