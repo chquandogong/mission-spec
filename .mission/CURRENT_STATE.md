@@ -1,10 +1,10 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-17 | Version: 1.16.6
+> Last updated: 2026-04-17 | Version: 1.16.7
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.16.6 — Test concurrency (E-7)
+- **Title:** Mission Spec v1.16.7 — package-lock drift + E-7 pattern spread
 - **Phase:** governed portability
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01

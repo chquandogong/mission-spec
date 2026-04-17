@@ -1,7 +1,7 @@
 // Plugin manifest validator — verifies the Claude Code plugin structure
 // (plugin.json, marketplace.json, skills/*/SKILL.md) is coherent and that
-// versions do not drift across package.json / plugin.json / marketplace.json /
-// mission.yaml.
+// versions do not drift across package.json / package-lock.json / plugin.json /
+// marketplace.json / mission.yaml.
 //
 // Used by scripts/validate-plugin.js and CI. Not a true install-E2E (that
 // needs Claude Code CLI), but closes the drift gap that prior adversarial
@@ -28,6 +28,30 @@ function readMissionVersion(projectDir: string): string | null {
     mission?: { version?: string };
   };
   return data?.mission?.version ?? null;
+}
+
+function readPackageLockVersions(projectDir: string): {
+  rootVersion: string | null;
+  packageVersion: string | null;
+} {
+  const p = join(projectDir, "package-lock.json");
+  if (!existsSync(p)) {
+    return { rootVersion: null, packageVersion: null };
+  }
+  const data = readJson(p) as {
+    version?: unknown;
+    packages?: Record<string, { version?: unknown }>;
+  };
+  const rootVersion = typeof data.version === "string" ? data.version : null;
+  const packageVersion =
+    data.packages &&
+    typeof data.packages === "object" &&
+    data.packages[""] &&
+    typeof data.packages[""] === "object" &&
+    typeof data.packages[""].version === "string"
+      ? data.packages[""].version
+      : null;
+  return { rootVersion, packageVersion };
 }
 
 function parseFrontmatter(md: string): Record<string, string> | null {
@@ -129,6 +153,7 @@ function validateVersions(projectDir: string, errors: string[]) {
   const plugin = validatePluginJson(projectDir, errors);
   const marketplace = validateMarketplaceJson(projectDir, errors);
   const missionVersion = readMissionVersion(projectDir);
+  const packageLock = readPackageLockVersions(projectDir);
 
   if (plugin.version && plugin.version !== pkgVersion) {
     errors.push(
@@ -143,6 +168,16 @@ function validateVersions(projectDir: string, errors: string[]) {
   if (missionVersion && missionVersion !== pkgVersion) {
     errors.push(
       `version drift: package.json=${pkgVersion} but mission.yaml mission.version=${missionVersion}`,
+    );
+  }
+  if (packageLock.rootVersion && packageLock.rootVersion !== pkgVersion) {
+    errors.push(
+      `version drift: package.json=${pkgVersion} but package-lock.json version=${packageLock.rootVersion}`,
+    );
+  }
+  if (packageLock.packageVersion && packageLock.packageVersion !== pkgVersion) {
+    errors.push(
+      `version drift: package.json=${pkgVersion} but package-lock.json packages[\"\"].version=${packageLock.packageVersion}`,
     );
   }
 }

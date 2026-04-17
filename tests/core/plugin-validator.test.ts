@@ -16,6 +16,24 @@ function writePkg(version: string) {
   writeFile("package.json", JSON.stringify({ name: "p", version }));
 }
 
+function writeLock(rootVersion: string, packageVersion = rootVersion) {
+  writeFile(
+    "package-lock.json",
+    JSON.stringify({
+      name: "p",
+      version: rootVersion,
+      lockfileVersion: 3,
+      requires: true,
+      packages: {
+        "": {
+          name: "p",
+          version: packageVersion,
+        },
+      },
+    }),
+  );
+}
+
 function writePlugin(version: string, extra: object = {}) {
   writeFile(
     ".claude-plugin/plugin.json",
@@ -71,6 +89,7 @@ afterEach(() => {
 describe("plugin-validator", () => {
   it("passes when versions are consistent and skills are well-formed", () => {
     writePkg("1.10.0");
+    writeLock("1.10.0");
     writePlugin("1.10.0");
     writeMarketplace("1.10.0");
     writeMission("1.10.0");
@@ -120,6 +139,40 @@ describe("plugin-validator", () => {
     expect(result.errors.some((e) => e.includes("marketplace.json"))).toBe(
       true,
     );
+  });
+
+  it("fails on version drift between package.json and package-lock.json root", () => {
+    writePkg("1.10.0");
+    writeLock("1.8.0", "1.10.0");
+    writePlugin("1.10.0");
+    writeMarketplace("1.10.0");
+    writeMission("1.10.0");
+    writeSkill("ms-init", { name: "ms-init", description: "x" });
+    writeSkill("ms-init", { name: "ms-init", description: "x" }, "ko.md");
+    writeSkill("ms-init", { name: "ms-init", description: "x" }, "zh.md");
+
+    const result = validatePlugin(tempDir);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes("package-lock.json version"))).toBe(
+      true,
+    );
+  });
+
+  it('fails on version drift between package.json and package-lock.json packages[""]', () => {
+    writePkg("1.10.0");
+    writeLock("1.10.0", "1.8.0");
+    writePlugin("1.10.0");
+    writeMarketplace("1.10.0");
+    writeMission("1.10.0");
+    writeSkill("ms-init", { name: "ms-init", description: "x" });
+    writeSkill("ms-init", { name: "ms-init", description: "x" }, "ko.md");
+    writeSkill("ms-init", { name: "ms-init", description: "x" }, "zh.md");
+
+    const result = validatePlugin(tempDir);
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.includes('package-lock.json packages[""].version')),
+    ).toBe(true);
   });
 
   it("fails when a skill is missing its frontmatter name field", () => {

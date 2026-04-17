@@ -6,6 +6,22 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.7] - 2026-04-17
+_Close a post-v1.16.6 drift that the existing validator chain missed — package-lock.json was still pinned at 1.8.0 despite mission.yaml / package.json / plugin.json / marketplace.json all tracking 1.9.0 → 1.16.6 through the day. Also spread the v1.16.6 E-7 test.extend + describe.concurrent pattern to the remaining two subprocess-heavy test files._
+
+### Changed
+
+- src/core/plugin-validator.ts: new readPackageLockVersions() helper + 2 new drift checks in validateVersions() (root version + packages[""] version); module comment advertises package-lock as a drift axis
+- tests/core/plugin-validator.test.ts: +2 tests (package.json vs package-lock.json root drift; package.json vs packages[""] drift) + writeLock() helper
+- tests/scripts/bump-metadata.test.ts: migrated to base.extend<{ fx: Fixture }> + describe.concurrent + async execFile (v1.16.6 E-7 pattern applied)
+- tests/scripts/generate-architecture.test.ts: same migration; writeTs/writeApiRegistry/writePackageJson now live on the fx fixture
+- package-lock.json: 1.8.0 → 1.16.7 (both top-level version and packages[""].version; historical drift since v1.9.0 fully resolved)
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: test count 237 → 239
+- .mission/traceability/TRACE_MATRIX.yaml: inline 237 → 239; plugin-validator.test cases 8 → 10 with 'package-lock.json drift (v1.16.7)' category; header v1.16.3 → v1.16.7
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.6 → 1.16.7; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped
+- .mission/ Version headers auto-synced to 1.16.7 via metadata:sync (eighth real pre-commit invocation of D-3 machinery); Title line auto-synced via v1.16.3 E-6 machinery
+
 ## [1.16.6] - 2026-04-17
 _Close E-7 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 §5.4 — reduce verify-registry.test.ts wall time from ~18s (serial subprocesses) to ~8s by switching to vitest's test.extend fixture pattern + describe.concurrent + async execFile._
 

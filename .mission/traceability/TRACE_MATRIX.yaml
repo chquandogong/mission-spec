@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.16.6
+# Last updated: 2026-04-17 | Version: 1.16.7
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 237 tests across 21 files)"
+      - "tests/ (총 239 tests across 21 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.16.3 기준, 21 files / 237 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.16.7 기준, 21 files / 239 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -272,12 +272,13 @@ test_coverage:
       ]
 
   - test_file: "tests/core/plugin-validator.test.ts"
-    cases: 8
+    cases: 10
     covers: [plugin-validator]
     categories:
       [
         "happy path",
         "version drift",
+        "package-lock.json drift (v1.16.7)",
         "SKILL frontmatter",
         "name/description",
         "trilingual missing",

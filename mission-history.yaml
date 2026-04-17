@@ -4,15 +4,72 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.6 — Test concurrency (E-7)"
+  mission_title: "Mission Spec v1.16.7 — package-lock drift + E-7 pattern spread"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 26
-  latest_version: "1.16.6"
+  total_revisions: 27
+  latest_version: "1.16.7"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-019"
+    semantic_version: "1.16.7"
+    change_sequence: 31
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close a post-v1.16.6 drift that the existing validator chain missed — package-lock.json was still pinned at 1.8.0 despite mission.yaml / package.json / plugin.json / marketplace.json all tracking 1.9.0 → 1.16.6 through the day. Also spread the v1.16.6 E-7 test.extend + describe.concurrent pattern to the remaining two subprocess-heavy test files."
+    decision: |
+      Three bundled changes, all patch-class per MDR-006. (1) src/core/plugin-validator.ts gains a readPackageLockVersions() helper and two new validateVersions checks — one for the top-level package-lock.json version, one for packages[""].version. Both are compared against package.json.version and emit a clear 'version drift: package.json=X but package-lock.json ...' error on mismatch. Two new unit tests in tests/core/plugin-validator.test.ts exercise both paths with an isolated writeLock() helper. Plugin-validator's module comment updated to advertise package-lock as a drift axis. (2) package-lock.json (which had silently stayed at 1.8.0 since that release!) rewritten to 1.16.6 then bumped again in this release to 1.16.7. This was exactly the class of drift the new validator is designed to catch; it will not recur. (3) The v1.16.6 test.extend + describe.concurrent + async execFile pattern is now applied to tests/scripts/bump-metadata.test.ts and tests/scripts/generate-architecture.test.ts, matching the v1.16.6 follow_up note that explicitly listed these as candidates 'if either grows past 5s wall time'. Total 239 tests (237 + 2 plugin-validator); REBUILD_PLAYBOOK + TRACE_MATRIX counts updated accordingly.
+    triggered_by: "The v1.16.7-pre audit surfaced an unstaged package-lock.json still at 1.8.0 — arch:verify / metadata:check / registry:check all passed but none of them looked at package-lock. plugin-validator was the natural owner (it already cross-checks package.json against plugin.json / marketplace.json / mission.yaml); adding package-lock is a one-file extension. E-7 spread follows v1.16.6 entry MSC-2026-04-17-018 follow_up."
+    issue_or_context: "Historical note: from v1.9.0 (when the 3-axis validator was introduced) through v1.16.6 — 18 consecutive semantic releases — none of them noticed that package-lock.json still said 1.8.0. The oversight is the class of drift the project exists to prevent ('Living Asset Registry' claims vs live source). This release closes that specific gap before external adopters (E-4) would otherwise ship a tarball whose lockfile contradicts the rest of the manifest. Fourth 'self-corrective loop' dogfood event (after v1.10 plugin.json drift, v1.13.1 arch-extractor asymmetry, v1.14.1 Unicode slug bug, v1.15.0 first metadata:sync catching 7 stale headers)."
+    changes:
+      added: []
+      modified:
+        - 'src/core/plugin-validator.ts: new readPackageLockVersions() helper + 2 new drift checks in validateVersions() (root version + packages[""] version); module comment advertises package-lock as a drift axis'
+        - 'tests/core/plugin-validator.test.ts: +2 tests (package.json vs package-lock.json root drift; package.json vs packages[""] drift) + writeLock() helper'
+        - "tests/scripts/bump-metadata.test.ts: migrated to base.extend<{ fx: Fixture }> + describe.concurrent + async execFile (v1.16.6 E-7 pattern applied)"
+        - "tests/scripts/generate-architecture.test.ts: same migration; writeTs/writeApiRegistry/writePackageJson now live on the fx fixture"
+        - 'package-lock.json: 1.8.0 → 1.16.7 (both top-level version and packages[""].version; historical drift since v1.9.0 fully resolved)'
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: test count 237 → 239"
+        - ".mission/traceability/TRACE_MATRIX.yaml: inline 237 → 239; plugin-validator.test cases 8 → 10 with 'package-lock.json drift (v1.16.7)' category; header v1.16.3 → v1.16.7"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.6 → 1.16.7; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/ Version headers auto-synced to 1.16.7 via metadata:sync (eighth real pre-commit invocation of D-3 machinery); Title line auto-synced via v1.16.3 E-6 machinery"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "plugin:verify now detects package-lock.json version drift — a gap that silently held for 18 consecutive releases"
+        - "Test concurrency pattern now uniform across all three subprocess-based test files (verify-registry, bump-metadata, generate-architecture)"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — plugin-validator extension is additive (no existing check modified); 239/239 tests green pre/post; arch:verify / plugin:verify (itself! with the new logic) / metadata:check / registry:check / validate:history-commits all green. package-lock.json bump is mechanical metadata sync — no dependency graph changes. Semantic version: patch per MDR-006 §PATCH 1 (existing validator function extension) + §PATCH 6 (test-only refactor for the E-7 spread) + §PATCH 7 (metadata sync for package-lock — analogous to .mission/ Version headers, no consumer surface change)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.7_mission.yaml"
+    follow_up:
+      - "Consider whether package-lock.json should also be synced automatically by bump-metadata.js on version changes — currently manual, a future fourth dogfood (v1.16.8?) could close that loop"
+      - "E-4 external adopter 1+ — now the only open E-series item; 7 of 8 closed plus one post-v1.16.6 drift closed; the v1.17 / v2.0 review baseline is at its cleanest point"
+      - "Tag and push v1.16.1 → v1.16.7 sequence (7 tags) to exercise the cold-build release gate — each tag push will be the first external verification of a whole day's drift defence layer"
+      - "Next 3-vendor adversarial review on v1.16.7 HEAD — E-1 through E-3 / E-5 through E-8 all closed, plus the new package-lock hole closed; what's left for the reviewers to find?"
+
   - change_id: "MSC-2026-04-17-018"
     semantic_version: "1.16.6"
     change_sequence: 30
