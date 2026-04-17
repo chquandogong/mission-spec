@@ -59,7 +59,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — extractArchitecture is additive; pre-commit gracefully skips when dist/ absent to avoid breaking fresh clones"
-    related_commits: []
+    related_commits: ["294f894"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.10.0_mission.yaml"
     follow_up:
