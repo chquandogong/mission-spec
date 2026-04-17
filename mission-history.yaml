@@ -52,7 +52,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — validator-only change; skipped gracefully when package.json or package_exports map is absent; 11/11 local tests and 203/203 full suite green; arch:verify and plugin:verify both remained green before and after."
-    related_commits: []
+    related_commits: ["c20d1a0"]
     related_decisions:
       ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.14.3_mission.yaml"
