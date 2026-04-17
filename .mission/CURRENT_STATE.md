@@ -1,10 +1,10 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-17 | Version: 1.16.2
+> Last updated: 2026-04-17 | Version: 1.16.3
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.16.2 — Value-shape + CURRENT_STATE freshness (E-5, E-8)
+- **Title:** Mission Spec v1.16.3 — CURRENT_STATE Title auto-sync (E-6)
 - **Phase:** governed portability
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01

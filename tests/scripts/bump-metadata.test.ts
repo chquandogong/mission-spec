@@ -219,4 +219,133 @@ describe("bump-metadata script", () => {
       ),
     ).toContain("**Version:** X.Y.Z");
   });
+
+  // E-6 (PROJECT_REVIEW_SNAPSHOT_V1.16.0 §6): also sync the Title line in
+  // CURRENT_STATE.md from mission.yaml.title. Before v1.16.3 this was a
+  // manual step; v1.16.2 added a verifier (registry:check catches drift)
+  // but the automation lived nowhere. This closes the loop.
+
+  function writeMissionYaml(title: string) {
+    writeFileSync(
+      join(tempDir, "mission.yaml"),
+      [
+        "mission:",
+        `  title: "${title}"`,
+        `  version: "1.15.0"`,
+        "  goal: x",
+        "  done_when: []",
+        "",
+      ].join("\n"),
+    );
+  }
+
+  it("--apply rewrites drifted Title line in CURRENT_STATE.md (E-6)", () => {
+    writePkg("1.15.0");
+    writeMissionYaml("Mission Spec v1.15.0 — Fresh");
+    writeMission(
+      "CURRENT_STATE.md",
+      [
+        "# Current State",
+        "",
+        "> Version: 1.15.0",
+        "",
+        "- **Title:** Mission Spec v1.14.0 — Stale",
+        "",
+      ].join("\n"),
+    );
+
+    runScript(["--apply"]);
+
+    const body = readFileSync(
+      join(tempDir, ".mission/CURRENT_STATE.md"),
+      "utf-8",
+    );
+    expect(body).toContain("- **Title:** Mission Spec v1.15.0 — Fresh");
+    expect(body).not.toContain("Mission Spec v1.14.0 — Stale");
+  });
+
+  it("--check exits 1 when Title line drifts from mission.yaml (E-6)", () => {
+    writePkg("1.15.0");
+    writeMissionYaml("Mission Spec v1.15.0 — Fresh");
+    writeMission(
+      "CURRENT_STATE.md",
+      [
+        "> Version: 1.15.0",
+        "- **Title:** Mission Spec v1.14.0 — Stale",
+        "",
+      ].join("\n"),
+    );
+
+    expect(() => runScript(["--check"])).toThrow();
+  });
+
+  it("--apply updates both Title and Version in a single pass (E-6)", () => {
+    writePkg("1.16.0");
+    writeMissionYaml("Mission Spec v1.16.0 — Bump");
+    writeMission(
+      "CURRENT_STATE.md",
+      ["> Version: 1.14.0", "- **Title:** Mission Spec v1.14.0 — Old", ""].join(
+        "\n",
+      ),
+    );
+
+    const stdout = runScript(["--apply"]);
+    expect(stdout).toContain("Version: 1.14.0 → 1.16.0");
+    expect(stdout).toContain("Title:");
+
+    const body = readFileSync(
+      join(tempDir, ".mission/CURRENT_STATE.md"),
+      "utf-8",
+    );
+    expect(body).toContain("Version: 1.16.0");
+    expect(body).toContain("- **Title:** Mission Spec v1.16.0 — Bump");
+  });
+
+  it("graceful when mission.yaml is absent — Version sync still works (E-6)", () => {
+    writePkg("1.15.0");
+    // no mission.yaml
+    writeMission(
+      "CURRENT_STATE.md",
+      ["> Version: 1.14.0", "- **Title:** anything goes", ""].join("\n"),
+    );
+
+    runScript(["--apply"]);
+    const body = readFileSync(
+      join(tempDir, ".mission/CURRENT_STATE.md"),
+      "utf-8",
+    );
+    expect(body).toContain("Version: 1.15.0");
+    // Title untouched because mission.yaml was not available
+    expect(body).toContain("- **Title:** anything goes");
+  });
+
+  it("graceful when CURRENT_STATE.md has no Title line — no error (E-6)", () => {
+    writePkg("1.15.0");
+    writeMissionYaml("Mission Spec v1.15.0 — Fresh");
+    writeMission("CURRENT_STATE.md", "> Version: 1.14.0\nno title line here\n");
+
+    runScript(["--apply"]);
+    const body = readFileSync(
+      join(tempDir, ".mission/CURRENT_STATE.md"),
+      "utf-8",
+    );
+    expect(body).toContain("Version: 1.15.0");
+    // No Title line to update; file should still be valid
+  });
+
+  it("leaves Title line unchanged when already matching (E-6)", () => {
+    writePkg("1.15.0");
+    writeMissionYaml("Mission Spec v1.15.0 — Match");
+    writeMission(
+      "CURRENT_STATE.md",
+      [
+        "> Version: 1.15.0",
+        "- **Title:** Mission Spec v1.15.0 — Match",
+        "",
+      ].join("\n"),
+    );
+
+    const stdout = runScript(["--apply"]);
+    expect(stdout).toContain("No changes needed");
+  });
 });

@@ -4,15 +4,66 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.2 — Value-shape + CURRENT_STATE freshness (E-5, E-8)"
+  mission_title: "Mission Spec v1.16.3 — CURRENT_STATE Title auto-sync (E-6)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 22
-  latest_version: "1.16.2"
+  total_revisions: 23
+  latest_version: "1.16.3"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-015"
+    semantic_version: "1.16.3"
+    change_sequence: 27
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close E-6 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — auto-sync CURRENT_STATE.md's Title line from mission.yaml.title via bump-metadata.js, promoting the v1.16.2 registry:check drift detector into a fix."
+    decision: |
+      Extended scripts/bump-metadata.js to also rewrite the `- **Title:** <…>` line in .mission/CURRENT_STATE.md from mission.yaml.title, in the same pass as the D-3 Version-header sync. TITLE_RE is intentionally narrow (`^(\s*-\s*\*\*Title:\*\*\s+)(.+?)\s*$/m`) so only the Title line in the Current-State asset is rewritten; MDR bodies, templates, snapshots, and evals are still excluded by EXCLUDE_SUBDIRS. loadMissionTitle() returns null if mission.yaml is absent or malformed, so the Version sync path still works for hand-rolled or partial fixtures (test coverage confirms). A single file can now produce multiple entries in the updates list (Version + Title); the apply loop dedupes writes by last-`next`-wins per file while still printing every drift line. This also exercised the E-1 cold-build gate's spirit in practice: when the test suite grew from 231 to 237, registry:check (v1.16.2 E-8) immediately flagged the REBUILD_PLAYBOOK + TRACE_MATRIX drift on the next run, forcing a matching update in the same commit. E-6 is now fully closed — previously validated (v1.16.2) but manually fixed, now validated and auto-corrected.
+    triggered_by: "v1.16.2 entry MSC-2026-04-17-014 follow-up E-6 (listed in that entry's follow_up); SNAPSHOT §6 categorized E-6 as 'validated but not auto-synced'."
+    issue_or_context: "E-6 is the smallest open E-series item, but its closure completes a feedback loop — before v1.16.2 the Title drift was invisible (neither detector nor fixer existed). v1.16.2 added the detector (registry:check). v1.16.3 adds the fixer, so the drift class cannot recur silently. Simpler than authoring MDR-006 or MDR-007 first because it reuses the v1.15.0 bump-metadata.js script (no new script added — within MDR-005 category 2 'living-asset maintainers')."
+    changes:
+      added: []
+      modified:
+        - "scripts/bump-metadata.js: new loadMissionTitle() reads mission.yaml via yaml parser; computeUpdates(version, missionTitle) now produces per-field change entries; apply loop dedupes writes by file; TITLE_RE added alongside VERSION_RE"
+        - "tests/scripts/bump-metadata.test.ts: +6 E-6 tests (Title rewrite on apply, check exits 1 on Title drift, Version+Title single pass, graceful mission.yaml absent, graceful no Title line, no-op when Title already matches)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: bump-metadata.test cases 11 → 17; inline test count 231 → 237; header v1.16.2 → v1.16.3"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: test count 231 → 237"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.2 → 1.16.3; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/CURRENT_STATE.md: Title line AUTO-SYNCED to v1.16.3 via the new E-6 machinery itself (first dogfood — no manual edit this release)"
+        - ".mission/ Version headers auto-synced to 1.16.3 via metadata:sync (fourth real pre-commit invocation of D-3 machinery from v1.15.0)"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "metadata:sync now also keeps CURRENT_STATE.md Title in sync with mission.yaml.title — E-6 stays closed without maintainer intervention going forward"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — TITLE_RE is narrow and EXCLUDE_SUBDIRS still blocks MDR/snapshot/template bodies; 17/17 bump-metadata + 237/237 full suite green; all validators (arch:verify, plugin:verify, metadata:check, registry:check, validate:history-commits) green before and after; the dogfooding of this release proves E-6 closure mechanically (Title line updated by the new code path, not by hand). Semantic version: patch (scripts-only extension, no API surface change) — continues the v1.16.1 / v1.16.2 E-3 precedent."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.3_mission.yaml"
+    follow_up:
+      - "E-3 SemVer policy MDR-007 — three consecutive releases (v1.16.1, .2, .3) are now scripts-only patches; the precedent is solid, formalizing it is cheap"
+      - "E-2 playbook language policy MDR-006"
+      - "E-7 test time refactor — 237 tests / ~26s+, verify-registry still dominates"
+      - "E-4 external adopter 1+ — still the 3-vendor top risk, only non-code item"
+
   - change_id: "MSC-2026-04-17-014"
     semantic_version: "1.16.2"
     change_sequence: 26
