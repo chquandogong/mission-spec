@@ -4,15 +4,66 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.13 — registry:check --verify-live (C-2)"
+  mission_title: "Mission Spec v1.16.14 — VERIFICATION_LOG evidence close-out"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 33
-  latest_version: "1.16.13"
+  total_revisions: 34
+  latest_version: "1.16.14"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-007"
+    semantic_version: "1.16.14"
+    change_sequence: 38
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "documentation"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "오늘 사이클(2026-04-17 저녁 ~ 2026-04-18 새벽) 종결 시점의 전체 validator + test 성공 증거를 `.mission/evidence/VERIFICATION_LOG.yaml`에 기록. Codex Rev.2 §5와 Claude Rev.1 F-5가 지적한 'VERIFICATION_LOG trailing 12 releases' gap을 닫는 evidence-only 릴리스."
+    decision: |
+      VERIFICATION_LOG.yaml에 v1.16.14 entry 한 개 추가 — v1.14.1 Codex entry 이후 13 릴리스 만에 쌓인 evidence 공백 해소. Entry에는 npm build / lint / test (254/254) / arch:verify / plugin:verify / metadata:check / registry:check (기본 + --verify-live) / validate-history-commits / reconstruction:verify / convert-platforms --verify / evaluateMission 전체 green 기록, 그리고 오늘 사이클 전체 요약 note (v1.16.1 → v1.16.13 13-patch 사이클 + 5회 self-corrective loop + 남은 축 E-4/F-1/F-9) 포함. 본 릴리스 자체는 `.mission/evidence/`만 touch하는 evidence-only change로 MDR-006 §PATCH 7 (.mission/ descriptive asset 내용 갱신)에 정확히 해당.
+    triggered_by: "사용자의 '문서와 코드의 일관성 전반 확인' 요청 과정에서 VERIFICATION_LOG가 v1.14.1 이후 append 없었다는 점이 드러남. F-5 (Claude Rev.1) + Codex Rev.2 §5 지적의 사후 해소."
+    issue_or_context: "Mission Spec은 매 릴리스에 mission-history entry + snapshot + CHANGELOG만 자동 기록하고, VERIFICATION_LOG entry append는 수동. v1.14.1 이후 13 패치 릴리스 동안 validator 성공 기록이 누적되지 않았음 — Codex v1.16.0/v1.16.7 리뷰에서 이 공백을 명시 지적. 오늘 사이클 전수 closure 이후의 전체 verified state 기록이 특히 의미 있는 타이밍(Rev.4 §8 code-actionable closure baseline)이므로 본 릴리스로 append."
+    changes:
+      added: []
+      modified:
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.16.14 entry 추가 (npm_test 254 passed / arch+plugin+metadata+registry+history+reconstruction+platforms 전수 green + evaluateMission 9/9 + today cycle summary note)"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.13 → 1.16.14"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.14 via metadata:sync (15th D-3 invocation); CURRENT_STATE.md Title auto-sync via E-6 + 최근 구현 header via F-4 manual 1-line update"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "Evidence ledger trails no longer 13 releases behind — 오늘 사이클 전체 verified state가 audit-trail로 보존됨"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — evidence-only append, 기존 entry 수정 없음; 254/254 full suite green; 모든 validator green 상태의 스냅샷 기록. Semantic version: patch per MDR-006 §PATCH 7 (.mission/ descriptive asset 내용 갱신, no consumer surface change)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.14_mission.yaml"
+    follow_up:
+      - "E-4 외부 adopter 1+ — 여전히 3벤더 합의 최상위 잔여 (advocacy)"
+      - "F-1 cold-build gate CI 실전 호출 (tag push)"
+      - "F-9 Living Asset Registry 크기 원칙 MDR-008 후보"
+      - "Next 3-vendor review: Rev.5 (세션 분리 전제) — v1.16.14가 최종 baseline"
+      - "VERIFICATION_LOG append 주기를 MDR-008 또는 별도 운영 규칙으로 정기화 검토 (현재 수동)"
+
   - change_id: "MSC-2026-04-18-006"
     semantic_version: "1.16.13"
     change_sequence: 37

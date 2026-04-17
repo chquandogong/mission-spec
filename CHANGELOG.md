@@ -6,6 +6,16 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.14] - 2026-04-18
+_오늘 사이클(2026-04-17 저녁 ~ 2026-04-18 새벽) 종결 시점의 전체 validator + test 성공 증거를 `.mission/evidence/VERIFICATION_LOG.yaml`에 기록. Codex Rev.2 §5와 Claude Rev.1 F-5가 지적한 'VERIFICATION_LOG trailing 12 releases' gap을 닫는 evidence-only 릴리스._
+
+### Changed
+
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.16.14 entry 추가 (npm_test 254 passed / arch+plugin+metadata+registry+history+reconstruction+platforms 전수 green + evaluateMission 9/9 + today cycle summary note)
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.13 → 1.16.14
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.14 via metadata:sync (15th D-3 invocation); CURRENT_STATE.md Title auto-sync via E-6 + 최근 구현 header via F-4 manual 1-line update
+
 ## [1.16.13] - 2026-04-18
 _Close C-2 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §2, Medium) — mechanically tie CURRENT_STATE.md의 `완료 조건 (N/M PASS)` claim에 opt-in `--verify-live` 플래그로 `evaluateMission()` 실제 결과 비교. 기본은 fast mode 유지 (pre-commit 비용 보존); release gate는 opt-in 권고._
 
