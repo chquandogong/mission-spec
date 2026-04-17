@@ -322,6 +322,13 @@ npm run build
 - 提供中：Schema 迁移基础设施 — `detectSchemaVersion()`、`registerMigration()`、`migrateMission()` + CLI wrapper `npm run migrate:dry-run -- <toVersion>` / `npm run migrate:apply -- <toVersion>`（v1.14.0+，schema v2 之前 registry 为空）
 - 提供中：Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]`（v1.14.0+）
 - 提供中：Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml`（v1.9.0+、v1.13.0+）
+- 提供中：`.mission/` 元数据自动同步 — `scripts/bump-metadata.js` 将 Version 头部和 CURRENT_STATE Title 行从 `mission.yaml` 自动同步（`npm run metadata:sync` / `metadata:check`，v1.15.0+、v1.16.3+ Title、v1.16.10+ CURRENT_STATE 专属 filename guard）
+- 提供中：Registry 新鲜度验证器 — `scripts/verify-registry.js` 通过 TypeScript AST 核对 `REBUILD_PLAYBOOK.md`、`TRACE_MATRIX.yaml`、`CURRENT_STATE.md` 的 Title/完成条件/`최근 구현` version range 与 live source（`npm run registry:check`，v1.16.0+、v1.16.2+ CURRENT_STATE、v1.16.9+ locale-tolerant Title + 최근 구현 range）
+- 提供中：Cold-build release gate — `reconstruction:verify --cold-build` 作为 release workflow 步骤运行，证明 tagged commit 可仅依赖源码重建（v1.16.1+）
+- 提供中：`arch:verify` deep-compare — `package.json.exports` 的嵌套 conditional exports 结构递归比较（v1.14.3+ key-set、v1.16.2+ value shape、v1.16.11+ nested depth）
+- 提供中：`plugin-validator` `package-lock.json` drift 检测 — 捕获 lockfile 停留在过去 release 版本的情况（v1.16.7+）
+- 提供中：`vitest.config.ts` 确定性 test timeout — `testTimeout: 15000` 消除 `describe.concurrent` 的 order-dependent flakiness（v1.16.8+）
+- 提供中：Governance MDR 系列 — `MDR-005` meta-tooling 范围（v1.14.2+）、`MDR-006` SemVer 等级策略（v1.16.4+）、`MDR-007` playbook 语言 Hold+Trigger（v1.16.5+）
 - 不包含：GitHub/PR 集成运行时、独立编排框架、SaaS/UI
 
 ## 设计原则

@@ -6,6 +6,18 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.12] - 2026-04-18
+_Close F-10 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Gemini Rev.2 Bottom Line). Refresh README.md + README.ko.md + README.zh.md to reflect the 10-release closure cycle since v1.14.2 that Gemini Rev.2 Bottom Line pointed out as trailing._
+
+### Changed
+
+- README.md: 8 new Providing: bullets (metadata:sync/check, registry:check, cold-build gate, arch:verify deep-compare, package-lock drift, vitest determinism, MDR-005/006/007 series)
+- README.ko.md: 동일 8 bullets 한국어 번역 유지
+- README.zh.md: 동일 8 bullets 중문 번역 유지
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.11 → 1.16.12
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.12 via metadata:sync (13th D-3 invocation); CURRENT_STATE.md Title + 최근 구현 header 갱신 via E-6 + F-4 machinery
+
 ## [1.16.11] - 2026-04-18
 _Close F-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §3, Medium — Claude Rev.1 F-3와 교차 확증) — `arch:verify`의 package_exports subkey 비교를 shallow `!==`에서 재귀 deep-compare로 교체, Codex가 temp fixture로 재현한 `[object Object]` false-drift 제거._
 

@@ -4,15 +4,63 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.11 — package_exports deep-compare (F-3)"
+  mission_title: "Mission Spec v1.16.12 — README refresh ko/zh/en (F-10)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 31
-  latest_version: "1.16.11"
+  total_revisions: 32
+  latest_version: "1.16.12"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-005"
+    semantic_version: "1.16.12"
+    change_sequence: 36
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "documentation"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close F-10 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Gemini Rev.2 Bottom Line). Refresh README.md + README.ko.md + README.zh.md to reflect the 10-release closure cycle since v1.14.2 that Gemini Rev.2 Bottom Line pointed out as trailing."
+    decision: |
+      Added 8 new 'Providing:' bullets to each of the 3 READMEs (en/ko/zh) covering the v1.15.0 ~ v1.16.11 feature surface that was missing: metadata:sync/check (v1.15.0 + v1.16.3 Title + v1.16.10 guard), registry:check (v1.16.0 + v1.16.2 CURRENT_STATE + v1.16.9 locale tolerance + 최근 구현 range), cold-build release gate (v1.16.1), arch:verify deep compare (v1.14.3 → v1.16.2 → v1.16.11 progressive), package-lock drift detection (v1.16.7), vitest testTimeout (v1.16.8), governance MDR 3-axis (005/006/007). Each bullet is 1 line with version tags, preserving existing README structure. 3 translations kept in parallel (MDR-002 trilingual discipline). Scope intentionally tight: only "Providing:" list updated — not the Usage examples / Installation / What's New. Rationale: Gemini's complaint was 'README trails feature surface', not 'README needs restructuring'.
+    triggered_by: "v1.16.11 entry MSC-2026-04-18-004 follow_up 1번째 항목 (F-10) — Rev.4 §8 item 3."
+    issue_or_context: "Gemini Rev.2 Bottom Line이 v1.16.7 HEAD 시점에 'README.md와 CURRENT_STATE.md의 본문 내용을 최신화한 뒤, 반드시 외부 채택자(External Adopter) 1명 이상을 확보하여 실제 환경에서의 가치를 증명(E-4)해야 한다'고 명시. CURRENT_STATE는 v1.16.9 F-4에서 prose 갱신 + v1.16.11까지 header 갱신 완료. README는 v1.14.2 시점 이후 실질 갱신 없음 — 10개 릴리스(v1.14.3 ~ v1.16.11) 분량의 새 scripts / validators / gates / MDRs가 'Providing:' 섹션에 반영 안 됨. E-4 (외부 채택자) 유치 전 해결해야 할 publishing prerequisite."
+    changes:
+      added: []
+      modified:
+        - "README.md: 8 new Providing: bullets (metadata:sync/check, registry:check, cold-build gate, arch:verify deep-compare, package-lock drift, vitest determinism, MDR-005/006/007 series)"
+        - "README.ko.md: 동일 8 bullets 한국어 번역 유지"
+        - "README.zh.md: 동일 8 bullets 중문 번역 유지"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.11 → 1.16.12"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.12 via metadata:sync (13th D-3 invocation); CURRENT_STATE.md Title + 최근 구현 header 갱신 via E-6 + F-4 machinery"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "README.md (ko/zh/en) 3종이 v1.15.0 ~ v1.16.11 feature surface를 반영 — 외부 adopter가 README 만으로 v1.16.x 기능 축을 파악 가능"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — docs-only change, 3종 README 병렬 갱신 유지 (MDR-002 trilingual discipline); 251/251 full suite green; 모든 validator green. 새 bullet text에 오타 있다면 외부 adopter에게 혼란 — 자체 교정 루프(registry:check는 CURRENT_STATE + REBUILD_PLAYBOOK만 커버, README 미검증)의 잔여 사각지대. Semantic version: patch per MDR-006 §PATCH 6 (docs/README 업데이트, no consumer surface change)."
+    related_commits: []
+    related_decisions: ["MDR-002-ms-prefix-adoption"]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.12_mission.yaml"
+    follow_up:
+      - "C-2 (Rev.4 §8 item 2 deferred): live evaluateMission coupling via `--verify-live` mode"
+      - "F-1 cold-build CI 실전 호출 — C-1 determinism + F-10 README refresh 이후 tag push 실험 viable"
+      - "E-4 외부 adopter 확보 — 이제 README가 최신 상태이므로 advocacy 작업 prerequisite 충족"
+      - "Next 3-vendor review: v1.16.12 HEAD baseline — Rev.5"
+
   - change_id: "MSC-2026-04-18-004"
     semantic_version: "1.16.11"
     change_sequence: 35

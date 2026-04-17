@@ -322,6 +322,13 @@ npm run build
 - 제공 중: Schema migration 인프라 — `detectSchemaVersion()`, `registerMigration()`, `migrateMission()` + CLI wrapper `npm run migrate:dry-run -- <toVersion>` / `npm run migrate:apply -- <toVersion>` (v1.14.0+, schema v2까지 registry 비어있음)
 - 제공 중: Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]` (v1.14.0+)
 - 제공 중: Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml` (v1.9.0+, v1.13.0+)
+- 제공 중: `.mission/` 메타데이터 auto-sync — `scripts/bump-metadata.js`가 Version 헤더와 CURRENT_STATE Title 라인을 `mission.yaml`에서 자동 동기화 (`npm run metadata:sync` / `metadata:check`, v1.15.0+, v1.16.3+ Title, v1.16.10+ CURRENT_STATE 전용 filename guard)
+- 제공 중: Registry freshness verifier — `scripts/verify-registry.js`가 `REBUILD_PLAYBOOK.md`, `TRACE_MATRIX.yaml`, `CURRENT_STATE.md`의 Title/완료 조건/`최근 구현` version range를 TypeScript AST 기반으로 live source와 대조 (`npm run registry:check`, v1.16.0+, v1.16.2+ CURRENT_STATE, v1.16.9+ locale-tolerant Title + 최근 구현 range)
+- 제공 중: Cold-build release gate — `reconstruction:verify --cold-build`가 release workflow 단계로 실행되어 태그된 커밋이 소스만으로 재구성 가능한지 증명 (v1.16.1+)
+- 제공 중: `arch:verify` deep-compare — `package.json.exports`의 nested conditional exports 구조 재귀 비교 (v1.14.3+ key-set, v1.16.2+ value shape, v1.16.11+ nested depth)
+- 제공 중: `plugin-validator` `package-lock.json` drift 감지 — lockfile이 과거 릴리스 버전에 머물러 있는 경우 포착 (v1.16.7+)
+- 제공 중: `vitest.config.ts` deterministic test timeout — `testTimeout: 15000`이 `describe.concurrent`의 order-dependent flakiness 제거 (v1.16.8+)
+- 제공 중: Governance MDR series — `MDR-005` meta-tooling 범위 (v1.14.2+), `MDR-006` SemVer 등급 정책 (v1.16.4+), `MDR-007` playbook 언어 Hold+Trigger (v1.16.5+)
 - 미포함: GitHub/PR integration runtime, 별도 orchestration framework, SaaS/UI
 
 ## 설계 원칙

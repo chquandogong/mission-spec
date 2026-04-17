@@ -322,6 +322,13 @@ npm run build
 - Providing: Schema migration infrastructure — `detectSchemaVersion()`, `registerMigration()`, `migrateMission()` + CLI wrappers `npm run migrate:dry-run -- <toVersion>` / `npm run migrate:apply -- <toVersion>` (v1.14.0+, registry empty until schema v2)
 - Providing: Reconstruction verifier — `verifyReconstructionReferences()` + `reconstruction:verify [--cold-build]` (v1.14.0+)
 - Providing: Release pipeline — `.github/workflows/{test,pre-commit-parity,release}.yml` (v1.9.0+, v1.13.0+)
+- Providing: `.mission/` metadata auto-sync — `scripts/bump-metadata.js` syncs Version headers + CURRENT_STATE Title line from `mission.yaml` (`npm run metadata:sync` / `metadata:check`, v1.15.0+, v1.16.3+ Title, v1.16.10+ CURRENT_STATE-scoped filename guard)
+- Providing: Registry freshness verifier — `scripts/verify-registry.js` checks embedded numeric claims in `REBUILD_PLAYBOOK.md`, `TRACE_MATRIX.yaml`, `CURRENT_STATE.md` Title/완료 조건/`최근 구현` version range against live source via TypeScript AST (`npm run registry:check`, v1.16.0+, v1.16.2+ CURRENT_STATE, v1.16.9+ locale-tolerant Title + 최근 구현 range)
+- Providing: Cold-build release gate — `reconstruction:verify --cold-build` runs `npm ci + build + test` in a tmp dir as a release workflow step, proving the tagged commit rebuilds from source alone (v1.16.1+)
+- Providing: `arch:verify` deep-compare for nested conditional exports in `package.json.exports` (v1.14.3+ key-set, v1.16.2+ value shape, v1.16.11+ nested depth)
+- Providing: `plugin-validator` `package-lock.json` drift detection — catches lockfile version pinned to an older release (v1.16.7+)
+- Providing: `vitest.config.ts` deterministic test timeouts — `testTimeout: 15000` eliminates order-dependent concurrency flakiness under `describe.concurrent` (v1.16.8+)
+- Providing: Governance MDR series — `MDR-005` meta-tooling scope (v1.14.2+), `MDR-006` SemVer grade policy (v1.16.4+), `MDR-007` playbook language Hold+Trigger (v1.16.5+)
 - Not included: GitHub/PR integration runtime, separate orchestration framework, SaaS/UI
 
 ## Design Principles
