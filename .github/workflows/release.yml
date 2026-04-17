@@ -95,6 +95,13 @@ jobs:
       - name: Architecture registry verify
         run: npm run arch:verify
 
+      - name: Reconstruction cold-build gate
+        # E-1 (PROJECT_REVIEW_SNAPSHOT_V1.16.0 §7 priority 1, MDR-005 Consequences)
+        # Copies the tagged commit into a tmp dir and runs `npm ci && npm run build
+        # && npm test` there, proving the repo can reconstruct from source alone.
+        # The main defence for bus-factor=1: if this step fails the publish is aborted.
+        run: npm run reconstruction:cold-build
+
       - name: Publish to npm (dry run on manual trigger)
         if: github.event_name == 'workflow_dispatch' && inputs.dry_run == 'true'
         run: npm publish --dry-run --provenance --access public

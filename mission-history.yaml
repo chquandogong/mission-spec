@@ -4,15 +4,63 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.0 — Registry freshness verifier (D-1)"
+  mission_title: "Mission Spec v1.16.1 — Cold-build release gate (E-1)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 20
-  latest_version: "1.16.0"
+  total_revisions: 21
+  latest_version: "1.16.1"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-013"
+    semantic_version: "1.16.1"
+    change_sequence: 25
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close E-1 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — promote reconstruction:cold-build from an opt-in local script to a blocking step in the release workflow, so every npm publish must first prove the tagged commit can rebuild from source in a clean environment."
+    decision: |
+      Added a single step to .github/workflows/release.yml between 'Architecture registry verify' and 'Publish to npm', running `npm run reconstruction:cold-build`. The underlying scripts/verify-reconstruction.js (v1.14.0) was already complete — it copies the repo to a tmp dir, runs npm ci + npm run build + npm test there, and cleans up via a try/finally. The only gap was wiring: MDR-005 Consequences §5 explicitly reserved this integration as permitted future work, but none of the v1.14.0 ~ v1.16.0 releases had enacted it. Three independent v1.16.0 reviews (Codex §5, Claude SNAPSHOT §5.2/§7 priority 1, Gemini bus-factor framing) converged on the same diagnosis: the cold-build script existed but was a release-grade safety net that nobody pulled. The gate now runs for both tag-triggered releases and manual workflow_dispatch paths (including dry-run), adding ~60s to each release. Local verification against 4ceefb9 succeeded (223/223 tests after clean npm ci + build in tmp dir). First real CI invocation will occur when v1.16.1 is tagged; if the gate fails, the publish aborts before reaching npm. This closes the single E-series item that was itself a "Rev.2 가외 권고 미이행" item in the root tracker — the CI-side of bus-factor=1 defence is now automated, not documented-and-hoped-for.
+    triggered_by: "v1.16.0 entry MSC-2026-04-17-012 follow-up E-1 (reserved by MDR-005 Consequences §5); 3-vendor consensus via PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 §7 priority 1."
+    issue_or_context: "reconstruction-verifier has shipped since v1.14.0 with fast and --cold-build modes, but only the fast variant had any CI coupling (none — it was pre-commit-only in docs, not workflow). The cold-build mode, which is the only verification that simulates 'fresh clone → build → test', was opt-in from the maintainer's shell. For a bus-factor=1 project, that is precisely the kind of safety mechanism that decays into 'existed but was never run' — Codex v1.16.0 §5 phrased it as 'selection feature vs release-reliability component'. With the gate wired, the act of pushing a release tag now proves the repo is self-rebuildable; if the playbook drifts again (as it did between v1.7.0 and v1.14.2 unnoticed), the next release will fail loudly instead of shipping silently."
+    changes:
+      added: []
+      modified:
+        - ".github/workflows/release.yml: new step 'Reconstruction cold-build gate' between arch:verify and Publish; runs `npm run reconstruction:cold-build` on every release path (tag push + workflow_dispatch dry-run and real publish)"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.0 → 1.16.1; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/ Version headers auto-synced to 1.16.1 via metadata:sync (second real pre-commit invocation of D-3 machinery from v1.15.0)"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "Reconstruction verifier cold-build mode is now a blocking release gate — the playbook's claim 'repo can rebuild from source alone' is automatically re-proven on every publish, not assumed"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — CI-only change, no src/ or scripts/ edits; cold-build verified locally (223/223 tests, ~60s overhead); gate skipped only if reconstruction:cold-build script itself is absent (it is not); existing arch:verify / plugin:verify / metadata:check / registry:check pipeline remained green before and after. Semantic version judgment: patch (CI workflow surface only, no npm-published artifact behaviour change) — this release is itself the clearest test case for the still-open E-3 SemVer-policy MDR."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.1_mission.yaml"
+    follow_up:
+      - "E-3 SemVer policy MDR — this release's 'CI-only → patch' judgment is the first precedent; formalize as MDR-007"
+      - "E-5 arch:verify value-shape drift for package_exports (types/import paths, not just keys)"
+      - "E-8 registry:check file coverage extension (CURRENT_STATE.md, VERIFICATION_LOG.yaml)"
+      - "E-2 PLAYBOOK_PATTERNS locale-independence — MDR-006 candidate"
+      - "E-4 external adopter 1+ — still the 3-vendor top risk, not addressable by code"
+
   - change_id: "MSC-2026-04-17-012"
     semantic_version: "1.16.0"
     change_sequence: 24

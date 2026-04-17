@@ -1,7 +1,7 @@
 # Mission Spec — Module Dependency Graph
 # 모듈 간 import 의존 관계를 방향성 그래프로 표현합니다.
 # ARCHITECTURE_CURRENT.yaml의 depends_on 필드와 동기화됩니다.
-# Last updated: 2026-04-17 | Version: 1.16.0
+# Last updated: 2026-04-17 | Version: 1.16.1
 
 # 읽는 법: edges[].from 모듈이 edges[].to 모듈을 import한다.
 # 예: { from: report, to: parser } = report.ts imports parser.ts
