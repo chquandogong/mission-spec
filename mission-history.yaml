@@ -54,7 +54,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — TITLE_RE is narrow and EXCLUDE_SUBDIRS still blocks MDR/snapshot/template bodies; 17/17 bump-metadata + 237/237 full suite green; all validators (arch:verify, plugin:verify, metadata:check, registry:check, validate:history-commits) green before and after; the dogfooding of this release proves E-6 closure mechanically (Title line updated by the new code path, not by hand). Semantic version: patch (scripts-only extension, no API surface change) — continues the v1.16.1 / v1.16.2 E-3 precedent."
-    related_commits: []
+    related_commits: ["0001078"]
     related_decisions:
       ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.16.3_mission.yaml"
