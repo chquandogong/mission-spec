@@ -59,7 +59,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — script is opt-in (needs `npm run` entry or pre-commit hook); graceful skip when .mission/ missing or Version header absent; historical subdirs excluded by whitelist; 11/11 local tests + 214/214 full suite green; arch:verify, plugin:verify, metadata:check all green after the first apply."
-    related_commits: []
+    related_commits: ["f074a24"]
     related_decisions:
       ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.15.0_mission.yaml"
