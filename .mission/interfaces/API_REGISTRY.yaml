@@ -72,6 +72,9 @@ public_api:
     - name: "extractArchitecture"
       signature: "(projectDir: string) => ExtractedArchitecture"
       source: "src/core/architecture-extractor.ts"
+    - name: "validatePlugin"
+      signature: "(projectDir: string) => PluginValidationResult"
+      source: "src/core/plugin-validator.ts"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 

@@ -67,3 +67,6 @@ jobs:
 
       - name: Verify ARCHITECTURE_CURRENT.yaml is in sync with src/
         run: npm run arch:verify
+
+      - name: Verify plugin manifest and skills structure
+        run: npm run plugin:verify

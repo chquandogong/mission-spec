@@ -53,3 +53,6 @@ jobs:
 
       - name: Schema validation smoke test
         run: node scripts/validate-schema.js
+
+      - name: Plugin manifest verify
+        run: npm run plugin:verify

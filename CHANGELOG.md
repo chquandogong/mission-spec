@@ -6,6 +6,28 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.11.0] - 2026-04-17
+_Plugin manifest drift — close the last gap from Codex's v1.2 'documentation ahead of implementation' critique by mechanically verifying plugin.json, marketplace.json, and SKILL.md coherence._
+
+### Added
+
+- src/core/plugin-validator.ts
+- scripts/validate-plugin.js (CLI wrapper, exits 1 on any error)
+- tests/core/plugin-validator.test.ts (8 tests: happy path, each version drift type, SKILL frontmatter/name/description, trilingual missing, plugin.json missing fields, empty skill dir)
+
+### Changed
+
+- src/index.ts: export validatePlugin and PluginValidationResult type
+- package.json: plugin:verify script; version 1.10.0 → 1.11.0
+- .claude-plugin/plugin.json: version 1.8.0 → 1.11.0 (was pre-existing drift, caught by first run)
+- .claude-plugin/marketplace.json: plugins[0].version 1.8.0 → 1.11.0 (same drift)
+- .mission/architecture/ARCHITECTURE_CURRENT.yaml: added plugin-validator module (surfaced by arch:verify)
+- .mission/architecture/DEPENDENCY_GRAPH.yaml: added plugin-validator node
+- .mission/interfaces/API_REGISTRY.yaml: added validatePlugin public function
+- .github/workflows/pre-commit-parity.yml: added plugin:verify step
+- .github/workflows/test.yml: added plugin:verify step after platforms verify
+- mission.yaml: title and version bumped to v1.11.0
+
 ## [1.10.0] - 2026-04-17
 _Architecture drift — automate what was manual. Extract module list, dependency edges, and public API surface from src/ so ARCHITECTURE_CURRENT.yaml cannot silently fall out of sync with code._
 

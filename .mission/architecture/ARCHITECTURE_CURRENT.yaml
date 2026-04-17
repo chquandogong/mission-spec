@@ -160,6 +160,15 @@ modules:
       - "ExtractedModule"
       - "ExtractedEdge"
 
+  - id: plugin-validator
+    path: "src/core/plugin-validator.ts"
+    responsibility: "Claude Code plugin 매니페스트 + SKILL.md 구조/버전 일관성 검증"
+    depends_on: []
+    exports:
+      - "validatePlugin(projectDir): PluginValidationResult"
+    types:
+      - "PluginValidationResult"
+
   - id: index
     path: "src/index.ts"
     responsibility: "public API 재수출 허브 (barrel export) — package.json exports가 가리키는 진입점"
@@ -175,9 +184,10 @@ modules:
         arch-diff,
         history,
         architecture-extractor,
+        plugin-validator,
       ]
     exports:
-      - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor"
+      - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor, core/plugin-validator"
 
 data_flow:
   pipeline: "parse → validate → evaluate → render"

@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Mission Spec — task contract layer for AI agent workflows",
   "type": "module",
   "main": "dist/index.js",
@@ -38,6 +38,7 @@
     "arch:sync": "node scripts/generate-architecture.js",
     "arch:check": "node scripts/generate-architecture.js --check",
     "arch:verify": "node scripts/generate-architecture.js --verify-current",
+    "plugin:verify": "node scripts/validate-plugin.js",
     "changelog": "node scripts/generate-changelog.js",
     "build": "tsc && cp src/schema/*.schema.json dist/schema/",
     "test": "vitest run",

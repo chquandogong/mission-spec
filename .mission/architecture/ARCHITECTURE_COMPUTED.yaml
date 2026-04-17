@@ -78,6 +78,7 @@ modules:
       - history
       - init
       - parser
+      - plugin-validator
       - report
       - status
       - validator
@@ -85,6 +86,7 @@ modules:
       - ExtractedArchitecture
       - ExtractedEdge
       - ExtractedModule
+      - PluginValidationResult
       - ValidationResult
       - diffArchitectureFromGit
       - diffArchitectures
@@ -101,6 +103,7 @@ modules:
       - parseMissionFile
       - validateHistory
       - validateMission
+      - validatePlugin
   - id: init
     path: src/commands/init.ts
     layer: commands
@@ -129,6 +132,13 @@ modules:
       - convertToCodex
       - convertToCursor
       - convertToOpenCode
+  - id: plugin-validator
+    path: src/core/plugin-validator.ts
+    layer: core
+    depends_on: []
+    exports:
+      - PluginValidationResult
+      - validatePlugin
   - id: report
     path: src/commands/report.ts
     layer: commands
@@ -194,6 +204,8 @@ edges:
   - from: index
     to: parser
   - from: index
+    to: plugin-validator
+  - from: index
     to: report
   - from: index
     to: status
@@ -238,8 +250,10 @@ public_api:
     - parseMissionFile
     - validateHistory
     - validateMission
+    - validatePlugin
   types:
     - ExtractedArchitecture
     - ExtractedEdge
     - ExtractedModule
+    - PluginValidationResult
     - ValidationResult

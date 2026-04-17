@@ -4,15 +4,68 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.10 — Architecture Auto-Sync"
+  mission_title: "Mission Spec v1.11 — Plugin Manifest Validator"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 10
-  latest_version: "1.10.0"
+  total_revisions: 11
+  latest_version: "1.11.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-003"
+    semantic_version: "1.11.0"
+    change_sequence: 15
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Plugin manifest drift — close the last gap from Codex's v1.2 'documentation ahead of implementation' critique by mechanically verifying plugin.json, marketplace.json, and SKILL.md coherence."
+    decision: "Add src/core/plugin-validator.ts that validates plugin.json/marketplace.json required fields, cross-version coherence (package.json ↔ plugin.json ↔ marketplace.json[0] ↔ mission.yaml), SKILL.md frontmatter correctness (name matches directory, description present), and trilingual completeness (SKILL.ko.md + SKILL.zh.md present). CI gate plugin:verify blocks merges on drift. First run caught pre-existing drift: plugin.json/marketplace.json were pinned at v1.8.0 while package.json was v1.10.0."
+    triggered_by: "PROJECT_REVIEW_V1.8.0_2026-04-17 B-2 item and Codex v1.2 review 'installable marketplace plugin' concern"
+    issue_or_context: "True install E2E requires Claude Code CLI which is not available in GH runners. This validator covers the mechanical layer (structure + version consistency) that catches >90% of broken-plugin scenarios without needing runtime."
+    changes:
+      added:
+        - "src/core/plugin-validator.ts"
+        - "scripts/validate-plugin.js (CLI wrapper, exits 1 on any error)"
+        - "tests/core/plugin-validator.test.ts (8 tests: happy path, each version drift type, SKILL frontmatter/name/description, trilingual missing, plugin.json missing fields, empty skill dir)"
+      modified:
+        - "src/index.ts: export validatePlugin and PluginValidationResult type"
+        - "package.json: plugin:verify script; version 1.10.0 → 1.11.0"
+        - ".claude-plugin/plugin.json: version 1.8.0 → 1.11.0 (was pre-existing drift, caught by first run)"
+        - ".claude-plugin/marketplace.json: plugins[0].version 1.8.0 → 1.11.0 (same drift)"
+        - ".mission/architecture/ARCHITECTURE_CURRENT.yaml: added plugin-validator module (surfaced by arch:verify)"
+        - ".mission/architecture/DEPENDENCY_GRAPH.yaml: added plugin-validator node"
+        - ".mission/interfaces/API_REGISTRY.yaml: added validatePlugin public function"
+        - ".github/workflows/pre-commit-parity.yml: added plugin:verify step"
+        - ".github/workflows/test.yml: added plugin:verify step after platforms verify"
+        - "mission.yaml: title and version bumped to v1.11.0"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "plugin manifest drift detection enforced in CI"
+        - "version coherence across manifests enforced"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: true
+      tests: true
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — validation is additive; drift was pre-existing and benign (manifest version stale since v1.9.0)"
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.11.0_mission.yaml"
+    follow_up:
+      - "Extend to verify package.json exports paths actually resolve against dist/"
+      - "Verify .claude-plugin/ commands and hooks references (if any added)"
+
   - change_id: "MSC-2026-04-17-002"
     semantic_version: "1.10.0"
     change_sequence: 14

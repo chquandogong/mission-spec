@@ -17,6 +17,8 @@ export type {
   ExtractedModule,
   ExtractedEdge,
 } from "./core/architecture-extractor.js";
+export { validatePlugin } from "./core/plugin-validator.js";
+export type { PluginValidationResult } from "./core/plugin-validator.js";
 export {
   loadHistory,
   getLatestEntry,

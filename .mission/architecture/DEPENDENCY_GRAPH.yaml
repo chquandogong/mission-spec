@@ -46,6 +46,9 @@ nodes:
   - id: architecture-extractor
     path: "src/core/architecture-extractor.ts"
     layer: core
+  - id: plugin-validator
+    path: "src/core/plugin-validator.ts"
+    layer: core
   - id: index
     path: "src/index.ts"
     layer: root
