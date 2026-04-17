@@ -505,4 +505,77 @@ describe.concurrent("verify-registry script", () => {
     const stdout = await fx.runScript();
     expect(stdout).toContain("Registry freshness check passed");
   });
+
+  // C-2 (PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4, Codex §2) — CURRENT_STATE.md's
+  // N/M PASS claim is not mechanically tied to evaluateMission() by default.
+  // v1.16.13 adds `--verify-live` opt-in that imports evaluateMission and
+  // compares claimPass === actualPassed. Default remains fast (no live run)
+  // so pre-commit stays cheap; release gate can opt in.
+
+  it("skips live evaluator by default (C-2, default fast mode)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("X", ["a"]);
+    fx.writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 완료 조건 (0/1 PASS)", // claims 0 of 1 passed
+        "",
+      ].join("\n"),
+    );
+
+    // Without --verify-live this should pass — only TOTAL is checked, not PASS
+    const stdout = await fx.runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  it("--verify-live reports drift when claimed PASS differs from evaluateMission (C-2)", async ({
+    fx,
+  }) => {
+    // Standard fixture has 0 skills at fixture path, so done_when `.claude-plugin/plugin.json 존재`
+    // would fail. We set done_when to one criterion that the standard fixture
+    // satisfies via file-existence, then claim 0/1 — live eval says 1/1.
+    fx.writeStandardFixture();
+    fx.writeMission("X", ["package.json 존재"]);
+    // Our fixture has package.json written, so file-existence check passes (1/1)
+    fx.writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 완료 조건 (0/1 PASS)", // claims 0 but evaluator says 1
+        "",
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript(["--verify-live"])).rejects.toThrow(
+      /CURRENT_STATE\.md completion-condition PASS.*claims 0.*actual 1/s,
+    );
+  });
+
+  it("--verify-live passes when claimed PASS matches evaluateMission (C-2)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("X", ["package.json 존재"]);
+    fx.writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 완료 조건 (1/1 PASS)", // matches the live 1/1
+        "",
+      ].join("\n"),
+    );
+
+    const stdout = await fx.runScript(["--verify-live"]);
+    expect(stdout).toContain("Registry freshness check passed");
+    expect(stdout).toContain("live evaluator: 1/1");
+  });
 });

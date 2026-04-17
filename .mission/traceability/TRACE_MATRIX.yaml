@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.16.12
+# Last updated: 2026-04-17 | Version: 1.16.13
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 251 tests across 21 files)"
+      - "tests/ (총 254 tests across 21 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.16.11 기준, 21 files / 251 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.16.13 기준, 21 files / 254 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -395,7 +395,7 @@ test_coverage:
       ]
 
   - test_file: "tests/scripts/verify-registry.test.ts"
-    cases: 21
+    cases: 24
     covers: []
     categories:
       [
@@ -417,6 +417,9 @@ test_coverage:
         "CURRENT_STATE.md Chinese 标题 label match (v1.16.9 C-4)",
         "CURRENT_STATE.md 제목 stale drift (v1.16.9 C-4)",
         "CURRENT_STATE.md no Title label fails loud (v1.16.9 C-4)",
+        "--verify-live skipped by default (v1.16.13 C-2)",
+        "--verify-live detects PASS vs live mismatch (v1.16.13 C-2)",
+        "--verify-live reports live evaluator line (v1.16.13 C-2)",
         "CURRENT_STATE.md 최근 구현 range includes current (v1.16.9 F-4)",
         "CURRENT_STATE.md 최근 구현 upper bound stale drift (v1.16.9 F-4)",
         "CURRENT_STATE.md 최근 구현 section absent graceful (v1.16.9 F-4)",

@@ -6,6 +6,20 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.13] - 2026-04-18
+_Close C-2 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §2, Medium) — mechanically tie CURRENT_STATE.md의 `완료 조건 (N/M PASS)` claim에 opt-in `--verify-live` 플래그로 `evaluateMission()` 실제 결과 비교. 기본은 fast mode 유지 (pre-commit 비용 보존); release gate는 opt-in 권고._
+
+### Changed
+
+- scripts/verify-registry.js: --verify-live 플래그, groundTruth() + check() async 승격, main() async wrapper, livePassed 필드 + CURRENT_STATE PASS 비교, 'live evaluator: N/M' 출력 라인
+- tests/scripts/verify-registry.test.ts: +3 C-2 tests (default fast, --verify-live drift, --verify-live pass output); 21 → 24 tests
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: test count 251 → 254
+- .mission/traceability/TRACE_MATRIX.yaml: inline 251 → 254; verify-registry.test cases 21 → 24 with 3 C-2 categories; 헤더 v1.16.11 → v1.16.13
+- .mission/CURRENT_STATE.md: 최근 구현 list C-2 항목 추가 + header v1.16.12 → v1.16.13
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.12 → 1.16.13
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.13 via metadata:sync (14th D-3 invocation); CURRENT_STATE.md Title auto-synced via E-6 + 최근 구현 header via F-4 manual edit
+
 ## [1.16.12] - 2026-04-18
 _Close F-10 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Gemini Rev.2 Bottom Line). Refresh README.md + README.ko.md + README.zh.md to reflect the 10-release closure cycle since v1.14.2 that Gemini Rev.2 Bottom Line pointed out as trailing._
 

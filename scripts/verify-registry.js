@@ -9,8 +9,11 @@
 //                        "214 tests across 20 files", test_coverage.cases)
 //
 // Usage:
-//   node scripts/verify-registry.js          # exit 1 on drift
-//   node scripts/verify-registry.js --list   # print ground truth as JSON
+//   node scripts/verify-registry.js               # exit 1 on drift (fast)
+//   node scripts/verify-registry.js --list        # print ground truth as JSON
+//   node scripts/verify-registry.js --verify-live # also run evaluateMission()
+//                                                   and compare claimed PASS
+//                                                   against live result (C-2)
 //
 // Ground truth sources:
 //   moduleCount     extractArchitecture(projectDir).modules.length
@@ -28,6 +31,7 @@ import { extractArchitecture } from "../dist/core/architecture-extractor.js";
 
 const projectDir = process.cwd();
 const args = process.argv.slice(2);
+const verifyLive = args.includes("--verify-live");
 
 function walkFiles(dir, filter) {
   const out = [];
@@ -121,7 +125,7 @@ function compareSemver(a, b) {
   return aC - bC;
 }
 
-function groundTruth() {
+async function groundTruth() {
   let arch = { modules: [], public_api: { functions: [] } };
   try {
     arch = extractArchitecture(projectDir);
@@ -147,6 +151,26 @@ function groundTruth() {
     }
   }
 
+  // C-2 (v1.16.13): --verify-live opt-in imports evaluateMission from dist
+  // and records the live PASS count so check() can compare against claimed
+  // CURRENT_STATE.md value. Default (verifyLive=false) returns null, which
+  // makes the live check skip — keeping the fast path for pre-commit.
+  let livePassed = null;
+  if (verifyLive && existsSync(missionPath)) {
+    try {
+      const mod = await import("../dist/index.js");
+      if (typeof mod.evaluateMission === "function") {
+        const result = mod.evaluateMission(projectDir);
+        if (result && typeof result.passed === "number") {
+          livePassed = result.passed;
+        }
+      }
+    } catch {
+      // dist/ missing or evaluateMission throws — leave null, treat as
+      // "live check unavailable"; existing mismatches still emit normally.
+    }
+  }
+
   return {
     moduleCount: arch.modules.length,
     apiCount: arch.public_api.functions.length,
@@ -156,6 +180,7 @@ function groundTruth() {
     testCount: countItCalls(join(projectDir, "tests")),
     missionTitle,
     doneWhenCount,
+    livePassed,
   };
 }
 
@@ -194,7 +219,7 @@ const PLAYBOOK_PATTERNS = [
   },
 ];
 
-function check() {
+async function check() {
   const playbookPath = join(
     projectDir,
     ".mission",
@@ -207,7 +232,7 @@ function check() {
     "traceability",
     "TRACE_MATRIX.yaml",
   );
-  const truth = groundTruth();
+  const truth = await groundTruth();
   const mismatches = [];
 
   if (existsSync(playbookPath)) {
@@ -311,6 +336,17 @@ function check() {
             `CURRENT_STATE.md completion-condition count: PASS (${claimPass}) exceeds TOTAL (${claimTotal})`,
           );
         }
+        // C-2 (v1.16.13): when --verify-live is passed, mechanically tie
+        // claimPass to evaluateMission()'s actual result. Default keeps
+        // registry:check fast (pre-commit runs without this flag); the
+        // release gate can opt in.
+        if (truth.livePassed != null) {
+          if (claimPass !== truth.livePassed) {
+            mismatches.push(
+              `CURRENT_STATE.md completion-condition PASS: claims ${claimPass}, actual ${truth.livePassed} (live evaluateMission)`,
+            );
+          }
+        }
       }
     }
 
@@ -336,32 +372,40 @@ function check() {
   return { mismatches, truth };
 }
 
-if (args.includes("--list")) {
-  process.stdout.write(JSON.stringify(groundTruth(), null, 2) + "\n");
-  process.exit(0);
-}
+async function main() {
+  if (args.includes("--list")) {
+    const gt = await groundTruth();
+    process.stdout.write(JSON.stringify(gt, null, 2) + "\n");
+    process.exit(0);
+  }
 
-const { mismatches, truth } = check();
+  const { mismatches, truth } = await check();
 
-if (mismatches.length === 0) {
-  process.stdout.write(
-    `Registry freshness check passed. Ground truth:\n` +
+  if (mismatches.length === 0) {
+    let line =
+      `Registry freshness check passed. Ground truth:\n` +
       `  modules: ${truth.moduleCount}\n` +
       `  public API: ${truth.apiCount}\n` +
       `  skills: ${truth.skillCount}\n` +
       `  platforms: ${truth.platformCount}\n` +
       `  test files: ${truth.testFileCount}\n` +
-      `  tests: ${truth.testCount}\n`,
+      `  tests: ${truth.testCount}\n`;
+    if (truth.livePassed != null && truth.doneWhenCount != null) {
+      line += `  live evaluator: ${truth.livePassed}/${truth.doneWhenCount}\n`;
+    }
+    process.stdout.write(line);
+    process.exit(0);
+  }
+
+  process.stderr.write(`Registry freshness drift detected:\n`);
+  for (const m of mismatches) {
+    process.stderr.write(`  - ${m}\n`);
+  }
+  process.stderr.write(
+    `\nGround truth: ${JSON.stringify(truth)}\n` +
+      `\nUpdate REBUILD_PLAYBOOK.md / TRACE_MATRIX.yaml to match.\n`,
   );
-  process.exit(0);
+  process.exit(1);
 }
 
-process.stderr.write(`Registry freshness drift detected:\n`);
-for (const m of mismatches) {
-  process.stderr.write(`  - ${m}\n`);
-}
-process.stderr.write(
-  `\nGround truth: ${JSON.stringify(truth)}\n` +
-    `\nUpdate REBUILD_PLAYBOOK.md / TRACE_MATRIX.yaml to match.\n`,
-);
-process.exit(1);
+main();

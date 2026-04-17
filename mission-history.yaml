@@ -4,15 +4,69 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.12 — README refresh ko/zh/en (F-10)"
+  mission_title: "Mission Spec v1.16.13 — registry:check --verify-live (C-2)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 32
-  latest_version: "1.16.12"
+  total_revisions: 33
+  latest_version: "1.16.13"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-006"
+    semantic_version: "1.16.13"
+    change_sequence: 37
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close C-2 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §2, Medium) — mechanically tie CURRENT_STATE.md의 `완료 조건 (N/M PASS)` claim에 opt-in `--verify-live` 플래그로 `evaluateMission()` 실제 결과 비교. 기본은 fast mode 유지 (pre-commit 비용 보존); release gate는 opt-in 권고."
+    decision: |
+      verify-registry.js에 `--verify-live` 플래그 추가. 플래그 활성 시 `dist/index.js`에서 `evaluateMission`을 동적 import하여 현 프로젝트의 실제 passed count를 얻고, CURRENT_STATE.md의 claimPass와 비교. 불일치 시 "CURRENT_STATE.md completion-condition PASS: claims X, actual Y (live evaluateMission)" mismatch. 기본 (no flag): livePassed=null, 비교 skip — pre-commit 속도 영향 0. groundTruth()와 check()를 async로 승격 (동적 import 때문), main() wrapper로 감싸 exit 처리. pre-commit parity 유지 — pre-commit-parity.yml은 여전히 `npm run registry:check` 기본 호출. release.yml은 cold-build gate에서 직접 `npm test`를 돌리므로 별도 opt-in 불필요 (동일한 의미를 두 번 실행하는 비효율 방지). 3 new tests: (a) default 모드 skip, (b) --verify-live drift 감지, (c) --verify-live pass + "live evaluator: N/M" 출력 검증. 21 → 24 verify-registry tests, 251 → 254 full suite.
+    triggered_by: "v1.16.12 entry MSC-2026-04-18-005 follow_up 1번째 항목 (C-2) — Rev.4 §8 item 2 deferred. v1.16.9 F-4 + C-4 merge에서 의도적으로 연기된 heavyweight 구현이 이번에 해소."
+    issue_or_context: "Codex Rev.2 §2가 같은 세션에서 `evaluateMission('.')`이 한 번은 8/9, 다음은 9/9를 반환하는 order-dependent 결과를 관찰 (v1.16.7 HEAD). 이것은 C-1이 이후 해결했지만, CURRENT_STATE.md의 claimPass는 여전히 정적 수치. v1.16.13은 claimPass가 live 결과와 mechanically tied되도록 opt-in 경로를 추가 — 기본 pre-commit은 비용 부담 없이 fast mode 유지, release/CI는 mode에 opt-in 가능."
+    changes:
+      added: []
+      modified:
+        - "scripts/verify-registry.js: --verify-live 플래그, groundTruth() + check() async 승격, main() async wrapper, livePassed 필드 + CURRENT_STATE PASS 비교, 'live evaluator: N/M' 출력 라인"
+        - "tests/scripts/verify-registry.test.ts: +3 C-2 tests (default fast, --verify-live drift, --verify-live pass output); 21 → 24 tests"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: test count 251 → 254"
+        - ".mission/traceability/TRACE_MATRIX.yaml: inline 251 → 254; verify-registry.test cases 21 → 24 with 3 C-2 categories; 헤더 v1.16.11 → v1.16.13"
+        - ".mission/CURRENT_STATE.md: 최근 구현 list C-2 항목 추가 + header v1.16.12 → v1.16.13"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.12 → 1.16.13"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.13 via metadata:sync (14th D-3 invocation); CURRENT_STATE.md Title auto-synced via E-6 + 최근 구현 header via F-4 manual edit"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "registry:check의 CURRENT_STATE 검증이 (기본) fast mode + (opt-in --verify-live) live evaluator 검증 두 모드 운용 — claimPass가 정적이던 문제가 해소"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — 기본 registry:check 동작은 unchanged (--verify-live는 opt-in); 기존 pre-commit/CI는 fast 경로 유지, 비용 증가 없음; 24/24 verify-registry + 254/254 full suite green; real-project dry-run on v1.16.12 HEAD에서 --verify-live가 `livePassed: 9`를 정확히 리포트. Edge case: dist/ 없거나 evaluateMission 실패 시 silent skip (livePassed=null) — 의도적 graceful (fixture-only test 상황). Semantic version: patch per MDR-006 §PATCH 1 (existing validator drift-range 확장, no consumer surface change — --verify-live는 script CLI flag 추가이므로 §MINOR 후보로 논란 가능; 선택: new public API는 아니고 기존 script의 optional 동작이라 §PATCH 1로 분류)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-004-done-when-eval-linking",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.13_mission.yaml"
+    follow_up:
+      - "F-1 cold-build CI 실전 호출 — C-1/C-2/F-3/F-4/F-10 모두 closure된 이후 의미있는 태그 푸시 실험. Rev.4 §8 item 1"
+      - "E-4 외부 adopter 확보 — advocacy 영역, 주 단위 작업"
+      - "Next 3-vendor review: v1.16.13 HEAD = Rev.4 §8 code-actionable 전수 closure. Rev.5 baseline 후보"
+      - "F-9 Living Asset Registry 누적 크기 원칙 (MDR-008 후보)"
+
   - change_id: "MSC-2026-04-18-005"
     semantic_version: "1.16.12"
     change_sequence: 36
