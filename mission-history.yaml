@@ -54,7 +54,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — 기존 shallow compare를 deep으로 교체 (functionality 확장, 기존 동작 unchanged for flat case); 17/17 generate-architecture + 251/251 full suite green; C-1 determinism 유지 확인. 에러 메시지 형식이 바뀜 (e.g. `package_exports['.'].types` → `package_exports['.'].types.deep`) — 기존 에러 패턴에 의존하는 외부 도구 없음(확인). Semantic version: patch per MDR-006 §PATCH 1 (existing validator drift-range 확장 + bugfix: false drift 제거, no consumer surface change — validator output format은 CLI 표면이 아님)."
-    related_commits: []
+    related_commits: ["737b33f"]
     related_decisions:
       [
         "MDR-003-minimal-dependencies",
