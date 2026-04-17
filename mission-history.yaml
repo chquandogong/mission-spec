@@ -57,7 +57,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — plugin-validator extension is additive (no existing check modified); 239/239 tests green pre/post; arch:verify / plugin:verify (itself! with the new logic) / metadata:check / registry:check / validate:history-commits all green. package-lock.json bump is mechanical metadata sync — no dependency graph changes. Semantic version: patch per MDR-006 §PATCH 1 (existing validator function extension) + §PATCH 6 (test-only refactor for the E-7 spread) + §PATCH 7 (metadata sync for package-lock — analogous to .mission/ Version headers, no consumer surface change)."
-    related_commits: []
+    related_commits: ["dcd7898"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
