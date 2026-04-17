@@ -53,7 +53,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — 기존 functionality에 제약 추가만, 확장 없음; 19/19 bump-metadata + 248/248 full suite green; C-1 closure 이후 5/5 consecutive runs determinism 유지 확인. 의도적 제약: 미래 maintainer가 다른 .mission/ 파일에 Title sync를 원하면 TITLE_SYNC_FILENAMES Set에 explicit 추가 필요 — discoverable via fail-loud pattern이 아님(silent no-op). Trade-off 허용 (over-inclusive scope leak이 더 위험). Semantic version: patch per MDR-006 §PATCH 4 (bugfix: existing script scope leak 수정, no consumer surface change)."
-    related_commits: []
+    related_commits: ["9d1adb3"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-18_v1.16.10_mission.yaml"
