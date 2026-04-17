@@ -50,7 +50,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — test-only refactor, no production code or validator logic touched; all 237 tests pass (same count pre/post); concurrent execution exposed and fixed the shared-state race cleanly via test.extend (not papered over). Potential flakiness watch: if a future test relies on execFileSync-style synchronous stderr capture, it will need to use execFile's callback-style error object — current tests all use .rejects.toThrow which works. Semantic version: patch per MDR-006 §PATCH 6 (test-only refactor — no consumer surface change)."
-    related_commits: []
+    related_commits: ["ef8dde3"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.16.6_mission.yaml"
