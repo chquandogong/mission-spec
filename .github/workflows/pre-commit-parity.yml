@@ -1,0 +1,43 @@
+name: pre-commit-parity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: pre-commit-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-history-commits:
+    name: Living Asset Registry validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate mission-history.yaml commit references
+        run: npm run validate:history-commits
+
+      - name: Verify snapshot dedup is deterministic (no spurious additions)
+        run: |
+          npm run snapshot --silent
+          git diff --exit-code .mission/snapshots/ || {
+            echo "::error::Running snapshot produced unstaged changes. \
+            A new mission.yaml version may be missing its snapshot commit, \
+            or the dedup logic regressed."
+            exit 1
+          }
