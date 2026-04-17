@@ -50,7 +50,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — single config file edit, no source or test body change, no behaviour change for consumers; 239/239 tests green across 5 consecutive `npm test` runs + 1 `npm run test:coverage` run post-fix; all validators (arch:verify, plugin:verify, metadata:check, registry:check, validate:history-commits) green. The only consequence: individual test timeout budget widened from 5s to 15s — a single degenerate subprocess hang would now block longer. Rev.4 §Codex framing calls this an acceptable trade until concurrency is explicitly tuned. Semantic version: patch per MDR-006 §PATCH 4 (bugfix, no consumer surface change) — the test suite is not exported; vitest.config.ts is dev-only."
-    related_commits: []
+    related_commits: ["d3a56fe"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-18_v1.16.8_mission.yaml"
