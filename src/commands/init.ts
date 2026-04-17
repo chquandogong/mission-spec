@@ -73,6 +73,73 @@ function deriveTitleFromGoal(goal: string): string {
   return firstLine.slice(0, 47) + "...";
 }
 
+// Heuristic vocabulary — Korean + English. Patterns are word-boundaried for
+// English to avoid false matches inside longer identifiers (e.g. `fix` inside
+// `prefix`). Korean is CJK so word boundaries are not enforced there.
+const IMPLEMENTATION_VERBS_EN = [
+  "implement",
+  "add",
+  "create",
+  "write",
+  "build",
+  "develop",
+  "make",
+  "design",
+  "refactor",
+  "update",
+  "fix",
+  "improve",
+  "enhance",
+  "deploy",
+  "migrate",
+  "integrate",
+  "ship",
+  "release",
+  "port",
+  "rewrite",
+  "introduce",
+  "expose",
+  "wire",
+  "scaffold",
+  "extract",
+  "implement",
+];
+
+const TEST_VERBS_EN = [
+  "test",
+  "verify",
+  "validate",
+  "assert",
+  "check",
+  "ensure",
+  "cover",
+];
+
+const DOCS_VERBS_EN = [
+  "doc",
+  "docs",
+  "readme",
+  "guide",
+  "tutorial",
+  "manual",
+  "explain",
+  "describe",
+  "document",
+];
+
+function matchesAny(text: string, kWords: string[], eWords: string[]): boolean {
+  // Korean: plain substring match (CJK has no word boundaries).
+  for (const k of kWords) {
+    if (text.includes(k)) return true;
+  }
+  // English: word-boundary match, case-insensitive.
+  const pattern = new RegExp(
+    `\\b(?:${[...new Set(eWords)].join("|")})\\b`,
+    "i",
+  );
+  return pattern.test(text);
+}
+
 function deriveDoneWhenFromGoal(goal: string): string[] {
   const criteria: string[] = [];
   const goalText = goal.trim();
@@ -81,20 +148,26 @@ function deriveDoneWhenFromGoal(goal: string): string[] {
   // 1. Core objective
   criteria.push(firstLine);
 
-  // 2. Verb-based inference (implement, add, create, etc.)
-  if (/구현|개발|작성|추가|생성|implement|add|create|write/i.test(goalText)) {
+  // 2. Verb-based inference (implementation intent)
+  if (
+    matchesAny(
+      goalText,
+      ["구현", "개발", "작성", "추가", "생성"],
+      IMPLEMENTATION_VERBS_EN,
+    )
+  ) {
     criteria.push("Code implementation complete and verified");
   }
 
   // 3. Test/verification
-  if (/테스트|검증|verify|test/i.test(goalText)) {
+  if (matchesAny(goalText, ["테스트", "검증"], TEST_VERBS_EN)) {
     criteria.push("All unit tests passing");
   } else {
     criteria.push("npm test or core logic verification complete");
   }
 
   // 4. Documentation
-  if (/문서|가이드|README|doc/i.test(goalText)) {
+  if (matchesAny(goalText, ["문서", "가이드"], DOCS_VERBS_EN)) {
     criteria.push("README.md or related documentation updated");
   }
 

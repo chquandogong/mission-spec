@@ -6,6 +6,21 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.12.0] - 2026-04-17
+_Ship a proper CLI (npx mission-spec <cmd>) and broaden ms-init heuristics to cover English-only inputs. Combined addresses B-4 and B-7 from the v1.8 review._
+
+### Added
+
+- bin/mission-spec.js (CLI dispatcher, Node shebang, executable)
+- tests/bin/cli.test.ts (8 tests: help, --version, each subcommand, unknown command, cwd default)
+
+### Changed
+
+- package.json: bin field for mission-spec entry; version 1.11.0 → 1.12.0
+- src/commands/init.ts: verb lists refactored to arrays; word-boundary regex for English; expanded from 4 to 25 English implementation verbs, 4 to 7 test verbs, 4 to 9 docs verbs
+- tests/commands/init.test.ts: added English-only inputs describe block (6 tests)
+- mission.yaml: title and version bumped to v1.12.0
+
 ## [1.11.0] - 2026-04-17
 _Plugin manifest drift — close the last gap from Codex's v1.2 'documentation ahead of implementation' critique by mechanically verifying plugin.json, marketplace.json, and SKILL.md coherence._
 

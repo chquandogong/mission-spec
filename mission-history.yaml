@@ -4,15 +4,61 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.11 — Plugin Manifest Validator"
+  mission_title: "Mission Spec v1.12 — CLI & English Heuristics"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 11
-  latest_version: "1.11.0"
+  total_revisions: 12
+  latest_version: "1.12.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-004"
+    semantic_version: "1.12.0"
+    change_sequence: 16
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "delivery"
+    persistence: "permanent"
+    intent: "Ship a proper CLI (npx mission-spec <cmd>) and broaden ms-init heuristics to cover English-only inputs. Combined addresses B-4 and B-7 from the v1.8 review."
+    decision: "Add bin/mission-spec.js dispatching to library functions (context/status/eval/report) with --help/--version. Expand init.ts verb lists from 5 Korean + 4 English to 5 Korean + 25 English verbs, using word-boundary regex to prevent false matches (e.g. 'fix' in 'prefix'). Added test covering case-insensitivity, Korean preservation, and the prefix false-match prevention."
+    triggered_by: "PROJECT_REVIEW_V1.8.0_2026-04-17 items B-4 (CLI) and B-7 (init English heuristics)"
+    changes:
+      added:
+        - "bin/mission-spec.js (CLI dispatcher, Node shebang, executable)"
+        - "tests/bin/cli.test.ts (8 tests: help, --version, each subcommand, unknown command, cwd default)"
+      modified:
+        - "package.json: bin field for mission-spec entry; version 1.11.0 → 1.12.0"
+        - "src/commands/init.ts: verb lists refactored to arrays; word-boundary regex for English; expanded from 4 to 25 English implementation verbs, 4 to 7 test verbs, 4 to 9 docs verbs"
+        - "tests/commands/init.test.ts: added English-only inputs describe block (6 tests)"
+        - "mission.yaml: title and version bumped to v1.12.0"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "npx mission-spec context . works"
+        - "English-only ms-init input handled with same heuristic depth as Korean"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: true
+      tests: true
+      docs: false
+      runtime: true
+    breaking: false
+    risk: "low — CLI is additive; init heuristic expansion preserves Korean and uses word boundaries to avoid false matches"
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.12.0_mission.yaml"
+    follow_up:
+      - "B-3 mission-history i18n normalization"
+      - "B-5 docs/internal audit"
+      - "B-6 npm publish release workflow"
+
   - change_id: "MSC-2026-04-17-003"
     semantic_version: "1.11.0"
     change_sequence: 15
