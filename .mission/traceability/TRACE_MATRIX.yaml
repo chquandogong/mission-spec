@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.16.10
+# Last updated: 2026-04-17 | Version: 1.16.11
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 248 tests across 21 files)"
+      - "tests/ (총 251 tests across 21 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.16.10 기준, 21 files / 248 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.16.11 기준, 21 files / 251 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -315,7 +315,7 @@ test_coverage:
       ]
 
   - test_file: "tests/scripts/generate-architecture.test.ts"
-    cases: 14
+    cases: 17
     covers: []
     categories:
       [
@@ -326,6 +326,7 @@ test_coverage:
         "API_REGISTRY ghost function detection (v1.13.1)",
         "package_exports missing/extra keys (v1.14.3 D-2)",
         "package_exports value-shape drift (v1.16.2 E-5)",
+        "package_exports nested conditional exports deep-compare (v1.16.11 F-3)",
       ]
 
   - test_file: "tests/scripts/generate-changelog.test.ts"

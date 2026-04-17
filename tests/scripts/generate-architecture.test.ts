@@ -94,7 +94,9 @@ const it = base.extend<{ fx: Fixture }>({
 });
 
 describe.concurrent("generate-architecture script", () => {
-  it("default mode writes ARCHITECTURE_COMPUTED.yaml with sorted module list", async ({ fx }) => {
+  it("default mode writes ARCHITECTURE_COMPUTED.yaml with sorted module list", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     mkdirSync(join(fx.tempDir, "src/commands"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
@@ -139,12 +141,16 @@ describe.concurrent("generate-architecture script", () => {
     await expect(fx.runScript(["--check"])).rejects.toThrow();
   });
 
-  it("--verify-current fails when ARCHITECTURE_CURRENT.yaml is missing a module", async ({ fx }) => {
+  it("--verify-current fails when ARCHITECTURE_CURRENT.yaml is missing a module", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/core/evaluator.ts", "export function evaluate() {}\n");
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       "modules:\n  - id: parser\n    path: src/core/parser.ts\n    depends_on: []\n",
@@ -153,7 +159,9 @@ describe.concurrent("generate-architecture script", () => {
     await expect(fx.runScript(["--verify-current"])).rejects.toThrow();
   });
 
-  it("--verify-current passes when module list + depends_on match", async ({ fx }) => {
+  it("--verify-current passes when module list + depends_on match", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs(
@@ -161,7 +169,9 @@ describe.concurrent("generate-architecture script", () => {
       `import { parse } from "./parser.js";\nexport function read() { return parse(); }\n`,
     );
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -183,7 +193,9 @@ describe.concurrent("generate-architecture script", () => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       "modules:\n  - id: parser\n    path: src/schema/parser.ts\n    depends_on: []\n",
@@ -192,7 +204,9 @@ describe.concurrent("generate-architecture script", () => {
     await expect(fx.runScript(["--verify-current"])).rejects.toThrow();
   });
 
-  it("--verify-current fails when ARCHITECTURE_CURRENT.yaml has extra depends_on entries", async ({ fx }) => {
+  it("--verify-current fails when ARCHITECTURE_CURRENT.yaml has extra depends_on entries", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs(
@@ -200,7 +214,9 @@ describe.concurrent("generate-architecture script", () => {
       `import { parse } from "./parser.js";\nexport function read() { return parse(); }\n`,
     );
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -217,12 +233,16 @@ describe.concurrent("generate-architecture script", () => {
     await expect(fx.runScript(["--verify-current"])).rejects.toThrow();
   });
 
-  it("--verify-current fails when API_REGISTRY.yaml public_api drifts from src/index.ts", async ({ fx }) => {
+  it("--verify-current fails when API_REGISTRY.yaml public_api drifts from src/index.ts", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -241,7 +261,9 @@ describe.concurrent("generate-architecture script", () => {
     await expect(fx.runScript(["--verify-current"])).rejects.toThrow();
   });
 
-  it("--verify-current fails when API_REGISTRY.yaml package_exports is missing a subpath present in package.json", async ({ fx }) => {
+  it("--verify-current fails when API_REGISTRY.yaml package_exports is missing a subpath present in package.json", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
@@ -251,7 +273,9 @@ describe.concurrent("generate-architecture script", () => {
       "./commands/decide": { import: "./dist/commands/decide.js" },
     });
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -273,14 +297,18 @@ describe.concurrent("generate-architecture script", () => {
     );
   });
 
-  it("--verify-current fails when API_REGISTRY.yaml package_exports has a subpath not in package.json", async ({ fx }) => {
+  it("--verify-current fails when API_REGISTRY.yaml package_exports has a subpath not in package.json", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
 
     fx.writePackageJson({ ".": { import: "./dist/index.js" } });
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -305,7 +333,9 @@ describe.concurrent("generate-architecture script", () => {
     );
   });
 
-  it("--verify-current passes when package_exports match package.json exports map", async ({ fx }) => {
+  it("--verify-current passes when package_exports match package.json exports map", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
@@ -315,7 +345,9 @@ describe.concurrent("generate-architecture script", () => {
       "./commands/decide": { import: "./dist/commands/decide.js" },
     });
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -338,7 +370,9 @@ describe.concurrent("generate-architecture script", () => {
     expect(stdout).toContain("in sync");
   });
 
-  it("--verify-current fails when package_exports types path diverges (E-5)", async ({ fx }) => {
+  it("--verify-current fails when package_exports types path diverges (E-5)", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
@@ -350,7 +384,9 @@ describe.concurrent("generate-architecture script", () => {
       },
     });
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -376,7 +412,9 @@ describe.concurrent("generate-architecture script", () => {
     );
   });
 
-  it("--verify-current fails when package_exports import path diverges (E-5)", async ({ fx }) => {
+  it("--verify-current fails when package_exports import path diverges (E-5)", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
@@ -388,7 +426,9 @@ describe.concurrent("generate-architecture script", () => {
       },
     });
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -414,14 +454,18 @@ describe.concurrent("generate-architecture script", () => {
     );
   });
 
-  it("--verify-current fails when package_exports registry has extra subkey (E-5)", async ({ fx }) => {
+  it("--verify-current fails when package_exports registry has extra subkey (E-5)", async ({
+    fx,
+  }) => {
     mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
     fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
     fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
 
     fx.writePackageJson({ ".": { import: "./dist/index.js" } });
 
-    mkdirSync(join(fx.tempDir, ".mission", "architecture"), { recursive: true });
+    mkdirSync(join(fx.tempDir, ".mission", "architecture"), {
+      recursive: true,
+    });
     writeFileSync(
       join(fx.tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       [
@@ -446,5 +490,172 @@ describe.concurrent("generate-architecture script", () => {
     await expect(fx.runScript(["--verify-current"])).rejects.toThrow(
       /package_exports\['\.'\].*extra subkeys.*types/,
     );
+  });
+
+  // F-3 (PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4, Codex §3) — package_exports
+  // subkey comparison must handle nested conditional exports. Before v1.16.11
+  // the comparison used `pkgEntry[sk] !== regEntry[sk]` which fails
+  // reference-equality for every object (Node conditional exports like
+  // `{"node": {types, import}, "default": {...}}`), producing a false drift
+  // with '[object Object]' stringification that Codex reproduced.
+
+  function writeRawRegistry(
+    tempDir: string,
+    functionNames: string[],
+    packageExportsYaml: string,
+  ) {
+    mkdirSync(join(tempDir, ".mission", "interfaces"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "interfaces", "API_REGISTRY.yaml"),
+      [
+        "public_api:",
+        "  package_exports:",
+        packageExportsYaml,
+        "  functions:",
+        ...functionNames.map((name) => `    - name: ${name}`),
+        "",
+      ].join("\n"),
+    );
+  }
+
+  function writeBasicArchCurrent(tempDir: string) {
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+  }
+
+  it("--verify-current passes when nested conditional exports match deep (F-3)", async ({
+    fx,
+  }) => {
+    mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
+    fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
+    fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writeFileSync(
+      join(fx.tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "fixture",
+          version: "0.0.0",
+          exports: {
+            ".": {
+              node: { types: "./dist/index.d.ts", import: "./dist/index.js" },
+              default: {
+                types: "./dist/index.d.ts",
+                import: "./dist/index.js",
+              },
+            },
+          },
+        },
+        null,
+        2,
+      ),
+    );
+    writeBasicArchCurrent(fx.tempDir);
+    writeRawRegistry(
+      fx.tempDir,
+      ["parse"],
+      [
+        '    ".":',
+        "      node:",
+        '        types: "./dist/index.d.ts"',
+        '        import: "./dist/index.js"',
+        "      default:",
+        '        types: "./dist/index.d.ts"',
+        '        import: "./dist/index.js"',
+      ].join("\n"),
+    );
+
+    const stdout = await fx.runScript(["--verify-current"]);
+    expect(stdout).toContain("in sync");
+  });
+
+  it("--verify-current fails when nested conditional exports diverge at depth 2 (F-3)", async ({
+    fx,
+  }) => {
+    mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
+    fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
+    fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writeFileSync(
+      join(fx.tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "fixture",
+          version: "0.0.0",
+          exports: {
+            ".": {
+              node: { types: "./dist/index.d.ts", import: "./dist/index.js" },
+            },
+          },
+        },
+        null,
+        2,
+      ),
+    );
+    writeBasicArchCurrent(fx.tempDir);
+    writeRawRegistry(
+      fx.tempDir,
+      ["parse"],
+      [
+        '    ".":',
+        "      node:",
+        '        types: "./dist/index.d.ts"',
+        '        import: "./dist/WRONG.js"', // path drift buried at depth 2
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript(["--verify-current"])).rejects.toThrow(
+      /package_exports\['\.'\]\.node\.import.*WRONG/,
+    );
+  });
+
+  it("--verify-current does NOT report false drift on structurally equal nested objects (F-3 regression test)", async ({
+    fx,
+  }) => {
+    mkdirSync(join(fx.tempDir, "src/core"), { recursive: true });
+    fx.writeTs("src/core/parser.ts", "export function parse() {}\n");
+    fx.writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writeFileSync(
+      join(fx.tempDir, "package.json"),
+      JSON.stringify(
+        {
+          name: "fixture",
+          version: "0.0.0",
+          exports: {
+            ".": {
+              types: { deep: "./dist/index.d.ts" },
+            },
+          },
+        },
+        null,
+        2,
+      ),
+    );
+    writeBasicArchCurrent(fx.tempDir);
+    writeRawRegistry(
+      fx.tempDir,
+      ["parse"],
+      ['    ".":', "      types:", '        deep: "./dist/index.d.ts"'].join(
+        "\n",
+      ),
+    );
+
+    // Pre-F-3 behaviour was the literal `[object Object]` false drift.
+    const stdout = await fx.runScript(["--verify-current"]);
+    expect(stdout).toContain("in sync");
+    expect(stdout).not.toContain("[object Object]");
   });
 });

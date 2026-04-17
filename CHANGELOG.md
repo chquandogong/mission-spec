@@ -6,6 +6,20 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.11] - 2026-04-18
+_Close F-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §3, Medium — Claude Rev.1 F-3와 교차 확증) — `arch:verify`의 package_exports subkey 비교를 shallow `!==`에서 재귀 deep-compare로 교체, Codex가 temp fixture로 재현한 `[object Object]` false-drift 제거._
+
+### Changed
+
+- scripts/generate-architecture.js: diffExportsLeaf 재귀 함수 추가; verifyCurrentMode의 subkey 비교가 deep-compare로 교체
+- tests/scripts/generate-architecture.test.ts: +3 F-3 tests (nested pass, depth-2 drift, [object Object] regression); 14 → 17 tests
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: test count 248 → 251
+- .mission/traceability/TRACE_MATRIX.yaml: inline 248 → 251; generate-architecture.test cases 14 → 17 with F-3 category; 헤더 v1.16.10 → v1.16.11
+- .mission/CURRENT_STATE.md: 최근 구현 header v1.16.10 → v1.16.11 + deep-compare 항목 추가
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.10 → 1.16.11
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.11 via metadata:sync (12th D-3 invocation); CURRENT_STATE.md Title 라인 auto-synced via v1.16.3 E-6 (v1.16.10 C-3 guard도 유효 — 다른 .mission 파일 untouched)
+
 ## [1.16.10] - 2026-04-18
 _Close C-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §4, Medium) — restrict bump-metadata.js Title auto-sync to CURRENT_STATE.md only, eliminating the silent rewrite of any `- **Title:** X` line across .mission/ that Codex reproduced with NOTES.md._
 

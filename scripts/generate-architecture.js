@@ -18,6 +18,57 @@ import { dirname, join } from "node:path";
 import { parse, stringify } from "yaml";
 import { extractArchitecture } from "../dist/core/architecture-extractor.js";
 
+// F-3 (v1.16.11 / PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 Codex §3): recursive
+// leaf-path comparison for nested conditional exports. Returns a list of
+// mismatch strings rooted at the given path. Empty list means equal.
+// Primitive inequality produces one entry with the full path; object type
+// vs primitive mismatch is reported as a shape mismatch at that path;
+// missing/extra subkeys are reported per subkey.
+function diffExportsLeaf(pkgValue, regValue, path) {
+  const mismatches = [];
+  const pkgIsObj =
+    pkgValue && typeof pkgValue === "object" && !Array.isArray(pkgValue);
+  const regIsObj =
+    regValue && typeof regValue === "object" && !Array.isArray(regValue);
+
+  if (!pkgIsObj && !regIsObj) {
+    if (pkgValue !== regValue) {
+      mismatches.push(
+        `API_REGISTRY.yaml public_api.package_exports${path} mismatch: registry '${regValue}', package.json '${pkgValue}'`,
+      );
+    }
+    return mismatches;
+  }
+
+  if (pkgIsObj !== regIsObj) {
+    mismatches.push(
+      `API_REGISTRY.yaml public_api.package_exports${path} shape mismatch: registry ${regIsObj ? "object" : typeof regValue}, package.json ${pkgIsObj ? "object" : typeof pkgValue}`,
+    );
+    return mismatches;
+  }
+
+  // Both are objects — compare subkeys recursively
+  const pkgKeys = Object.keys(pkgValue).sort();
+  const regKeys = Object.keys(regValue).sort();
+  const missing = pkgKeys.filter((k) => !regKeys.includes(k));
+  const extra = regKeys.filter((k) => !pkgKeys.includes(k));
+  if (missing.length > 0) {
+    mismatches.push(
+      `API_REGISTRY.yaml public_api.package_exports${path} missing subkeys from package.json: ${missing.join(", ")}`,
+    );
+  }
+  if (extra.length > 0) {
+    mismatches.push(
+      `API_REGISTRY.yaml public_api.package_exports${path} has extra subkeys not in package.json: ${extra.join(", ")}`,
+    );
+  }
+  for (const k of pkgKeys.filter((x) => regKeys.includes(x))) {
+    const sub = diffExportsLeaf(pkgValue[k], regValue[k], `${path}.${k}`);
+    for (const m of sub) mismatches.push(m);
+  }
+  return mismatches;
+}
+
 const projectDir = process.cwd();
 const args = process.argv.slice(2);
 const outputPath = join(
@@ -274,12 +325,18 @@ function verifyCurrentMode() {
                 `API_REGISTRY.yaml public_api.package_exports['${key}'] has extra subkeys not in package.json: ${extraSubKeys.join(", ")}`,
               );
             }
+            // F-3 (v1.16.11 / Rev.4 Codex §3): descend into nested conditional
+            // exports. Before v1.16.11 this used `pkgEntry[sk] !== regEntry[sk]`
+            // which failed reference-equality for every object, producing the
+            // `[object Object]` false-drift Codex reproduced. Now report
+            // leaf-path mismatches like `['.'].node.import`.
             for (const sk of pkgSubKeys.filter((k) => regSubKeys.includes(k))) {
-              if (pkgEntry[sk] !== regEntry[sk]) {
-                mismatches.push(
-                  `API_REGISTRY.yaml public_api.package_exports['${key}'].${sk} mismatch: registry '${regEntry[sk]}', package.json '${pkgEntry[sk]}'`,
-                );
-              }
+              const leafMismatches = diffExportsLeaf(
+                pkgEntry[sk],
+                regEntry[sk],
+                `['${key}'].${sk}`,
+              );
+              for (const m of leafMismatches) mismatches.push(m);
             }
             continue;
           }
