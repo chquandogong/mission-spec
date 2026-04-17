@@ -52,7 +52,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — release workflow is dormant until NPM_TOKEN is configured and a tag is pushed. i18n is additive (original Korean preserved)."
-    related_commits: []
+    related_commits: ["be15ab5"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.13.0_mission.yaml"
     follow_up:
