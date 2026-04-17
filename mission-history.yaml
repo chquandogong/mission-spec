@@ -53,7 +53,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — docs-only change across 3 README files (MDR-002 trilingual discipline 유지); 254/254 full suite green; 모든 validator green. 사용자가 외부 adopter 관점에서 지적한 2 issue 모두 해소. Semantic version: patch per MDR-006 §PATCH 6 (docs/README 업데이트, no consumer surface change)."
-    related_commits: []
+    related_commits: ["9f263c4"]
     related_decisions:
       [
         "MDR-002-ms-prefix-adoption",
