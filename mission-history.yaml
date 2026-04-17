@@ -4,15 +4,64 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.7 — package-lock drift + E-7 pattern spread"
+  mission_title: "Mission Spec v1.16.8 — Test timeout determinism (C-1)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 27
-  latest_version: "1.16.7"
+  total_revisions: 28
+  latest_version: "1.16.8"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-001"
+    semantic_version: "1.16.8"
+    change_sequence: 32
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "bugfix"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close C-1 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §1, High) — eliminate the order-dependent test flakiness introduced by the v1.16.6 E-7 concurrency refactor, so that `npm test` / `npm run test:coverage` return the same green signal across consecutive runs regardless of CPU warmth."
+    decision: |
+      Single-line-equivalent fix: added `testTimeout: 15000` and `hookTimeout: 15000` to vitest.config.ts, with a block comment pointing at the Rev.4 Codex finding so the next person reading the config understands why the defaults are overridden. 15000ms is the empirically verified threshold Codex used to get 239/239 consistent in its Rev.2 session. The root cause is not logic: it is that v1.16.6's `describe.concurrent` pattern spawns 14 Node subprocesses per test file, each paying a TypeScript compiler cold-start cost, and under CPU contention some individual tests exceed the vitest 5000ms default — producing order-dependent 7/1/5 failures observed in 3 consecutive pre-fix `npm test` runs on this HEAD (v1.16.7 / 058553f). Post-fix: 5 consecutive runs all green at 239/239, with individual file wall times 8.1~12.2s (comfortably under the new 15s test-level budget because the test-level timer is per-test, not per-file). `npm run test:coverage` also recovered — Codex reported this command as 14/14 timeout failure at v1.16.7; at v1.16.8 it returns 239/239 pass + full coverage report (94 stmts / 83.69 branches / 95.58 functions / 94 lines, near-identical to v1.14.1 Codex reading). This release intentionally does NOT reduce describe.concurrent parallelism — the observed behaviour is "slow under contention" not "too-parallel", and the config override is the smallest correct fix. If release-grade determinism needs tighter bounds later (e.g. CI runners with fewer cores), the comment in vitest.config.ts instructs future maintainers to prefer cutting concurrency over lowering these timeouts.
+    triggered_by: "Codex Rev.2 v1.16.7 review §1 (High severity): reproducible `npm test` / `npm run test:coverage` flakiness with 7 / 1 / 5 timeout failures across 3 runs on identical HEAD. Claude Rev.1 F-series had NOT flagged this — Codex independent execution pass surfaced it. 3벤더 full loop의 첫 High-severity 발견."
+    issue_or_context: "v1.16.6 E-7 refactor celebrated a 26s → 10.66s wall-time reduction but did not verify cross-run determinism. Codex Rev.2 ran `npm test` twice in the same session and saw 7/232 vs 1/238 pass ratios, then confirmed that `npx vitest run --testTimeout=15000` returned 239/239 consistently. test.yml + release.yml both run the default-timeout code path, so a tag push (deliberately deferred in Rev.3 / Rev.4) would have hit flaky failures in CI — this fix is a hard prerequisite for F-1 closure (cold-build gate실전 호출). First real example of 3-vendor adversarial review catching a High-severity issue that single-vendor self-review missed."
+    changes:
+      added: []
+      modified:
+        - "vitest.config.ts: added testTimeout: 15000 + hookTimeout: 15000 with explanatory comment pointing to Rev.4 Codex §1"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.7 → 1.16.8; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/ Version headers auto-synced to 1.16.8 via metadata:sync (ninth real invocation of D-3 machinery); Title line auto-synced via v1.16.3 E-6 machinery"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "`command_test` is now deterministic across consecutive runs — the green signal means what it says again. 5/5 post-fix runs all 239/239, whereas v1.16.7 HEAD showed 7/1/5 timeout failures over 3 runs"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — single config file edit, no source or test body change, no behaviour change for consumers; 239/239 tests green across 5 consecutive `npm test` runs + 1 `npm run test:coverage` run post-fix; all validators (arch:verify, plugin:verify, metadata:check, registry:check, validate:history-commits) green. The only consequence: individual test timeout budget widened from 5s to 15s — a single degenerate subprocess hang would now block longer. Rev.4 §Codex framing calls this an acceptable trade until concurrency is explicitly tuned. Semantic version: patch per MDR-006 §PATCH 4 (bugfix, no consumer surface change) — the test suite is not exported; vitest.config.ts is dev-only."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.8_mission.yaml"
+    follow_up:
+      - "F-4 + C-4 + C-2 merge (Rev.4 §8 item 2): registry:check CURRENT_STATE format tolerance + live evaluateMission PASS coupling + prose 2-section extension"
+      - "F-10 README refresh (Rev.4 §8 item 3): ko/zh/en v1.14.3 ~ v1.16.8 changes reflected"
+      - "C-3 bump-metadata filename guard (Rev.4 §8 item 4): scope leak closure"
+      - "F-3 generate-architecture deep-compare (Rev.4 §8 item 5): nested conditional exports"
+      - "F-1 cold-build release gate CI실전 호출 — now viable after C-1 closure (test determinism prerequisite met)"
+      - "E-4 외부 adopter 1+ — remaining non-code item"
+
   - change_id: "MSC-2026-04-17-019"
     semantic_version: "1.16.7"
     change_sequence: 31

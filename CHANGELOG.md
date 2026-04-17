@@ -6,6 +6,16 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.8] - 2026-04-18
+_Close C-1 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §1, High) — eliminate the order-dependent test flakiness introduced by the v1.16.6 E-7 concurrency refactor, so that `npm test` / `npm run test:coverage` return the same green signal across consecutive runs regardless of CPU warmth._
+
+### Changed
+
+- vitest.config.ts: added testTimeout: 15000 + hookTimeout: 15000 with explanatory comment pointing to Rev.4 Codex §1
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.7 → 1.16.8; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped
+- .mission/ Version headers auto-synced to 1.16.8 via metadata:sync (ninth real invocation of D-3 machinery); Title line auto-synced via v1.16.3 E-6 machinery
+
 ## [1.16.7] - 2026-04-17
 _Close a post-v1.16.6 drift that the existing validator chain missed — package-lock.json was still pinned at 1.8.0 despite mission.yaml / package.json / plugin.json / marketplace.json all tracking 1.9.0 → 1.16.6 through the day. Also spread the v1.16.6 E-7 test.extend + describe.concurrent pattern to the remaining two subprocess-heavy test files._
 
