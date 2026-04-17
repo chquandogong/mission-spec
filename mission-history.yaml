@@ -50,7 +50,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — evidence-only append, 기존 entry 수정 없음; 254/254 full suite green; 모든 validator green 상태의 스냅샷 기록. Semantic version: patch per MDR-006 §PATCH 7 (.mission/ descriptive asset 내용 갱신, no consumer surface change)."
-    related_commits: []
+    related_commits: ["f40efb7"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
