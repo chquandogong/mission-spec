@@ -44,16 +44,44 @@ function runScript(args: string[] = []) {
 }
 
 describe("generate-architecture script", () => {
-  function writeApiRegistry(functionNames: string[]) {
+  function writeApiRegistry(
+    functionNames: string[],
+    packageExports: Record<string, Record<string, string>> = {},
+  ) {
     mkdirSync(join(tempDir, ".mission", "interfaces"), { recursive: true });
+    const exportLines: string[] = [];
+    const exportKeys = Object.keys(packageExports);
+    if (exportKeys.length > 0) {
+      exportLines.push("  package_exports:");
+      for (const key of exportKeys) {
+        exportLines.push(`    "${key}":`);
+        for (const [k, v] of Object.entries(packageExports[key])) {
+          exportLines.push(`      ${k}: "${v}"`);
+        }
+      }
+    }
     writeFileSync(
       join(tempDir, ".mission", "interfaces", "API_REGISTRY.yaml"),
       [
         "public_api:",
+        ...exportLines,
         "  functions:",
         ...functionNames.map((name) => `    - name: ${name}`),
         "",
       ].join("\n"),
+    );
+  }
+
+  function writePackageJson(
+    exportsMap: Record<string, Record<string, string>>,
+  ) {
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify(
+        { name: "fixture", version: "0.0.0", exports: exportsMap },
+        null,
+        2,
+      ),
     );
   }
 
@@ -202,5 +230,102 @@ describe("generate-architecture script", () => {
     writeApiRegistry(["ghost"]);
 
     expect(() => runScript(["--verify-current"])).toThrow();
+  });
+
+  it("--verify-current fails when API_REGISTRY.yaml package_exports is missing a subpath present in package.json", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writePackageJson({
+      ".": { import: "./dist/index.js" },
+      "./commands/decide": { import: "./dist/commands/decide.js" },
+    });
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    // API_REGISTRY only lists "." — missing ./commands/decide
+    writeApiRegistry(["parse"], { ".": { import: "./dist/index.js" } });
+
+    expect(() => runScript(["--verify-current"])).toThrow(
+      /package_exports missing keys.*\.\/commands\/decide/,
+    );
+  });
+
+  it("--verify-current fails when API_REGISTRY.yaml package_exports has a subpath not in package.json", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writePackageJson({ ".": { import: "./dist/index.js" } });
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    // API_REGISTRY lists an extra ./commands/ghost not in package.json
+    writeApiRegistry(["parse"], {
+      ".": { import: "./dist/index.js" },
+      "./commands/ghost": { import: "./dist/commands/ghost.js" },
+    });
+
+    expect(() => runScript(["--verify-current"])).toThrow(
+      /package_exports has extra keys.*\.\/commands\/ghost/,
+    );
+  });
+
+  it("--verify-current passes when package_exports match package.json exports map", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writePackageJson({
+      ".": { import: "./dist/index.js" },
+      "./commands/decide": { import: "./dist/commands/decide.js" },
+    });
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    writeApiRegistry(["parse"], {
+      ".": { import: "./dist/index.js" },
+      "./commands/decide": { import: "./dist/commands/decide.js" },
+    });
+
+    const stdout = runScript(["--verify-current"]);
+    expect(stdout).toContain("in sync");
   });
 });

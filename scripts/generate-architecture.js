@@ -157,9 +157,7 @@ function verifyCurrentMode() {
     const apiRegistry = loadYaml(apiRegistryPath);
     const registryFunctions = Array.isArray(apiRegistry?.public_api?.functions)
       ? apiRegistry.public_api.functions
-          .map((entry) =>
-            typeof entry?.name === "string" ? entry.name : null,
-          )
+          .map((entry) => (typeof entry?.name === "string" ? entry.name : null))
           .filter(Boolean)
           .sort()
       : [];
@@ -180,6 +178,55 @@ function verifyCurrentMode() {
       mismatches.push(
         `API_REGISTRY.yaml public_api.functions has extra entries not exported by src/index.ts: ${extraFunctions.join(", ")}`,
       );
+    }
+
+    // package_exports drift (D-2): compare API_REGISTRY.public_api.package_exports
+    // against package.json's exports map. Keys only — value shape is left to
+    // package.json as the source of truth.
+    const packageJsonPath = join(projectDir, "package.json");
+    if (existsSync(packageJsonPath)) {
+      let pkg;
+      try {
+        pkg = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+      } catch (err) {
+        mismatches.push(
+          `package.json parse error (${err instanceof Error ? err.message : String(err)})`,
+        );
+        pkg = null;
+      }
+      if (pkg) {
+        const pkgExportsObj =
+          pkg.exports &&
+          typeof pkg.exports === "object" &&
+          !Array.isArray(pkg.exports)
+            ? pkg.exports
+            : {};
+        const registryExportsObj =
+          apiRegistry?.public_api?.package_exports &&
+          typeof apiRegistry.public_api.package_exports === "object" &&
+          !Array.isArray(apiRegistry.public_api.package_exports)
+            ? apiRegistry.public_api.package_exports
+            : {};
+        const pkgExportKeys = Object.keys(pkgExportsObj).sort();
+        const registryExportKeys = Object.keys(registryExportsObj).sort();
+        const missingInRegistry = pkgExportKeys.filter(
+          (k) => !registryExportKeys.includes(k),
+        );
+        const extraInRegistry = registryExportKeys.filter(
+          (k) => !pkgExportKeys.includes(k),
+        );
+
+        if (missingInRegistry.length > 0) {
+          mismatches.push(
+            `API_REGISTRY.yaml public_api.package_exports missing keys from package.json: ${missingInRegistry.join(", ")}`,
+          );
+        }
+        if (extraInRegistry.length > 0) {
+          mismatches.push(
+            `API_REGISTRY.yaml public_api.package_exports has extra keys not in package.json: ${extraInRegistry.join(", ")}`,
+          );
+        }
+      }
     }
   }
 

@@ -1,10 +1,10 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-17 | Version: 1.14.2
+> Last updated: 2026-04-17 | Version: 1.14.3
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.14.2 — Registry Freshness Sync & MDR-005
+- **Title:** Mission Spec v1.14.3 — package_exports drift detection (D-2)
 - **Phase:** governed portability
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01

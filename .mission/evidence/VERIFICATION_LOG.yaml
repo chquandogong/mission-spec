@@ -1,7 +1,7 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-17 | Version: 1.14.2
+# Last updated: 2026-04-17 | Version: 1.14.3
 
 entries:
   - version: "1.14.1"

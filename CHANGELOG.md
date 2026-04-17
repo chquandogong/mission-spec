@@ -6,6 +6,21 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.14.3] - 2026-04-17
+_Close D-2 from PROJECT_REVIEW_V1.14.1_2026-04-17 — extend arch:verify to detect drift between package.json.exports and API_REGISTRY.yaml.public_api.package_exports._
+
+### Added
+
+- tests/scripts/generate-architecture.test.ts: 3 new tests (missing key, extra key, matching case) + writePackageJson helper + writeApiRegistry second parameter for packageExports
+
+### Changed
+
+- scripts/generate-architecture.js: verifyCurrentMode now loads package.json and compares Object.keys(pkg.exports) with Object.keys(apiRegistry.public_api.package_exports); graceful skip when either is missing or not an object
+- .mission/traceability/TRACE_MATRIX.yaml: command_test aggregate 200 → 203; generate-architecture.test.ts cases 8 → 11; new category 'package_exports missing/extra keys (v1.14.3 D-2)'; Version header 1.14.2 → 1.14.3
+- .mission/{CURRENT_STATE.md, evidence/VERIFICATION_LOG.yaml, interfaces/API_REGISTRY.yaml, reconstruction/REBUILD_PLAYBOOK.md}: Version headers 1.14.2 → 1.14.3
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.2 → 1.14.3; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped
+
 ## [1.14.2] - 2026-04-17
 _Close D-1 through D-5 from PROJECT_REVIEW_V1.14.1_2026-04-17 — Living Asset Registry descriptive-layer freshness, discovery-surface accuracy, and MDR-005 formalization of the meta-tooling boundary._
 

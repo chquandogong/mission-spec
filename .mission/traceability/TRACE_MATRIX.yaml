@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.14.2
+# Last updated: 2026-04-17 | Version: 1.14.3
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 200 tests across 19 files)"
+      - "tests/ (총 203 tests across 19 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -314,7 +314,7 @@ test_coverage:
       ]
 
   - test_file: "tests/scripts/generate-architecture.test.ts"
-    cases: 8
+    cases: 11
     covers: []
     categories:
       [
@@ -323,6 +323,7 @@ test_coverage:
         "--verify-current pass/fail",
         "phantom depends_on detection (v1.13.1)",
         "API_REGISTRY ghost function detection (v1.13.1)",
+        "package_exports missing/extra keys (v1.14.3 D-2)",
       ]
 
   - test_file: "tests/scripts/generate-changelog.test.ts"

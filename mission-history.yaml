@@ -4,15 +4,63 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.14.2 — Registry Freshness Sync & MDR-005"
+  mission_title: "Mission Spec v1.14.3 — package_exports drift detection (D-2)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 17
-  latest_version: "1.14.2"
+  total_revisions: 18
+  latest_version: "1.14.3"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-010"
+    semantic_version: "1.14.3"
+    change_sequence: 22
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close D-2 from PROJECT_REVIEW_V1.14.1_2026-04-17 — extend arch:verify to detect drift between package.json.exports and API_REGISTRY.yaml.public_api.package_exports."
+    decision: |
+      Extended scripts/generate-architecture.js verifyCurrentMode to compare Object.keys(package.json.exports) against Object.keys(API_REGISTRY.public_api.package_exports). Keys-only comparison for now — value shape (types/import paths) remains package.json's source-of-truth responsibility. Graceful skip when either package.json or the package_exports map is absent, so existing fixtures and consumers without this field keep working. Three new tests: missing key raises, extra key raises, matching keys passes. Total suite 200 → 203. No public API change, no runtime change.
+    triggered_by: "v1.14.2 entry MSC-2026-04-17-009 follow-up D-2: 'extend arch:verify to compare package.json.exports ↔ API_REGISTRY.yaml.package_exports'."
+    issue_or_context: "In v1.14.2 the manual sync of API_REGISTRY.yaml.package_exports with package.json.exports (adding ./commands/decide) closed the data-side gap, but the drift detector itself did not yet compare these two maps. Without this check, the same silent drift that hid ./commands/decide for the entire v1.14.0–v1.14.1 window could recur on any future subpath export addition. This entry restores the self-correcting loop property that v1.10's architecture-extractor originally established."
+    changes:
+      added:
+        - "tests/scripts/generate-architecture.test.ts: 3 new tests (missing key, extra key, matching case) + writePackageJson helper + writeApiRegistry second parameter for packageExports"
+      modified:
+        - "scripts/generate-architecture.js: verifyCurrentMode now loads package.json and compares Object.keys(pkg.exports) with Object.keys(apiRegistry.public_api.package_exports); graceful skip when either is missing or not an object"
+        - ".mission/traceability/TRACE_MATRIX.yaml: command_test aggregate 200 → 203; generate-architecture.test.ts cases 8 → 11; new category 'package_exports missing/extra keys (v1.14.3 D-2)'; Version header 1.14.2 → 1.14.3"
+        - ".mission/{CURRENT_STATE.md, evidence/VERIFICATION_LOG.yaml, interfaces/API_REGISTRY.yaml, reconstruction/REBUILD_PLAYBOOK.md}: Version headers 1.14.2 → 1.14.3"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.2 → 1.14.3; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "arch:verify now symmetrically detects package_exports drift in addition to depends_on and public_api.functions drift — the same class of gap that hid ./commands/decide from v1.14.0 to v1.14.1 cannot recur silently"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — validator-only change; skipped gracefully when package.json or package_exports map is absent; 11/11 local tests and 203/203 full suite green; arch:verify and plugin:verify both remained green before and after."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.14.3_mission.yaml"
+    follow_up:
+      - "D-1 automation: scripts/verify-registry.js — content-level freshness for REBUILD_PLAYBOOK + TRACE_MATRIX"
+      - "D-3 automation: scripts/bump-metadata.js — pre-commit version-header sync across .mission/*"
+      - "Consider extending this check to also compare package_exports value shapes (types/import paths), not only keys"
+
   - change_id: "MSC-2026-04-17-009"
     semantic_version: "1.14.2"
     change_sequence: 21
