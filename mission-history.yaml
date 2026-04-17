@@ -4,15 +4,71 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.14.3 — package_exports drift detection (D-2)"
+  mission_title: "Mission Spec v1.15.0 — Metadata sync automation (D-3)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 18
-  latest_version: "1.14.3"
+  total_revisions: 19
+  latest_version: "1.15.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-011"
+    semantic_version: "1.15.0"
+    change_sequence: 23
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close D-3 from PROJECT_REVIEW_V1.14.1_2026-04-17 — automate .mission/ Version-header sync with package.json so patch releases cannot silently leave the descriptive layer stale again."
+    decision: |
+      Added scripts/bump-metadata.js (dry-run / --apply / --check) that walks .mission/ and rewrites the 'Version: X.Y.Z' token in .md/.yaml/.yml files to match package.json.version. Historical subdirectories (decisions/, snapshots/, templates/, evals/) are explicitly excluded — their Version fields are time-stamped records, not live metadata. package.json gains two scripts (metadata:check, metadata:sync); .githooks/pre-commit runs --apply + `git add -u .mission` so maintainers never re-do this step by hand; .github/workflows/pre-commit-parity.yml runs --check as a CI parity gate. First real invocation caught two previously hidden stale headers — .mission/architecture/ARCHITECTURE_CURRENT.yaml and DEPENDENCY_GRAPH.yaml were still at 1.14.0 despite four release cycles since; this release both implements the detector and applies its first fix in one atomic commit.
+    triggered_by: "v1.14.2 entry MSC-2026-04-17-009 follow-up D-3: 'scripts/bump-metadata.js + pre-commit hook for version-header sync across .mission/*'. Also evidenced by v1.14.1/2/3 release notes repeatedly touching .mission/ headers by hand and still missing two files."
+    issue_or_context: "Across v1.14.0 → v1.14.1 → v1.14.2 → v1.14.3, every release manually touched a subset of .mission/ Version headers, and the set differed each time. Two headers (ARCHITECTURE_CURRENT, DEPENDENCY_GRAPH) had been silently carrying 1.14.0 since four releases ago — Codex's v1.14.1 review called this out as a Medium-severity drift class (D-3 in the baseline review). Manual process was provably insufficient; this release makes the sync a validator-backed build step."
+    changes:
+      added:
+        - "scripts/bump-metadata.js (dry-run/apply/check modes; walks .mission/, excludes decisions+snapshots+templates+evals as historical)"
+        - "tests/scripts/bump-metadata.test.ts (11 tests: dry-run reporting, --apply rewrites, --check exit codes, idempotency, skip files without header, .md/.yaml filter, invalid semver error, missing .mission/ graceful, 3 exclusion cases for decisions/snapshots/templates)"
+      modified:
+        - "package.json: scripts.metadata:check + metadata:sync; version 1.14.3 → 1.15.0"
+        - ".githooks/pre-commit: npm run metadata:sync + `git add -u .mission` between snapshot/changelog and arch:sync/verify"
+        - ".github/workflows/pre-commit-parity.yml: new step 'npm run metadata:check' after plugin:verify"
+        - ".mission/architecture/ARCHITECTURE_CURRENT.yaml: Version 1.14.0 → 1.15.0 (stale since v1.14.0 release; caught by first metadata:check dry-run)"
+        - ".mission/architecture/DEPENDENCY_GRAPH.yaml: Version 1.14.0 → 1.15.0 (same class of stale)"
+        - ".mission/{CURRENT_STATE.md, evidence/VERIFICATION_LOG.yaml, interfaces/API_REGISTRY.yaml, reconstruction/REBUILD_PLAYBOOK.md, traceability/TRACE_MATRIX.yaml}: Version 1.14.3 → 1.15.0 (applied via the new script — first dogfooding)"
+        - ".mission/CURRENT_STATE.md: Title line synced to v1.15.0 (not a Version header, manual edit)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: command_test aggregate 203 → 214; header '19 files / 200 tests' → '20 files / 214 tests'; bump-metadata.test.ts entry added with 11 cases"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: Phase 7 now lists 8+ verification axes (metadata:check added); test count and file count updated"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.3 → 1.15.0; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta bumped"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "patch releases can no longer silently leave .mission/ Version headers stale — CI parity gate (metadata:check) and pre-commit autofix (metadata:sync) together close the drift class"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — script is opt-in (needs `npm run` entry or pre-commit hook); graceful skip when .mission/ missing or Version header absent; historical subdirs excluded by whitelist; 11/11 local tests + 214/214 full suite green; arch:verify, plugin:verify, metadata:check all green after the first apply."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.15.0_mission.yaml"
+    follow_up:
+      - "D-1 automation: scripts/verify-registry.js — content-level freshness for REBUILD_PLAYBOOK + TRACE_MATRIX (not just headers; actual embedded counts)"
+      - "Consider extending bump-metadata to also sync Title lines in CURRENT_STATE.md (currently requires manual edit — same class of drift as Version)"
+      - "Wire reconstruction:verify --cold-build into release workflow (original v1.14 follow-up, still open)"
+      - "R-2: promote the 3-vendor review cycle to quarterly cadence; next review would benchmark against v1.15.0"
+
   - change_id: "MSC-2026-04-17-010"
     semantic_version: "1.14.3"
     change_sequence: 22

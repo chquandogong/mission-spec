@@ -7,6 +7,11 @@ if [ -d .mission/snapshots ]; then
 fi
 npm run changelog --silent
 git add CHANGELOG.md
+# Sync .mission/ Version headers with package.json (D-3, v1.15.0+).
+# Historical subdirs (decisions/, snapshots/, templates/, evals/) are excluded
+# by the script itself.
+npm run metadata:sync --silent
+git add -u .mission
 # Regenerate architecture snapshot (derived from src/) and enforce current registry sync.
 if [ -d dist/core ]; then
   npm run arch:sync --silent

@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.14.3",
+  "version": "1.15.0",
   "description": "Mission Spec — task contract layer for AI agent workflows",
   "type": "module",
   "main": "dist/index.js",
@@ -46,6 +46,8 @@
     "arch:check": "node scripts/generate-architecture.js --check",
     "arch:verify": "node scripts/generate-architecture.js --verify-current",
     "plugin:verify": "node scripts/validate-plugin.js",
+    "metadata:check": "node scripts/bump-metadata.js --check",
+    "metadata:sync": "node scripts/bump-metadata.js --apply",
     "migrate:dry-run": "node scripts/migrate-mission.js",
     "migrate:apply": "node scripts/migrate-mission.js --apply",
     "reconstruction:verify": "node scripts/verify-reconstruction.js",

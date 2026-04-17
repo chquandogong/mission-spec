@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.14.3
+# Last updated: 2026-04-17 | Version: 1.15.0
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 203 tests across 19 files)"
+      - "tests/ (총 214 tests across 20 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.14.2 기준, 19 files / 200 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.15.0 기준, 20 files / 214 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -370,6 +370,23 @@ test_coverage:
         "report subcommand",
         "unknown command",
         "cwd default",
+      ]
+
+  - test_file: "tests/scripts/bump-metadata.test.ts"
+    cases: 11
+    covers: []
+    categories:
+      [
+        "dry-run reporting",
+        "--apply rewrites headers",
+        "--check exits 0/1",
+        "idempotency",
+        "skip files without Version header",
+        ".md/.yaml filter (ignores .txt/.json)",
+        "invalid semver errors",
+        "missing .mission/ graceful",
+        "excludes decisions/ (historical)",
+        "excludes snapshots/ and templates/ (historical/placeholder)",
       ]
 
   - test_file: "tests/index.test.ts"

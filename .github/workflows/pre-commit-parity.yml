@@ -70,3 +70,6 @@ jobs:
 
       - name: Verify plugin manifest and skills structure
         run: npm run plugin:verify
+
+      - name: Verify .mission/ Version headers are in sync with package.json
+        run: npm run metadata:check
