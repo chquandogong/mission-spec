@@ -59,7 +59,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — validation is additive; drift was pre-existing and benign (manifest version stale since v1.9.0)"
-    related_commits: []
+    related_commits: ["245ef71"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.11.0_mission.yaml"
     follow_up:
