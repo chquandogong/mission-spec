@@ -57,7 +57,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — both changes are validator extensions, not behaviour changes; 14/14 generate-architecture + 14/14 verify-registry local, 231/231 full suite green; arch:verify / plugin:verify / metadata:check / registry:check all green before and after; real-project registry:check caught the test-count drift (223→231) on first run and forced the REBUILD_PLAYBOOK / TRACE_MATRIX sync, demonstrating the E-1 cold-build gate's drift-detection contract. Semantic version: patch (scripts-only extension, no npm artifact surface change) — continues the v1.16.1 E-3 precedent."
-    related_commits: []
+    related_commits: ["a5e649d"]
     related_decisions:
       ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.16.2_mission.yaml"
