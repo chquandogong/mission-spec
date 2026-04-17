@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.15.0
+# Last updated: 2026-04-17 | Version: 1.16.0
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 214 tests across 20 files)"
+      - "tests/ (총 223 tests across 21 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.15.0 기준, 20 files / 214 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.16.0 기준, 21 files / 223 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -387,6 +387,22 @@ test_coverage:
         "missing .mission/ graceful",
         "excludes decisions/ (historical)",
         "excludes snapshots/ and templates/ (historical/placeholder)",
+      ]
+
+  - test_file: "tests/scripts/verify-registry.test.ts"
+    cases: 9
+    covers: []
+    categories:
+      [
+        "--list prints ground truth JSON",
+        "passes on matching playbook + trace counts",
+        "drift: playbook module count",
+        "drift: playbook test count",
+        "drift: trace inline counts",
+        "drift: test_coverage.cases sum",
+        "graceful missing playbook/trace",
+        "malformed YAML errors",
+        "ignores unrelated numbers in prose",
       ]
 
   - test_file: "tests/index.test.ts"

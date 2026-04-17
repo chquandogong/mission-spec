@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.0] - 2026-04-17
+_Close D-1 from PROJECT_REVIEW_V1.14.1_2026-04-17 — verify that numeric claims embedded in REBUILD_PLAYBOOK.md and TRACE_MATRIX.yaml stay synchronized with the live source (module/API/skill/platform/test counts)._
+
+### Added
+
+- scripts/verify-registry.js (TS-AST test counter, Korean-pattern playbook matcher, YAML test_coverage.cases sum, --list mode)
+- tests/scripts/verify-registry.test.ts (9 tests: --list JSON output, matching claims pass, playbook module/test drift, TRACE_MATRIX inline drift, cases sum drift, graceful missing files, malformed YAML, unrelated numbers ignored)
+
+### Changed
+
+- package.json: scripts.registry:check + registry:list; version 1.15.0 → 1.16.0
+- .github/workflows/pre-commit-parity.yml: new step 'npm run registry:check' after metadata:check
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: Phase 7 now lists 9+ verification axes (registry:check added as step 39); phase numbers renumbered to remove 42-43 collision; test count 214 → 223; test files 20 → 21
+- .mission/traceability/TRACE_MATRIX.yaml: command_test aggregate 214 → 223; header '20 files / 214 tests' → '21 files / 223 tests'; verify-registry.test.ts entry added with 9 cases
+- .mission/ 7 Version headers auto-synced to 1.16.0 via metadata:sync (first real pre-commit invocation of D-3 machinery from v1.15.0)
+- .mission/CURRENT_STATE.md: Title line synced to v1.16.0
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.15.0 → 1.16.0; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta bumped
+
 ## [1.15.0] - 2026-04-17
 _Close D-3 from PROJECT_REVIEW_V1.14.1_2026-04-17 — automate .mission/ Version-header sync with package.json so patch releases cannot silently leave the descriptive layer stale again._
 

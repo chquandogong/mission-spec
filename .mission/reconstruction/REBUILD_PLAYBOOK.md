@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-17 | Version: 1.15.0
+> Last updated: 2026-04-17 | Version: 1.16.0
 
 ## 전제 조건
 
@@ -71,32 +71,33 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 30. `migration.ts` (v1.14) — BFS chain, schema v2 대비 기반 (registry 비어있음)
 31. `reconstruction-verifier.ts` (v1.14) — REBUILD_PLAYBOOK 경로 참조 검증 (fast / `--cold-build` temp dir)
 
-## Phase 7: 검증 (총 8+ 축)
+## Phase 7: 검증 (총 9+ 축)
 
-32. `npm test` — 현재 기준 214 tests 전수 통과 (20 test files)
+32. `npm test` — 현재 기준 223 tests 전수 통과 (21 test files)
 33. `npm run test:coverage` — stmts/branches/functions/lines ≥ 80/75/80/80 (현 baseline 93.95 / 83.59 / 95.52 / 93.95)
 34. `node scripts/validate-schema.js` — 스키마 검증 (3 fixtures)
 35. `node scripts/convert-platforms.js --verify` — 6개 플랫폼
 36. `npm run plugin:verify` — plugin/skill 일관성
 37. `npm run arch:verify` — ARCHITECTURE_CURRENT ↔ src/ + API_REGISTRY.public_api.functions 대칭 drift + package.json.exports ↔ API_REGISTRY.public_api.package_exports (v1.13.1+ 대칭화, v1.14.3+ exports-map)
 38. `npm run metadata:check` (v1.15.0+) — `.mission/` Version 헤더가 package.json과 sync (D-3). 실패 시 `npm run metadata:sync`로 자동 수정
-39. `npm run reconstruction:verify` — playbook 경로 무결성 (선택: `--cold-build` — temp dir에서 `npm ci && build && test`)
-40. `npm run validate:history-commits` — history ↔ git log cross-check (bootstrap + HEAD self-reference 예외)
-41. `evaluateMission('.')` — 9/9 criteria passed 확인
-42. **Traceability Matrix** (`.mission/traceability/TRACE_MATRIX.yaml`) 참조하여 모든 done_when → eval → code → test 연결 확인
+39. `npm run registry:check` (v1.16.0+) — REBUILD_PLAYBOOK + TRACE_MATRIX 본문의 수치(module/API/skill/platform/test counts)가 live source와 sync (D-1). TS AST 기반
+40. `npm run reconstruction:verify` — playbook 경로 무결성 (선택: `--cold-build` — temp dir에서 `npm ci && build && test`)
+41. `npm run validate:history-commits` — history ↔ git log cross-check (bootstrap + HEAD self-reference 예외)
+42. `evaluateMission('.')` — 9/9 criteria passed 확인
+43. **Traceability Matrix** (`.mission/traceability/TRACE_MATRIX.yaml`) 참조하여 모든 done_when → eval → code → test 연결 확인
 
 ## Phase 8: 크로스 플랫폼 + 플러그인
 
-42. `src/adapters/platforms.ts` — 6개 플랫폼 변환 (Cursor, Codex, OpenCode, Cline, Continue, Aider) — v1.14.0+
-43. `skills/ms-*/SKILL.md` + `SKILL.ko.md` + `SKILL.zh.md` (삼국어, v1.8.0+) — 6 skill: ms-init, ms-eval, ms-status, ms-report, ms-context, ms-decide
-44. `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` 생성 — version은 `package.json` / `mission.yaml` 과 일치(`plugin-validator`가 자동 검증)
+44. `src/adapters/platforms.ts` — 6개 플랫폼 변환 (Cursor, Codex, OpenCode, Cline, Continue, Aider) — v1.14.0+
+45. `skills/ms-*/SKILL.md` + `SKILL.ko.md` + `SKILL.zh.md` (삼국어, v1.8.0+) — 6 skill: ms-init, ms-eval, ms-status, ms-report, ms-context, ms-decide
+46. `.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` 생성 — version은 `package.json` / `mission.yaml` 과 일치(`plugin-validator`가 자동 검증)
 
 ## Phase 9: CLI + Release Pipeline
 
-45. `bin/mission-spec.js` (v1.12+) — dispatcher for `context | status | eval | report` + `--version` / `--help`
-46. `.github/workflows/test.yml` — Node 20+22 matrix: build + lint + test:coverage + platforms verify + plugin:verify + arch:verify
-47. `.github/workflows/pre-commit-parity.yml` — `validate-history-commits` + snapshot dedup + CHANGELOG determinism + arch:sync / verify
-48. `.github/workflows/release.yml` (v1.13+) — v\* 태그 → npm publish with provenance, ref-ancestry check (publish from origin/main only), 태그 ↔ package.json 일치 검증
+47. `bin/mission-spec.js` (v1.12+) — dispatcher for `context | status | eval | report` + `--version` / `--help`
+48. `.github/workflows/test.yml` — Node 20+22 matrix: build + lint + test:coverage + platforms verify + plugin:verify + arch:verify
+49. `.github/workflows/pre-commit-parity.yml` — `validate-history-commits` + snapshot dedup + CHANGELOG determinism + arch:sync / verify + metadata:check + registry:check
+50. `.github/workflows/release.yml` (v1.13+) — v\* 태그 → npm publish with provenance, ref-ancestry check (publish from origin/main only), 태그 ↔ package.json 일치 검증
 
 ## 읽기 순서 요약
 

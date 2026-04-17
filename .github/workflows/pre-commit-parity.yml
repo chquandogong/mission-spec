@@ -73,3 +73,6 @@ jobs:
 
       - name: Verify .mission/ Version headers are in sync with package.json
         run: npm run metadata:check
+
+      - name: Verify REBUILD_PLAYBOOK + TRACE_MATRIX body counts match live source
+        run: npm run registry:check

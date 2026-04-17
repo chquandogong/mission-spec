@@ -1,10 +1,10 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-17 | Version: 1.15.0
+> Last updated: 2026-04-17 | Version: 1.16.0
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.15.0 — Metadata sync automation (D-3)
+- **Title:** Mission Spec v1.16.0 — Registry freshness verifier (D-1)
 - **Phase:** governed portability
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01

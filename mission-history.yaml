@@ -4,15 +4,69 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.15.0 — Metadata sync automation (D-3)"
+  mission_title: "Mission Spec v1.16.0 — Registry freshness verifier (D-1)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 19
-  latest_version: "1.15.0"
+  total_revisions: 20
+  latest_version: "1.16.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-012"
+    semantic_version: "1.16.0"
+    change_sequence: 24
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close D-1 from PROJECT_REVIEW_V1.14.1_2026-04-17 — verify that numeric claims embedded in REBUILD_PLAYBOOK.md and TRACE_MATRIX.yaml stay synchronized with the live source (module/API/skill/platform/test counts)."
+    decision: |
+      Added scripts/verify-registry.js — a TypeScript-AST-based verifier that walks src/, skills/, and tests/ to compute ground truth (module count via extractArchitecture, public_api.functions count, ms-* skill directories, convertTo* exports in platforms.ts, .test.ts file count, it()/test() call count via ts.forEachChild), then matches that against claims in .mission/reconstruction/REBUILD_PLAYBOOK.md (6 patterns: N개 모듈, public API N개 함수, skill N개, N개 플랫폼, (N test files), 현재 기준 N tests) and .mission/traceability/TRACE_MATRIX.yaml (inline "총 N tests across M files" + test_coverage.cases sum). Exit 1 on drift. --list mode dumps ground truth as JSON. First switch from regex counting to TS AST eliminated 3 false-positives (regex matched "it" in comments/strings, AST does not). CI parity via pre-commit-parity.yml step. pre-commit hook deliberately omitted — verifier takes ~10s due to TypeScript compiler init, too heavy for local dev loop; drift will be caught at push time. 9 new tests + one behaviorally-correct script = closes the last D-series gap.
+    triggered_by: "v1.14.2 entry MSC-2026-04-17-009 follow-up D-1: 'scripts/verify-registry.js — content-level freshness for REBUILD_PLAYBOOK + TRACE_MATRIX + CURRENT_STATE + VERIFICATION_LOG'."
+    issue_or_context: "D-3 (v1.15.0) closed the Version-header class of drift; D-1 closes the embedded-count class. When v1.14.2 refreshed REBUILD_PLAYBOOK from '11 modules / 119 tests / 4 skills' to '18 / 200 / 6', the update was manual, and there was no machinery to catch the next divergence. Every release that adds or removes a module/API/test/platform silently decays the descriptive layer's accuracy. registry:check closes that loop."
+    changes:
+      added:
+        - "scripts/verify-registry.js (TS-AST test counter, Korean-pattern playbook matcher, YAML test_coverage.cases sum, --list mode)"
+        - "tests/scripts/verify-registry.test.ts (9 tests: --list JSON output, matching claims pass, playbook module/test drift, TRACE_MATRIX inline drift, cases sum drift, graceful missing files, malformed YAML, unrelated numbers ignored)"
+      modified:
+        - "package.json: scripts.registry:check + registry:list; version 1.15.0 → 1.16.0"
+        - ".github/workflows/pre-commit-parity.yml: new step 'npm run registry:check' after metadata:check"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: Phase 7 now lists 9+ verification axes (registry:check added as step 39); phase numbers renumbered to remove 42-43 collision; test count 214 → 223; test files 20 → 21"
+        - ".mission/traceability/TRACE_MATRIX.yaml: command_test aggregate 214 → 223; header '20 files / 214 tests' → '21 files / 223 tests'; verify-registry.test.ts entry added with 9 cases"
+        - ".mission/ 7 Version headers auto-synced to 1.16.0 via metadata:sync (first real pre-commit invocation of D-3 machinery from v1.15.0)"
+        - ".mission/CURRENT_STATE.md: Title line synced to v1.16.0"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.15.0 → 1.16.0; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta bumped"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "Embedded numeric claims in Living Asset Registry prose/YAML are now CI-verified — the last silent-drift class from PROJECT_REVIEW_V1.14.1 D-series is closed"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — verifier runs as an independent CI step; skipped gracefully when REBUILD_PLAYBOOK or TRACE_MATRIX is absent; AST-based counting eliminates the regex false-positive class (226→223 convergence with vitest's own count); 9/9 local tests + 223/223 full suite green; arch:verify, plugin:verify, metadata:check, registry:check all green before commit."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.0_mission.yaml"
+    follow_up:
+      - "Extend verify-registry to detect new claim shapes not yet in PLAYBOOK_PATTERNS (e.g. specific per-file test counts in traceability)"
+      - "Wire registry:check into reconstruction:verify --cold-build (Phase 7 integration)"
+      - "Consider promoting registry:check to pre-commit once TS import cost drops or is cached"
+      - "R-2: run the next 3-vendor adversarial review against v1.16.0 — the D-series closure is the first time all five gaps have been automated"
+      - "All D-series (D-1 through D-5) from PROJECT_REVIEW_V1.14.1 are now closed. Next baseline review is a PROJECT_REVIEW_V1.16.0 against the new automation surface"
+
   - change_id: "MSC-2026-04-17-011"
     semantic_version: "1.15.0"
     change_sequence: 23
