@@ -62,7 +62,7 @@ timeline:
       tests: true
     breaking: false
     risk: "low — no API changes, only string translations and new documentation files"
-    related_commits: ["b55e7b8"]
+    related_commits: ["b55e7b8", "910963d", "f396cde"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-15_v1.8.0_mission.yaml"
 
