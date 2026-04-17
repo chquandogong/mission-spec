@@ -6,6 +6,22 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.2] - 2026-04-17
+_Close E-5 and E-8 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — extend the existing arch:verify and registry:check validators to catch two silent drift classes that the current (v1.16.1) verifiers miss._
+
+### Changed
+
+- scripts/generate-architecture.js: verifyCurrentMode package_exports check now includes subkey-set comparison and string-value comparison for every key common to pkg.exports and apiRegistry.public_api.package_exports; graceful handling for string-vs-object shape mismatches
+- scripts/verify-registry.js: groundTruth reads mission.yaml for missionTitle + doneWhenCount; check() validates CURRENT_STATE.md Title line against mission.yaml title and 완료 조건 (N/M PASS) total against done_when length; also flags PASS > TOTAL absurdity
+- tests/scripts/generate-architecture.test.ts: +3 E-5 tests (types path drift, import path drift, extra subkey)
+- tests/scripts/verify-registry.test.ts: +5 E-8 tests (matching title+count pass, title drift, count drift, PASS>TOTAL absurdity, graceful absence)
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: test count 223 → 231
+- .mission/traceability/TRACE_MATRIX.yaml: inline 223 → 231; test_coverage cases for generate-architecture 11 → 14 and verify-registry 9 → 14; category list expanded with E-5 and E-8 tags; header v1.16.0 → v1.16.2
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.1 → 1.16.2; mission.yaml title + lineage.total_revisions updated
+- mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped
+- .mission/CURRENT_STATE.md: Title line manually synced to v1.16.2 (E-6 stays partially open — validated now, still not auto-synced)
+- .mission/ Version headers auto-synced to 1.16.2 via metadata:sync (third real pre-commit invocation of D-3 machinery from v1.15.0)
+
 ## [1.16.1] - 2026-04-17
 _Close E-1 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — promote reconstruction:cold-build from an opt-in local script to a blocking step in the release workflow, so every npm publish must first prove the tagged commit can rebuild from source in a clean environment._
 

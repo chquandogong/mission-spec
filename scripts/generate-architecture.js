@@ -180,9 +180,10 @@ function verifyCurrentMode() {
       );
     }
 
-    // package_exports drift (D-2): compare API_REGISTRY.public_api.package_exports
-    // against package.json's exports map. Keys only — value shape is left to
-    // package.json as the source of truth.
+    // package_exports drift (D-2 key-set + E-5 value-shape): compare
+    // API_REGISTRY.public_api.package_exports against package.json's exports
+    // map. Key set is the D-2 check; value shape (types/import paths, other
+    // conditional keys) is the E-5 extension.
     const packageJsonPath = join(projectDir, "package.json");
     if (existsSync(packageJsonPath)) {
       let pkg;
@@ -224,6 +225,68 @@ function verifyCurrentMode() {
         if (extraInRegistry.length > 0) {
           mismatches.push(
             `API_REGISTRY.yaml public_api.package_exports has extra keys not in package.json: ${extraInRegistry.join(", ")}`,
+          );
+        }
+
+        // E-5: for keys present on both sides, compare the value shape.
+        // package.json's exports map entries are either a plain string
+        // (shortcut form) or an object of conditions (types/import/require/default).
+        const commonKeys = pkgExportKeys.filter((k) =>
+          registryExportKeys.includes(k),
+        );
+        for (const key of commonKeys) {
+          const pkgEntry = pkgExportsObj[key];
+          const regEntry = registryExportsObj[key];
+          const pkgIsObj =
+            pkgEntry &&
+            typeof pkgEntry === "object" &&
+            !Array.isArray(pkgEntry);
+          const regIsObj =
+            regEntry &&
+            typeof regEntry === "object" &&
+            !Array.isArray(regEntry);
+
+          if (typeof pkgEntry === "string" && typeof regEntry === "string") {
+            if (pkgEntry !== regEntry) {
+              mismatches.push(
+                `API_REGISTRY.yaml public_api.package_exports['${key}'] value mismatch: registry '${regEntry}', package.json '${pkgEntry}'`,
+              );
+            }
+            continue;
+          }
+
+          if (pkgIsObj && regIsObj) {
+            const pkgSubKeys = Object.keys(pkgEntry).sort();
+            const regSubKeys = Object.keys(regEntry).sort();
+            const missingSubKeys = pkgSubKeys.filter(
+              (k) => !regSubKeys.includes(k),
+            );
+            const extraSubKeys = regSubKeys.filter(
+              (k) => !pkgSubKeys.includes(k),
+            );
+            if (missingSubKeys.length > 0) {
+              mismatches.push(
+                `API_REGISTRY.yaml public_api.package_exports['${key}'] missing subkeys from package.json: ${missingSubKeys.join(", ")}`,
+              );
+            }
+            if (extraSubKeys.length > 0) {
+              mismatches.push(
+                `API_REGISTRY.yaml public_api.package_exports['${key}'] has extra subkeys not in package.json: ${extraSubKeys.join(", ")}`,
+              );
+            }
+            for (const sk of pkgSubKeys.filter((k) => regSubKeys.includes(k))) {
+              if (pkgEntry[sk] !== regEntry[sk]) {
+                mismatches.push(
+                  `API_REGISTRY.yaml public_api.package_exports['${key}'].${sk} mismatch: registry '${regEntry[sk]}', package.json '${pkgEntry[sk]}'`,
+                );
+              }
+            }
+            continue;
+          }
+
+          // One side is string, the other is object — structural drift.
+          mismatches.push(
+            `API_REGISTRY.yaml public_api.package_exports['${key}'] shape mismatch: registry is ${regIsObj ? "object" : typeof regEntry}, package.json is ${pkgIsObj ? "object" : typeof pkgEntry}`,
           );
         }
       }

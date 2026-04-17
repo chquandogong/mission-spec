@@ -328,4 +328,118 @@ describe("generate-architecture script", () => {
     const stdout = runScript(["--verify-current"]);
     expect(stdout).toContain("in sync");
   });
+
+  // E-5 (PROJECT_REVIEW_SNAPSHOT_V1.16.0) — value-shape drift: key sets match
+  // but the types/import path strings diverge. Before v1.16.2 this class of
+  // drift passed silently because only Object.keys was compared.
+
+  it("--verify-current fails when package_exports types path diverges (E-5)", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writePackageJson({
+      "./commands/decide": {
+        types: "./dist/commands/decide.d.ts",
+        import: "./dist/commands/decide.js",
+      },
+    });
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    writeApiRegistry(["parse"], {
+      "./commands/decide": {
+        types: "./dist/commands/WRONG.d.ts",
+        import: "./dist/commands/decide.js",
+      },
+    });
+
+    expect(() => runScript(["--verify-current"])).toThrow(
+      /package_exports\['\.\/commands\/decide'\]\.types/,
+    );
+  });
+
+  it("--verify-current fails when package_exports import path diverges (E-5)", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writePackageJson({
+      ".": {
+        types: "./dist/index.d.ts",
+        import: "./dist/index.js",
+      },
+    });
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    writeApiRegistry(["parse"], {
+      ".": {
+        types: "./dist/index.d.ts",
+        import: "./dist/wrong.js",
+      },
+    });
+
+    expect(() => runScript(["--verify-current"])).toThrow(
+      /package_exports\['\.'\]\.import/,
+    );
+  });
+
+  it("--verify-current fails when package_exports registry has extra subkey (E-5)", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    writePackageJson({ ".": { import: "./dist/index.js" } });
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    // Registry has a ghost `types` subkey that package.json does not declare
+    writeApiRegistry(["parse"], {
+      ".": {
+        types: "./dist/index.d.ts",
+        import: "./dist/index.js",
+      },
+    });
+
+    expect(() => runScript(["--verify-current"])).toThrow(
+      /package_exports\['\.'\].*extra subkeys.*types/,
+    );
+  });
 });

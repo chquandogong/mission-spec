@@ -4,15 +4,71 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.1 — Cold-build release gate (E-1)"
+  mission_title: "Mission Spec v1.16.2 — Value-shape + CURRENT_STATE freshness (E-5, E-8)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 21
-  latest_version: "1.16.1"
+  total_revisions: 22
+  latest_version: "1.16.2"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-014"
+    semantic_version: "1.16.2"
+    change_sequence: 26
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close E-5 and E-8 from PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 — extend the existing arch:verify and registry:check validators to catch two silent drift classes that the current (v1.16.1) verifiers miss."
+    decision: |
+      Two complementary validator extensions, bundled because both are "release-grade coverage completion" of existing scripts (the SNAPSHOT §7 priority-1 double-close). E-5 extends scripts/generate-architecture.js verifyCurrentMode: after the existing Object.keys comparison, for each common package_exports key the validator now compares the subkey set (types/import/require/default) and the string values. Previously a package.json entry like `"./commands/decide": { "types": "./dist/commands/decide.d.ts" }` could drift to `{ "types": "./dist/commands/WRONG.d.ts" }` and still pass arch:verify so long as the key `./commands/decide` was present on both sides. Codex v1.16.0 §4 called this out independently. E-8 extends scripts/verify-registry.js: groundTruth now also reads mission.yaml to expose missionTitle and doneWhenCount, and check() now validates .mission/CURRENT_STATE.md's `- **Title:**` line against mission.yaml.title and its `완료 조건 (N/M PASS)` total against done_when.length. This closes the manual-sync gap that E-6 raised (Title line not auto-synced by bump-metadata) by turning it into a CI failure, and extends registry:check's file coverage beyond REBUILD_PLAYBOOK + TRACE_MATRIX to the third long-stale prose asset Codex §3 singled out. VERIFICATION_LOG.yaml is deliberately NOT covered because its entries are historical snapshots — adding an entry is an authorship action, not a drift class. 8 new tests total (3 generate-architecture + 5 verify-registry); 223 → 231 tests across the repo; drift claims in REBUILD_PLAYBOOK and TRACE_MATRIX updated to reflect the new count.
+    triggered_by: "v1.16.1 entry MSC-2026-04-17-013 follow-up (E-5, E-8 listed in that entry's follow_up); 3-vendor agreement via PROJECT_REVIEW_SNAPSHOT_V1.16.0_2026-04-17 §7 priority 1 (E-1 + E-8 + E-5 double-close)."
+    issue_or_context: "D-2 (v1.14.3) closed the key-set class of package_exports drift but deliberately deferred value-shape checking. D-1 (v1.16.0) closed REBUILD_PLAYBOOK and TRACE_MATRIX numeric drift but left CURRENT_STATE.md and VERIFICATION_LOG.yaml uncovered. Codex v1.16.0 review independently raised both gaps as Medium; Claude v1.16.0 SNAPSHOT §6 codified them as E-5 and E-8. The fix is a validator extension on each side, not a new script — MDR-005 explicitly permits integrity-verifier growth within existing scripts."
+    changes:
+      added: []
+      modified:
+        - "scripts/generate-architecture.js: verifyCurrentMode package_exports check now includes subkey-set comparison and string-value comparison for every key common to pkg.exports and apiRegistry.public_api.package_exports; graceful handling for string-vs-object shape mismatches"
+        - "scripts/verify-registry.js: groundTruth reads mission.yaml for missionTitle + doneWhenCount; check() validates CURRENT_STATE.md Title line against mission.yaml title and 완료 조건 (N/M PASS) total against done_when length; also flags PASS > TOTAL absurdity"
+        - "tests/scripts/generate-architecture.test.ts: +3 E-5 tests (types path drift, import path drift, extra subkey)"
+        - "tests/scripts/verify-registry.test.ts: +5 E-8 tests (matching title+count pass, title drift, count drift, PASS>TOTAL absurdity, graceful absence)"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: test count 223 → 231"
+        - ".mission/traceability/TRACE_MATRIX.yaml: inline 223 → 231; test_coverage cases for generate-architecture 11 → 14 and verify-registry 9 → 14; category list expanded with E-5 and E-8 tags; header v1.16.0 → v1.16.2"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.16.1 → 1.16.2; mission.yaml title + lineage.total_revisions updated"
+        - "mission-history.yaml: meta.mission_title / total_revisions / latest_version bumped"
+        - ".mission/CURRENT_STATE.md: Title line manually synced to v1.16.2 (E-6 stays partially open — validated now, still not auto-synced)"
+        - ".mission/ Version headers auto-synced to 1.16.2 via metadata:sync (third real pre-commit invocation of D-3 machinery from v1.15.0)"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "arch:verify now additionally fails on package_exports types/import/subkey drift — key-set parity alone is no longer enough"
+        - "registry:check now additionally fails on CURRENT_STATE.md Title / completion-condition drift against mission.yaml — the third prose asset is now CI-covered"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — both changes are validator extensions, not behaviour changes; 14/14 generate-architecture + 14/14 verify-registry local, 231/231 full suite green; arch:verify / plugin:verify / metadata:check / registry:check all green before and after; real-project registry:check caught the test-count drift (223→231) on first run and forced the REBUILD_PLAYBOOK / TRACE_MATRIX sync, demonstrating the E-1 cold-build gate's drift-detection contract. Semantic version: patch (scripts-only extension, no npm artifact surface change) — continues the v1.16.1 E-3 precedent."
+    related_commits: []
+    related_decisions:
+      ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.16.2_mission.yaml"
+    follow_up:
+      - "E-6 auto-sync: extend bump-metadata.js to also update CURRENT_STATE.md Title line from mission.yaml (validator now catches drift; automation would prevent it)"
+      - "E-2 playbook language policy (MDR-006) — locale-independent PLAYBOOK_PATTERNS or YAML frontmatter for numeric claims"
+      - "E-3 SemVer policy MDR-007 — formalize the 'CI/scripts-only → patch' rule exercised by v1.16.1 and v1.16.2"
+      - "E-7 test time concentration: verify-registry.test.ts took ~24s of the 26s suite after this change, pre-commit responsiveness degrading"
+      - "E-4 external adopter 1+ — still the 3-vendor top risk"
+      - "Consider adding VERIFICATION_LOG.yaml entry freshness check (latest entry version must equal or exceed a configurable floor) — currently left uncovered because entries are authorship artefacts"
+
   - change_id: "MSC-2026-04-17-013"
     semantic_version: "1.16.1"
     change_sequence: 25

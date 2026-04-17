@@ -105,6 +105,25 @@ function groundTruth() {
   } catch {
     // src/ absent in this cwd — leave arch as empty
   }
+
+  // E-8: read mission.yaml for fields that CURRENT_STATE.md mirrors.
+  let missionTitle = null;
+  let doneWhenCount = null;
+  const missionPath = join(projectDir, "mission.yaml");
+  if (existsSync(missionPath)) {
+    try {
+      const parsed = parse(readFileSync(missionPath, "utf-8"));
+      if (typeof parsed?.mission?.title === "string") {
+        missionTitle = parsed.mission.title;
+      }
+      if (Array.isArray(parsed?.mission?.done_when)) {
+        doneWhenCount = parsed.mission.done_when.length;
+      }
+    } catch {
+      // malformed mission.yaml — leave fields null, CURRENT_STATE checks skip.
+    }
+  }
+
   return {
     moduleCount: arch.modules.length,
     apiCount: arch.public_api.functions.length,
@@ -112,6 +131,8 @@ function groundTruth() {
     platformCount: countPlatforms(),
     testFileCount: countTestFiles(join(projectDir, "tests")),
     testCount: countItCalls(join(projectDir, "tests")),
+    missionTitle,
+    doneWhenCount,
   };
 }
 
@@ -212,6 +233,43 @@ function check() {
         if (sum !== truth.testCount) {
           mismatches.push(
             `TRACE_MATRIX test_coverage.cases sum: ${sum}, actual ${truth.testCount}`,
+          );
+        }
+      }
+    }
+  }
+
+  // E-8: CURRENT_STATE.md content checks — Title line mirrors mission.yaml
+  // title, and "완료 조건 (N/M PASS)" total must match done_when length.
+  const currentStatePath = join(projectDir, ".mission", "CURRENT_STATE.md");
+  if (existsSync(currentStatePath)) {
+    const body = readFileSync(currentStatePath, "utf-8");
+
+    if (truth.missionTitle != null) {
+      const titleMatch = body.match(/^\s*-\s*\*\*Title:\*\*\s*(.+?)\s*$/m);
+      if (titleMatch) {
+        const claim = titleMatch[1].trim();
+        if (claim !== truth.missionTitle) {
+          mismatches.push(
+            `CURRENT_STATE.md Title line: claims "${claim}", actual "${truth.missionTitle}"`,
+          );
+        }
+      }
+    }
+
+    if (truth.doneWhenCount != null) {
+      const countMatch = body.match(/완료\s*조건\s*\((\d+)\/(\d+)\s*PASS\)/);
+      if (countMatch) {
+        const claimPass = parseInt(countMatch[1], 10);
+        const claimTotal = parseInt(countMatch[2], 10);
+        if (claimTotal !== truth.doneWhenCount) {
+          mismatches.push(
+            `CURRENT_STATE.md completion-condition count: claims ${claimTotal}, actual ${truth.doneWhenCount}`,
+          );
+        }
+        if (claimPass > claimTotal) {
+          mismatches.push(
+            `CURRENT_STATE.md completion-condition count: PASS (${claimPass}) exceeds TOTAL (${claimTotal})`,
           );
         }
       }

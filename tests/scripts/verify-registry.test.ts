@@ -211,4 +211,114 @@ describe("verify-registry script", () => {
     const stdout = runScript();
     expect(stdout).toContain("Registry freshness check passed");
   });
+
+  // E-8 (PROJECT_REVIEW_SNAPSHOT_V1.16.0 §6) — extend file coverage beyond
+  // REBUILD_PLAYBOOK + TRACE_MATRIX to include CURRENT_STATE.md's two fields
+  // that can drift: the Title line (mirrors mission.yaml.title) and the
+  // completion-condition count (mirrors mission.yaml.done_when.length).
+
+  function writeMission(title: string, doneWhen: string[]) {
+    writeFixture(
+      "mission.yaml",
+      [
+        "mission:",
+        `  title: "${title}"`,
+        `  version: "0.0.0"`,
+        "  goal: x",
+        "  constraints: []",
+        "  done_when:",
+        ...doneWhen.map((c) => `    - "${c}"`),
+        "",
+      ].join("\n"),
+    );
+  }
+
+  function writeCurrentState(text: string) {
+    writeFixture(".mission/CURRENT_STATE.md", text);
+  }
+
+  it("passes when CURRENT_STATE.md Title and completion count match mission.yaml (E-8)", () => {
+    writeStandardFixture();
+    writeMission("My Project v0.0.0 — Initial", [
+      "foo_exists",
+      "bar_passes",
+      "baz_valid",
+    ]);
+    writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "> Last updated: 2026-04-17 | Version: 0.0.0",
+        "",
+        "## 현재 상태",
+        "",
+        "- **Title:** My Project v0.0.0 — Initial",
+        "",
+        "## 완료 조건 (3/3 PASS)",
+        "",
+      ].join("\n"),
+    );
+
+    const stdout = runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  it("detects drift when CURRENT_STATE.md Title diverges from mission.yaml (E-8)", () => {
+    writeStandardFixture();
+    writeMission("My Project v1.0.0 — New", ["foo"]);
+    writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** My Project v0.9.0 — Stale",
+        "",
+      ].join("\n"),
+    );
+
+    expect(() => runScript()).toThrow(/CURRENT_STATE\.md Title line/);
+  });
+
+  it("detects drift when CURRENT_STATE.md completion-condition count diverges (E-8)", () => {
+    writeStandardFixture();
+    writeMission("X", ["a", "b", "c", "d", "e"]);
+    writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 완료 조건 (2/2 PASS)",
+        "",
+      ].join("\n"),
+    );
+
+    expect(() => runScript()).toThrow(
+      /CURRENT_STATE\.md completion-condition count.*claims 2.*actual 5/s,
+    );
+  });
+
+  it("detects absurdity when CURRENT_STATE.md claims PASS exceeds TOTAL (E-8)", () => {
+    writeStandardFixture();
+    writeMission("X", ["a", "b"]);
+    writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 완료 조건 (5/2 PASS)",
+        "",
+      ].join("\n"),
+    );
+
+    expect(() => runScript()).toThrow(/PASS \(5\) exceeds TOTAL \(2\)/);
+  });
+
+  it("graceful when CURRENT_STATE.md is absent (E-8)", () => {
+    writeStandardFixture();
+    writeMission("X", ["a"]);
+    // No CURRENT_STATE.md
+    const stdout = runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
 });
