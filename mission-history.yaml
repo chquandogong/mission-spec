@@ -54,7 +54,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — verify-registry의 기능 확장 + CURRENT_STATE prose 갱신; 21/21 verify-registry tests + 246/246 full suite green; 5/5 consecutive npm test runs (C-1 closure 이후 determinism 유지 확인). 새로운 false-positive 리스크: TITLE_RE가 Title|제목|标题|タイトル 4 locale만 허용 — 일본어 외 언어(예: 스페인어 'Título') 도입 시 no-Title failure 발동. 의도된 동작(silent skip 방지). Semantic version: patch per MDR-006 §PATCH 1 (기존 validator drift-range 확장) + §PATCH 7 (.mission/ descriptive asset 내용 갱신)."
-    related_commits: []
+    related_commits: ["39645b7"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
