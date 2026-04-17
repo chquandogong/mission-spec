@@ -50,7 +50,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — validation tightening only. Current registries are already clean (verified by running arch:verify after changes)."
-    related_commits: []
+    related_commits: ["f3dee97"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.13.1_mission.yaml"
     follow_up:
