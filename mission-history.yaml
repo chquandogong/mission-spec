@@ -56,7 +56,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — verifier runs as an independent CI step; skipped gracefully when REBUILD_PLAYBOOK or TRACE_MATRIX is absent; AST-based counting eliminates the regex false-positive class (226→223 convergence with vitest's own count); 9/9 local tests + 223/223 full suite green; arch:verify, plugin:verify, metadata:check, registry:check all green before commit."
-    related_commits: []
+    related_commits: ["cef9e22"]
     related_decisions:
       ["MDR-005-meta-tooling-expansion-within-task-contract-scope"]
     snapshot_after: ".mission/snapshots/2026-04-17_v1.16.0_mission.yaml"
