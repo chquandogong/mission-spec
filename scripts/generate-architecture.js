@@ -32,6 +32,12 @@ const currentPath = join(
   "architecture",
   "ARCHITECTURE_CURRENT.yaml",
 );
+const apiRegistryPath = join(
+  projectDir,
+  ".mission",
+  "interfaces",
+  "API_REGISTRY.yaml",
+);
 
 function extractedToYamlModel(extracted) {
   return {
@@ -134,15 +140,53 @@ function verifyCurrentMode() {
       : [];
     const srcDeps = [...extractedMod.depends_on].sort();
     const missing = srcDeps.filter((d) => !curDeps.includes(d));
+    const extra = curDeps.filter((d) => !srcDeps.includes(d));
     if (missing.length > 0) {
       mismatches.push(
         `module '${id}' depends_on missing entries from ARCHITECTURE_CURRENT.yaml: ${missing.join(", ")}`,
       );
     }
+    if (extra.length > 0) {
+      mismatches.push(
+        `module '${id}' depends_on has extra entries not found in src/: ${extra.join(", ")}`,
+      );
+    }
+  }
+
+  if (existsSync(apiRegistryPath)) {
+    const apiRegistry = loadYaml(apiRegistryPath);
+    const registryFunctions = Array.isArray(apiRegistry?.public_api?.functions)
+      ? apiRegistry.public_api.functions
+          .map((entry) =>
+            typeof entry?.name === "string" ? entry.name : null,
+          )
+          .filter(Boolean)
+          .sort()
+      : [];
+    const extractedFunctions = [...extracted.public_api.functions].sort();
+    const missingFunctions = extractedFunctions.filter(
+      (name) => !registryFunctions.includes(name),
+    );
+    const extraFunctions = registryFunctions.filter(
+      (name) => !extractedFunctions.includes(name),
+    );
+
+    if (missingFunctions.length > 0) {
+      mismatches.push(
+        `API_REGISTRY.yaml public_api.functions missing entries from src/index.ts: ${missingFunctions.join(", ")}`,
+      );
+    }
+    if (extraFunctions.length > 0) {
+      mismatches.push(
+        `API_REGISTRY.yaml public_api.functions has extra entries not exported by src/index.ts: ${extraFunctions.join(", ")}`,
+      );
+    }
   }
 
   if (mismatches.length === 0) {
-    console.log("ARCHITECTURE_CURRENT.yaml module list is in sync with src/.");
+    console.log(
+      "ARCHITECTURE_CURRENT.yaml and API_REGISTRY.yaml are in sync with src/.",
+    );
     return;
   }
   console.error("ARCHITECTURE_CURRENT.yaml is out of sync with src/:");

@@ -44,6 +44,19 @@ function runScript(args: string[] = []) {
 }
 
 describe("generate-architecture script", () => {
+  function writeApiRegistry(functionNames: string[]) {
+    mkdirSync(join(tempDir, ".mission", "interfaces"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "interfaces", "API_REGISTRY.yaml"),
+      [
+        "public_api:",
+        "  functions:",
+        ...functionNames.map((name) => `    - name: ${name}`),
+        "",
+      ].join("\n"),
+    );
+  }
+
   it("default mode writes ARCHITECTURE_COMPUTED.yaml with sorted module list", () => {
     mkdirSync(join(tempDir, "src/core"), { recursive: true });
     mkdirSync(join(tempDir, "src/commands"), { recursive: true });
@@ -125,7 +138,6 @@ describe("generate-architecture script", () => {
         "",
       ].join("\n"),
     );
-
     const stdout = runScript(["--verify-current"]);
     expect(stdout).toContain("in sync");
   });
@@ -139,6 +151,55 @@ describe("generate-architecture script", () => {
       join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
       "modules:\n  - id: parser\n    path: src/schema/parser.ts\n    depends_on: []\n",
     );
+
+    expect(() => runScript(["--verify-current"])).toThrow();
+  });
+
+  it("--verify-current fails when ARCHITECTURE_CURRENT.yaml has extra depends_on entries", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs(
+      "src/core/reader.ts",
+      `import { parse } from "./parser.js";\nexport function read() { return parse(); }\n`,
+    );
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "  - id: reader",
+        "    path: src/core/reader.ts",
+        "    depends_on: [parser, ghost]",
+        "",
+      ].join("\n"),
+    );
+    expect(() => runScript(["--verify-current"])).toThrow();
+  });
+
+  it("--verify-current fails when API_REGISTRY.yaml public_api drifts from src/index.ts", () => {
+    mkdirSync(join(tempDir, "src/core"), { recursive: true });
+    writeTs("src/core/parser.ts", "export function parse() {}\n");
+    writeTs("src/index.ts", `export { parse } from "./core/parser.js";\n`);
+
+    mkdirSync(join(tempDir, ".mission", "architecture"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "architecture", "ARCHITECTURE_CURRENT.yaml"),
+      [
+        "modules:",
+        "  - id: index",
+        "    path: src/index.ts",
+        "    depends_on: [parser]",
+        "  - id: parser",
+        "    path: src/core/parser.ts",
+        "    depends_on: []",
+        "",
+      ].join("\n"),
+    );
+    writeApiRegistry(["ghost"]);
 
     expect(() => runScript(["--verify-current"])).toThrow();
   });

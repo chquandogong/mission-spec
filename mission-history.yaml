@@ -4,15 +4,59 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.13 — Release Path & History i18n"
+  mission_title: "Mission Spec v1.13.1 — Stricter Drift & Publish Ref Guards"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 13
-  latest_version: "1.13.0"
+  total_revisions: 14
+  latest_version: "1.13.1"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-006"
+    semantic_version: "1.13.1"
+    change_sequence: 18
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "bugfix"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Tighten drift detection to be symmetric and harden the npm publish path against releases from non-main refs."
+    decision: "Extend arch:verify to catch (1) extra depends_on entries in ARCHITECTURE_CURRENT.yaml (phantom modules never imported by src/), and (2) public_api.functions drift between API_REGISTRY.yaml and src/index.ts (missing + extra). Harden release.yml: before publish, verify ref type is 'tag', tag name equals v${package.json.version}, and the commit is contained in origin/main (git merge-base --is-ancestor). Blocks ad-hoc tags on feature branches, force-pushed tags, and hotfix tags that never reached main — npm supply-chain hygiene."
+    triggered_by: "Post-v1.13.0 review of drift detection coverage; asymmetry in missing-vs-extra detection and the publish-from-any-ref risk surfaced during PROJECT_REVIEW_V1.8.0_2026-04-17 re-read"
+    changes:
+      added:
+        - "tests/scripts/generate-architecture.test.ts: 2 new cases (extra depends_on phantom detection, API_REGISTRY ghost function detection)"
+      modified:
+        - "scripts/generate-architecture.js: verifyCurrentMode now symmetric (detects both missing and extra depends_on) and validates API_REGISTRY.yaml public_api.functions against src/index.ts extractor output"
+        - ".github/workflows/release.yml: replaced 'Verify tag matches package.json' with 'Verify publish ref matches package.json and origin/main'; adds ref-type check and ancestry check via git merge-base"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.13.0 → 1.13.1"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added:
+        - "ARCHITECTURE_CURRENT.yaml phantom-deps detection enforced"
+        - "API_REGISTRY.yaml public_api.functions drift detection enforced"
+        - "npm publish refuses refs not contained in origin/main"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: false
+      runtime: true
+    breaking: false
+    risk: "low — validation tightening only. Current registries are already clean (verified by running arch:verify after changes)."
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.13.1_mission.yaml"
+    follow_up:
+      - "Also validate DEPENDENCY_GRAPH.yaml edges vs extracted edges (currently only ARCHITECTURE_CURRENT.yaml is checked)"
+      - "Consider verifying exports[] per module in ARCHITECTURE_CURRENT.yaml against extracted exports (currently only depends_on is checked)"
+
   - change_id: "MSC-2026-04-17-005"
     semantic_version: "1.13.0"
     change_sequence: 17
