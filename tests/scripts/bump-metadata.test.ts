@@ -94,7 +94,9 @@ describe.concurrent("bump-metadata script", () => {
     expect(content).not.toContain("1.15.0");
   });
 
-  it("--apply rewrites drifted Version headers across .md and .yaml files", async ({ fx }) => {
+  it("--apply rewrites drifted Version headers across .md and .yaml files", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMission(
       "CURRENT_STATE.md",
@@ -128,7 +130,9 @@ describe.concurrent("bump-metadata script", () => {
     ).toContain("Version: 1.15.0");
   });
 
-  it("--check exits 0 when every .mission/ header matches package.json", async ({ fx }) => {
+  it("--check exits 0 when every .mission/ header matches package.json", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMission("CURRENT_STATE.md", "> Version: 1.15.0\n");
     fx.writeMission("interfaces/API_REGISTRY.yaml", "# Version: 1.15.0\n");
@@ -164,7 +168,9 @@ describe.concurrent("bump-metadata script", () => {
     expect(stdout).toContain("No changes needed");
   });
 
-  it("only touches .md and .yaml files (skips .txt, .json, etc.)", async ({ fx }) => {
+  it("only touches .md and .yaml files (skips .txt, .json, etc.)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMission("notes.txt", "Version: 1.14.0\n"); // .txt — ignored
     fx.writeMission("data.json", '{"version":"1.14.0"}\n'); // .json — ignored
@@ -178,19 +184,23 @@ describe.concurrent("bump-metadata script", () => {
     expect(
       readFileSync(join(fx.tempDir, ".mission/data.json"), "utf-8"),
     ).toContain("1.14.0"); // untouched
-    expect(readFileSync(join(fx.tempDir, ".mission/real.md"), "utf-8")).toContain(
-      "Version: 1.15.0",
-    );
+    expect(
+      readFileSync(join(fx.tempDir, ".mission/real.md"), "utf-8"),
+    ).toContain("Version: 1.15.0");
   });
 
-  it("errors when package.json.version is not a valid semver triplet", async ({ fx }) => {
+  it("errors when package.json.version is not a valid semver triplet", async ({
+    fx,
+  }) => {
     fx.writePkg("not-a-version");
     fx.writeMission("CURRENT_STATE.md", "> Version: 1.14.0\n");
 
     await expect(fx.runScript()).rejects.toThrow();
   });
 
-  it("handles absence of .mission/ directory gracefully (no-op)", async ({ fx }) => {
+  it("handles absence of .mission/ directory gracefully (no-op)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     // no .mission/ at all
 
@@ -198,7 +208,9 @@ describe.concurrent("bump-metadata script", () => {
     expect(stdout).toContain("No changes needed");
   });
 
-  it("skips .mission/decisions/ — MDR Version fields are historical records", async ({ fx }) => {
+  it("skips .mission/decisions/ — MDR Version fields are historical records", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     // MDR style body, mirrors real MDR-001 etc.
     fx.writeMission(
@@ -217,7 +229,9 @@ describe.concurrent("bump-metadata script", () => {
     expect(body).not.toContain("Version: 1.15.0");
   });
 
-  it("skips .mission/snapshots/ and .mission/templates/ (historical + placeholder)", async ({ fx }) => {
+  it("skips .mission/snapshots/ and .mission/templates/ (historical + placeholder)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMission(
       "snapshots/2026-04-02_v1.0.0_mission.yaml",
@@ -244,7 +258,9 @@ describe.concurrent("bump-metadata script", () => {
     ).toContain("**Version:** X.Y.Z");
   });
 
-  it("--apply rewrites drifted Title line in CURRENT_STATE.md (E-6)", async ({ fx }) => {
+  it("--apply rewrites drifted Title line in CURRENT_STATE.md (E-6)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMissionYaml("Mission Spec v1.15.0 — Fresh");
     fx.writeMission(
@@ -269,7 +285,9 @@ describe.concurrent("bump-metadata script", () => {
     expect(body).not.toContain("Mission Spec v1.14.0 — Stale");
   });
 
-  it("--check exits 1 when Title line drifts from mission.yaml (E-6)", async ({ fx }) => {
+  it("--check exits 1 when Title line drifts from mission.yaml (E-6)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMissionYaml("Mission Spec v1.15.0 — Fresh");
     fx.writeMission(
@@ -284,7 +302,9 @@ describe.concurrent("bump-metadata script", () => {
     await expect(fx.runScript(["--check"])).rejects.toThrow();
   });
 
-  it("--apply updates both Title and Version in a single pass (E-6)", async ({ fx }) => {
+  it("--apply updates both Title and Version in a single pass (E-6)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.16.0");
     fx.writeMissionYaml("Mission Spec v1.16.0 — Bump");
     fx.writeMission(
@@ -306,7 +326,9 @@ describe.concurrent("bump-metadata script", () => {
     expect(body).toContain("- **Title:** Mission Spec v1.16.0 — Bump");
   });
 
-  it("graceful when mission.yaml is absent — Version sync still works (E-6)", async ({ fx }) => {
+  it("graceful when mission.yaml is absent — Version sync still works (E-6)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     // no mission.yaml
     fx.writeMission(
@@ -324,10 +346,15 @@ describe.concurrent("bump-metadata script", () => {
     expect(body).toContain("- **Title:** anything goes");
   });
 
-  it("graceful when CURRENT_STATE.md has no Title line — no error (E-6)", async ({ fx }) => {
+  it("graceful when CURRENT_STATE.md has no Title line — no error (E-6)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMissionYaml("Mission Spec v1.15.0 — Fresh");
-    fx.writeMission("CURRENT_STATE.md", "> Version: 1.14.0\nno title line here\n");
+    fx.writeMission(
+      "CURRENT_STATE.md",
+      "> Version: 1.14.0\nno title line here\n",
+    );
 
     await fx.runScript(["--apply"]);
     const body = readFileSync(
@@ -338,7 +365,9 @@ describe.concurrent("bump-metadata script", () => {
     // No Title line to update; file should still be valid
   });
 
-  it("leaves Title line unchanged when already matching (E-6)", async ({ fx }) => {
+  it("leaves Title line unchanged when already matching (E-6)", async ({
+    fx,
+  }) => {
     fx.writePkg("1.15.0");
     fx.writeMissionYaml("Mission Spec v1.15.0 — Match");
     fx.writeMission(
@@ -352,5 +381,73 @@ describe.concurrent("bump-metadata script", () => {
 
     const stdout = await fx.runScript(["--apply"]);
     expect(stdout).toContain("No changes needed");
+  });
+
+  // C-3 (PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4, Codex §4) — Title auto-sync
+  // must be scoped to CURRENT_STATE.md only. Before v1.16.10 TITLE_RE matched
+  // any `- **Title:** X` line in any .mission file, silently corrupting them.
+  // Fix: filename guard restricts Title rewrite to basename === CURRENT_STATE.md.
+
+  it("does NOT rewrite Title in .mission files other than CURRENT_STATE.md (C-3)", async ({
+    fx,
+  }) => {
+    fx.writePkg("1.15.0");
+    fx.writeMissionYaml("Canonical Mission Title");
+    fx.writeMission(
+      "CURRENT_STATE.md",
+      ["> Version: 1.15.0", "- **Title:** Canonical Mission Title", ""].join(
+        "\n",
+      ),
+    );
+    fx.writeMission(
+      "NOTES.md",
+      [
+        "# Maintainer notes",
+        "",
+        "> Version: 1.15.0",
+        "",
+        "- **Title:** Draft note about something unrelated",
+        "- Another bullet",
+        "",
+      ].join("\n"),
+    );
+
+    await fx.runScript(["--apply"]);
+
+    const notes = readFileSync(join(fx.tempDir, ".mission/NOTES.md"), "utf-8");
+    expect(notes).toContain(
+      "- **Title:** Draft note about something unrelated",
+    );
+    expect(notes).not.toContain("- **Title:** Canonical Mission Title");
+  });
+
+  it("still rewrites Title in CURRENT_STATE.md when other .mission files have Title lines (C-3)", async ({
+    fx,
+  }) => {
+    fx.writePkg("1.15.0");
+    fx.writeMissionYaml("Fresh Title");
+    fx.writeMission(
+      "CURRENT_STATE.md",
+      ["> Version: 1.15.0", "- **Title:** Stale Title", ""].join("\n"),
+    );
+    fx.writeMission(
+      "ARBITRARY.md",
+      "- **Title:** Irrelevant bullet in a different doc\n",
+    );
+
+    await fx.runScript(["--apply"]);
+
+    const cs = readFileSync(
+      join(fx.tempDir, ".mission/CURRENT_STATE.md"),
+      "utf-8",
+    );
+    expect(cs).toContain("- **Title:** Fresh Title");
+    const arbitrary = readFileSync(
+      join(fx.tempDir, ".mission/ARBITRARY.md"),
+      "utf-8",
+    );
+    expect(arbitrary).toContain(
+      "- **Title:** Irrelevant bullet in a different doc",
+    );
   });
 });

@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-17 | Version: 1.16.9
+> Last updated: 2026-04-17 | Version: 1.16.10
 
 ## 전제 조건
 
@@ -73,7 +73,7 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 
 ## Phase 7: 검증 (총 9+ 축)
 
-32. `npm test` — 현재 기준 246 tests 전수 통과 (21 test files)
+32. `npm test` — 현재 기준 248 tests 전수 통과 (21 test files)
 33. `npm run test:coverage` — stmts/branches/functions/lines ≥ 80/75/80/80 (현 baseline 93.95 / 83.59 / 95.52 / 93.95)
 34. `node scripts/validate-schema.js` — 스키마 검증 (3 fixtures)
 35. `node scripts/convert-platforms.js --verify` — 6개 플랫폼

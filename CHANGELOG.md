@@ -6,6 +6,19 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.10] - 2026-04-18
+_Close C-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §4, Medium) — restrict bump-metadata.js Title auto-sync to CURRENT_STATE.md only, eliminating the silent rewrite of any `- **Title:** X` line across .mission/ that Codex reproduced with NOTES.md._
+
+### Changed
+
+- scripts/bump-metadata.js: TITLE_SYNC_FILENAMES whitelist Set + basename import + computeUpdates()에 filename guard 추가
+- tests/scripts/bump-metadata.test.ts: +2 C-3 tests (scope guard + still rewrites CURRENT_STATE)
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: test count 246 → 248
+- .mission/traceability/TRACE_MATRIX.yaml: inline 246 → 248; bump-metadata.test cases 17 → 19 with C-3 category; 헤더 v1.16.9 → v1.16.10
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.9 → 1.16.10
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.10 via metadata:sync (11th D-3 invocation); CURRENT_STATE.md Title 라인 auto-synced via v1.16.3 E-6 — 이 릴리스의 dogfood는 C-3 guard가 Title rewrite를 CURRENT_STATE.md로 제한하는지 확인 (다른 .mission/ 파일에 Title 라인 없음 → trivially green)
+
 ## [1.16.9] - 2026-04-18
 _Close F-4 + C-4 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 §8 item 2 — extend registry:check CURRENT_STATE coverage so (a) Title label is format-tolerant across locales (C-4), (b) existing-but-unlabeled CURRENT_STATE.md fails loud instead of silently passing (C-4), (c) `## 최근 구현 (vA ~ vB)` header is caught as stale when its upper bound trails package.json.version (F-4). Also refresh the CURRENT_STATE.md prose sections (최근 구현 / 직전 구현 / 다음 변경 후보) from the v1.14.0-era snapshot to the current v1.14.2 ~ v1.16.9 reality — the gap that Gemini Rev.2 Findings #2 specifically pinpointed._
 

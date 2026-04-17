@@ -4,15 +4,66 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.9 — CURRENT_STATE 3-axis hardening (F-4+C-4)"
+  mission_title: "Mission Spec v1.16.10 — bump-metadata filename guard (C-3)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 29
-  latest_version: "1.16.9"
+  total_revisions: 30
+  latest_version: "1.16.10"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-003"
+    semantic_version: "1.16.10"
+    change_sequence: 34
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "bugfix"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close C-3 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §4, Medium) — restrict bump-metadata.js Title auto-sync to CURRENT_STATE.md only, eliminating the silent rewrite of any `- **Title:** X` line across .mission/ that Codex reproduced with NOTES.md."
+    decision: |
+      Single-line logical fix: `TITLE_SYNC_FILENAMES` whitelist Set introduced in scripts/bump-metadata.js with CURRENT_STATE.md as the only entry. `computeUpdates()`가 TITLE_RE를 적용하기 전에 basename(file)이 whitelist에 포함되는지 체크. v1.16.3 E-6 구현 당시 주석에 "currently just CURRENT_STATE.md"라고 의도를 적었지만 filename guard는 없어서 live doc scope leak 가능했다 — Codex가 temp NOTES.md로 재현. Whitelist는 의도적으로 좁고(현재 1개) 미래 .mission/ 자산이 Title sync를 요구하면 이 Set에 explicit 추가. 2 new tests in bump-metadata.test.ts: (a) .mission/NOTES.md의 `- **Title:**`은 --apply 후에도 보존, (b) CURRENT_STATE.md의 Title은 다른 .mission 파일에 Title 라인이 있어도 정상 rewrite. 17 → 19 bump-metadata tests, 246 → 248 full suite.
+    triggered_by: "v1.16.9 entry MSC-2026-04-18-002 follow_up 2번째 항목 (C-3) — Rev.4 §8 item 4."
+    issue_or_context: "Codex Rev.2 §4 재현: temp fixture의 .mission/NOTES.md에 `- **Title:** Draft note`를 두고 --apply 실행 시 NOTES.md의 Title이 mission.yaml.title로 덮어써진 사례. Claude Rev.1 / Gemini Rev.2는 이 케이스 미발견 (Codex 직접 실행 고유 기여). 현 저장소에는 CURRENT_STATE.md 외 .mission 파일에 `- **Title:**` 패턴을 쓴 곳이 없어 즉시 폭발하지 않았지만, 미래 maintainer notes / draft docs가 추가되는 순간 silent corruption 위험."
+    changes:
+      added: []
+      modified:
+        - "scripts/bump-metadata.js: TITLE_SYNC_FILENAMES whitelist Set + basename import + computeUpdates()에 filename guard 추가"
+        - "tests/scripts/bump-metadata.test.ts: +2 C-3 tests (scope guard + still rewrites CURRENT_STATE)"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: test count 246 → 248"
+        - ".mission/traceability/TRACE_MATRIX.yaml: inline 246 → 248; bump-metadata.test cases 17 → 19 with C-3 category; 헤더 v1.16.9 → v1.16.10"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.9 → 1.16.10"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.10 via metadata:sync (11th D-3 invocation); CURRENT_STATE.md Title 라인 auto-synced via v1.16.3 E-6 — 이 릴리스의 dogfood는 C-3 guard가 Title rewrite를 CURRENT_STATE.md로 제한하는지 확인 (다른 .mission/ 파일에 Title 라인 없음 → trivially green)"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "bump-metadata.js Title rewrite scope이 CURRENT_STATE.md에만 적용됨 — 미래 .mission/ 자산에 `- **Title:** X` 라인이 포함되어도 corruption 없음"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "low — 기존 functionality에 제약 추가만, 확장 없음; 19/19 bump-metadata + 248/248 full suite green; C-1 closure 이후 5/5 consecutive runs determinism 유지 확인. 의도적 제약: 미래 maintainer가 다른 .mission/ 파일에 Title sync를 원하면 TITLE_SYNC_FILENAMES Set에 explicit 추가 필요 — discoverable via fail-loud pattern이 아님(silent no-op). Trade-off 허용 (over-inclusive scope leak이 더 위험). Semantic version: patch per MDR-006 §PATCH 4 (bugfix: existing script scope leak 수정, no consumer surface change)."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.10_mission.yaml"
+    follow_up:
+      - "F-3 (Rev.4 §8 item 5): arch:verify package_exports deep-compare"
+      - "F-10 (Rev.4 §8 item 3): README.md ko/zh/en v1.14.3 ~ v1.16.10 반영"
+      - "C-2 (Rev.4 §8 item 2 deferred): live evaluateMission coupling via `--verify-live` mode"
+      - "F-1 cold-build CI 실전 호출"
+      - "E-4 외부 adopter 확보"
+
   - change_id: "MSC-2026-04-18-002"
     semantic_version: "1.16.9"
     change_sequence: 33

@@ -24,7 +24,7 @@ import {
   statSync,
   existsSync,
 } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { parse as parseYaml } from "yaml";
 
 const projectDir = process.cwd();
@@ -66,6 +66,14 @@ function loadMissionTitle() {
 
 const VERSION_RE = /(Version:\s*)(\d+\.\d+\.\d+)/;
 const TITLE_RE = /^(\s*-\s*\*\*Title:\*\*\s+)(.+?)\s*$/m;
+
+// C-3 (PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4, Codex §4): Title auto-sync is
+// restricted to CURRENT_STATE.md by filename. Before v1.16.10 TITLE_RE would
+// silently rewrite any `- **Title:** X` line across .mission/ — Codex
+// reproduced corruption with a temp NOTES.md. The whitelist is intentional:
+// if a future .mission/ asset needs Title sync, add it here explicitly
+// rather than expanding the regex.
+const TITLE_SYNC_FILENAMES = new Set(["CURRENT_STATE.md"]);
 
 // Subdirectories under .mission/ whose Version fields are historical records
 // (the version at the time of that artifact's creation), not the current
@@ -117,13 +125,13 @@ function computeUpdates(targetVersion, missionTitle) {
       });
     }
 
-    // E-6: Title line applies only to files that carry one (currently just
-    // CURRENT_STATE.md). TITLE_RE is intentionally conservative — it matches
-    // `- **Title:** …` with optional leading whitespace, nothing else, so MDR
-    // / snapshot bodies don't get rewritten even if they happen to quote a
-    // title elsewhere. decisions/ / snapshots/ / templates/ / evals/ are also
-    // excluded by EXCLUDE_SUBDIRS.
-    if (missionTitle != null) {
+    // E-6 + C-3 (v1.16.10): Title line is rewritten only for files whose
+    // basename is in TITLE_SYNC_FILENAMES (currently just CURRENT_STATE.md).
+    // Before the filename guard, any .mission file containing `- **Title:**`
+    // was silently corrupted — Codex Rev.2 §4 reproduced this with NOTES.md.
+    // EXCLUDE_SUBDIRS still blocks decisions/ / snapshots/ / templates/ /
+    // evals/; the whitelist is an additional, more specific guard.
+    if (missionTitle != null && TITLE_SYNC_FILENAMES.has(basename(file))) {
       const tm = next.match(TITLE_RE);
       if (tm && tm[2].trim() !== missionTitle) {
         next = next.replace(TITLE_RE, `$1${missionTitle}`);
