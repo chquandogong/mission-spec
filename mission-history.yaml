@@ -4,15 +4,72 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.8 — Test timeout determinism (C-1)"
+  mission_title: "Mission Spec v1.16.9 — CURRENT_STATE 3-axis hardening (F-4+C-4)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 28
-  latest_version: "1.16.8"
+  total_revisions: 29
+  latest_version: "1.16.9"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-18-002"
+    semantic_version: "1.16.9"
+    change_sequence: 33
+    date: "2026-04-18"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "enhancement"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Close F-4 + C-4 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 §8 item 2 — extend registry:check CURRENT_STATE coverage so (a) Title label is format-tolerant across locales (C-4), (b) existing-but-unlabeled CURRENT_STATE.md fails loud instead of silently passing (C-4), (c) `## 최근 구현 (vA ~ vB)` header is caught as stale when its upper bound trails package.json.version (F-4). Also refresh the CURRENT_STATE.md prose sections (최근 구현 / 직전 구현 / 다음 변경 후보) from the v1.14.0-era snapshot to the current v1.14.2 ~ v1.16.9 reality — the gap that Gemini Rev.2 Findings #2 specifically pinpointed."
+    decision: |
+      Three bundled changes, all tightly scoped to closing gaps the 3-vendor Rev.4 review flagged. (1) C-4 label tolerance: `scripts/verify-registry.js:250-275`의 TITLE_RE가 `Title|제목|标题|タイトル` 4 locale label을 수용하도록 확장. 동시에 CURRENT_STATE.md가 존재하지만 **어떤 Title 라벨도 없는 경우 fail**하도록 추가 — v1.16.8 이전에는 silent skip이어서 drift detector가 조용히 비활성화됐다. (2) F-4 최근 구현 range check: `scripts/verify-registry.js:283-303`에 `## 최근 구현 (vA ~ vB)` 정규식 + `compareSemver` + `loadPackageVersion` helper 추가. upper bound < package.json.version이면 drift 판정. MDR-007 정책 준수를 위해 header의 '최근 구현' label은 Korean-coupled로 유지 (다른 .mission/ 자산과 일관). (3) `.mission/CURRENT_STATE.md:44-67` prose sections 갱신 — `최근 구현 (v1.14.0 ~ v1.14.1)` → `최근 구현 (v1.14.2 ~ v1.16.9)` 및 실제 closed E/F/C-items로 내용 재작성, `직전 구현 (v1.13.x)` → `직전 구현 (v1.9.0 ~ v1.14.1)`으로 확장, `다음 변경 후보`를 Rev.4 §8의 남은 C-2/C-3/F-3/F-10/F-1/E-4/F-9로 재구성. 실행 과정: 먼저 verifier만 배치하면 본 저장소가 즉시 drift 판정(v1.14.1 < 1.16.8)을 내며 fail하므로 같은 릴리스에서 prose 갱신 + verifier를 묶음 — 검증기 생성과 첫 dogfood가 같은 commit에 들어가는 5번째 self-corrective loop 사례.
+    triggered_by: "v1.16.8 entry MSC-2026-04-18-001 follow_up 첫 항목 (Rev.4 §8 item 2). Rev.4의 3-item merge(F-4 + C-4 + C-2) 중 C-2는 heavyweight(verify-registry가 evaluateMission을 호출해야 함)이라 별도 릴리스(v1.16.10 후보)로 분리 결정."
+    issue_or_context: "Codex Rev.2 §5가 format-coupling을 Low로, Gemini Rev.2 Findings #2가 prose stale을 Medium으로, Claude Rev.1 §3.2가 F-4를 일반적 문제로 제기. 세 각도의 교집합은 'CURRENT_STATE.md가 표면 검증기에 비해 실제 drift가 넓다'는 것. 세 지적을 한 릴리스 안에 기계적으로 닫고 동시에 prose 본문 자체도 v1.14 → v1.16.9으로 이동."
+    changes:
+      added: []
+      modified:
+        - "scripts/verify-registry.js: TITLE_RE가 Title/제목/标题/タイトル 수용; CURRENT_STATE.md exists + no Title match인 경우 explicit failure; loadPackageVersion + compareSemver helper 추가; 최근 구현 (vA ~ vB) upper bound 검증 추가"
+        - "tests/scripts/verify-registry.test.ts: +7 tests (C-4 locale 4개 + F-4 3개); 전체 14 → 21 tests"
+        - ".mission/CURRENT_STATE.md: 최근 구현 (v1.14.0~v1.14.1) → (v1.14.2~v1.16.9) 헤더 + body 10 items 재작성; 직전 구현 (v1.13.x) → (v1.9.0~v1.14.1) 요약; 다음 변경 후보를 Rev.4 §8 남은 후속작업 7건으로 재구성"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: test count 239 → 246"
+        - ".mission/traceability/TRACE_MATRIX.yaml: inline 239 → 246; verify-registry.test cases 14 → 21 with 7 new C-4/F-4 categories; 헤더 v1.16.7 → v1.16.9"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.8 → 1.16.9"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.9 via metadata:sync (10번째 D-3 invocation); CURRENT_STATE.md Title 라인 auto-synced via v1.16.3 E-6"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "registry:check는 이제 (a) 존재하지만 label 없는 CURRENT_STATE.md를 silent skip 대신 explicit failure로 처리, (b) Title 라벨 locale 변화를 허용, (c) 최근 구현 version range stale을 drift로 판정"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — verify-registry의 기능 확장 + CURRENT_STATE prose 갱신; 21/21 verify-registry tests + 246/246 full suite green; 5/5 consecutive npm test runs (C-1 closure 이후 determinism 유지 확인). 새로운 false-positive 리스크: TITLE_RE가 Title|제목|标题|タイトル 4 locale만 허용 — 일본어 외 언어(예: 스페인어 'Título') 도입 시 no-Title failure 발동. 의도된 동작(silent skip 방지). Semantic version: patch per MDR-006 §PATCH 1 (기존 validator drift-range 확장) + §PATCH 7 (.mission/ descriptive asset 내용 갱신)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-18_v1.16.9_mission.yaml"
+    follow_up:
+      - "C-2 (Codex Rev.2 §2): CURRENT_STATE.md 9/9 PASS를 live evaluateMission 결과와 mechanically tie — v1.16.10 candidate. `--verify-live` flag 옵션으로 registry:check heavy mode 추가 설계"
+      - "C-3 (Codex Rev.2 §4): bump-metadata TITLE_RE scope leak filename guard"
+      - "F-3 (Claude Rev.1 + Codex Rev.2 §3): arch:verify package_exports deep-compare"
+      - "F-10 (Gemini Rev.2 Bottom Line): README.md ko/zh/en v1.14.3 ~ v1.16.9 변경 반영"
+      - "F-1 (cold-build CI 실전): C-1 완료 후 viable — v1.16.9 태그 푸시 실험"
+      - "E-4 외부 adopter 1+ 확보 — advocacy 영역, 주 단위 작업"
+
   - change_id: "MSC-2026-04-18-001"
     semantic_version: "1.16.8"
     change_sequence: 32

@@ -186,7 +186,9 @@ describe.concurrent("verify-registry script", () => {
     );
   });
 
-  it("detects drift when TRACE_MATRIX inline count is wrong", async ({ fx }) => {
+  it("detects drift when TRACE_MATRIX inline count is wrong", async ({
+    fx,
+  }) => {
     fx.writeStandardFixture();
     fx.writePlaybook("# Playbook\n");
     fx.writeTrace(
@@ -368,6 +370,138 @@ describe.concurrent("verify-registry script", () => {
   it("graceful when CURRENT_STATE.md is absent (E-8)", async ({ fx }) => {
     fx.writeStandardFixture();
     fx.writeMission("X", ["a"]);
+    const stdout = await fx.runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  // C-4 (PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4, Codex §5) — CURRENT_STATE.md
+  // format coupling: `- **Title:**` is not the only valid label. If a
+  // maintainer uses `- **제목:**` (Korean) the existing check silently
+  // passed, disabling the drift detector. v1.16.9 broadens TITLE_RE to
+  // accept Title / 제목 / 标题 / タイトル, and fails when CURRENT_STATE.md
+  // exists but contains no recognisable Title label at all.
+
+  it("passes when CURRENT_STATE.md uses Korean 제목 label matching mission.yaml (C-4)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("Korean Label Project", ["a"]);
+    fx.writeCurrentState(
+      ["# Current State", "", "- **제목:** Korean Label Project", ""].join(
+        "\n",
+      ),
+    );
+
+    const stdout = await fx.runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  it("passes when CURRENT_STATE.md uses Chinese 标题 label matching mission.yaml (C-4)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("中文标题 Project", ["a"]);
+    fx.writeCurrentState(
+      ["# Current State", "", "- **标题:** 中文标题 Project", ""].join("\n"),
+    );
+
+    const stdout = await fx.runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  it("detects drift when 제목 label has stale content (C-4)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("Fresh Title", ["a"]);
+    fx.writeCurrentState(
+      ["# Current State", "", "- **제목:** Stale Title", ""].join("\n"),
+    );
+
+    await expect(fx.runScript()).rejects.toThrow(
+      /CURRENT_STATE\.md Title line/,
+    );
+  });
+
+  it("fails when CURRENT_STATE.md exists but contains no Title label at all (C-4)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("X", ["a"]);
+    fx.writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "This file exists but has no - **Title:** / 제목 / 标题 line.",
+        "",
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript()).rejects.toThrow(
+      /CURRENT_STATE\.md exists but no Title/,
+    );
+  });
+
+  // F-4 (PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4, Gemini Findings #2 +
+  // Claude §3.2) — `## 최근 구현 (vA ~ vB)` header should not claim a
+  // range whose upper version trails the current package.json.version.
+  // The existing v1.16.x CURRENT_STATE.md still said `(v1.14.0 ~ v1.14.1)`
+  // as "recent" despite 6 more releases, and neither Title nor PASS-count
+  // checks caught that class of drift.
+
+  it("passes when 최근 구현 header range includes current version (F-4)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture("package.json", '{"name":"fx","version":"1.16.9"}\n');
+    fx.writeMission("X", ["a"]);
+    fx.writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 최근 구현 (v1.14.2 ~ v1.16.9)",
+        "",
+        "- [x] change",
+        "",
+      ].join("\n"),
+    );
+
+    const stdout = await fx.runScript();
+    expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  it("detects drift when 최근 구현 header upper bound is older than package.json (F-4)", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture("package.json", '{"name":"fx","version":"1.16.9"}\n');
+    fx.writeMission("X", ["a"]);
+    fx.writeCurrentState(
+      [
+        "# Current State",
+        "",
+        "- **Title:** X",
+        "",
+        "## 최근 구현 (v1.14.0 ~ v1.14.1)",
+        "",
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript()).rejects.toThrow(
+      /최근 구현.*1\.14\.1.*behind.*1\.16\.9/,
+    );
+  });
+
+  it("graceful when 최근 구현 section is absent (F-4)", async ({ fx }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture("package.json", '{"name":"fx","version":"1.16.9"}\n');
+    fx.writeMission("X", ["a"]);
+    fx.writeCurrentState(
+      ["# Current State", "", "- **Title:** X", ""].join("\n"),
+    );
+
     const stdout = await fx.runScript();
     expect(stdout).toContain("Registry freshness check passed");
   });

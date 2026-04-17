@@ -6,6 +6,20 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.9] - 2026-04-18
+_Close F-4 + C-4 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 §8 item 2 — extend registry:check CURRENT_STATE coverage so (a) Title label is format-tolerant across locales (C-4), (b) existing-but-unlabeled CURRENT_STATE.md fails loud instead of silently passing (C-4), (c) `## 최근 구현 (vA ~ vB)` header is caught as stale when its upper bound trails package.json.version (F-4). Also refresh the CURRENT_STATE.md prose sections (최근 구현 / 직전 구현 / 다음 변경 후보) from the v1.14.0-era snapshot to the current v1.14.2 ~ v1.16.9 reality — the gap that Gemini Rev.2 Findings #2 specifically pinpointed._
+
+### Changed
+
+- scripts/verify-registry.js: TITLE_RE가 Title/제목/标题/タイトル 수용; CURRENT_STATE.md exists + no Title match인 경우 explicit failure; loadPackageVersion + compareSemver helper 추가; 최근 구현 (vA ~ vB) upper bound 검증 추가
+- tests/scripts/verify-registry.test.ts: +7 tests (C-4 locale 4개 + F-4 3개); 전체 14 → 21 tests
+- .mission/CURRENT_STATE.md: 최근 구현 (v1.14.0~v1.14.1) → (v1.14.2~v1.16.9) 헤더 + body 10 items 재작성; 직전 구현 (v1.13.x) → (v1.9.0~v1.14.1) 요약; 다음 변경 후보를 Rev.4 §8 남은 후속작업 7건으로 재구성
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: test count 239 → 246
+- .mission/traceability/TRACE_MATRIX.yaml: inline 239 → 246; verify-registry.test cases 14 → 21 with 7 new C-4/F-4 categories; 헤더 v1.16.7 → v1.16.9
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.8 → 1.16.9
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.9 via metadata:sync (10번째 D-3 invocation); CURRENT_STATE.md Title 라인 auto-synced via v1.16.3 E-6
+
 ## [1.16.8] - 2026-04-18
 _Close C-1 from PROJECT_REVIEW_SNAPSHOT_V1.16.7 Rev.4 (Codex Rev.2 §1, High) — eliminate the order-dependent test flakiness introduced by the v1.16.6 E-7 concurrency refactor, so that `npm test` / `npm run test:coverage` return the same green signal across consecutive runs regardless of CPU warmth._
 

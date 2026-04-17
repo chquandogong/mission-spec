@@ -98,6 +98,29 @@ function countPlatforms() {
   return matches ? matches.length : 0;
 }
 
+// F-4 helpers. Tiny semver compare that avoids pulling `semver` (MDR-003
+// minimal-deps). Inputs are triplets; no prerelease / build metadata handling
+// needed for our use case (CURRENT_STATE 헤더 version is always a plain
+// X.Y.Z from mission.yaml / package.json).
+function loadPackageVersion() {
+  const p = join(projectDir, "package.json");
+  if (!existsSync(p)) return null;
+  try {
+    const pkg = JSON.parse(readFileSync(p, "utf-8"));
+    return typeof pkg.version === "string" ? pkg.version : null;
+  } catch {
+    return null;
+  }
+}
+
+function compareSemver(a, b) {
+  const [aA, aB, aC] = a.split(".").map((x) => parseInt(x, 10) || 0);
+  const [bA, bB, bC] = b.split(".").map((x) => parseInt(x, 10) || 0);
+  if (aA !== bA) return aA - bA;
+  if (aB !== bB) return aB - bB;
+  return aC - bC;
+}
+
 function groundTruth() {
   let arch = { modules: [], public_api: { functions: [] } };
   try {
@@ -241,15 +264,29 @@ function check() {
     }
   }
 
-  // E-8: CURRENT_STATE.md content checks — Title line mirrors mission.yaml
-  // title, and "완료 조건 (N/M PASS)" total must match done_when length.
+  // E-8 (v1.16.2) + C-4/F-4 (v1.16.9): CURRENT_STATE.md content checks.
+  // - Title line mirrors mission.yaml title. C-4: accept Title / 제목 / 标题 /
+  //   タイトル labels; fail if CURRENT_STATE.md exists but no recognisable
+  //   Title label found (silent-skip used to disable the detector).
+  // - "완료 조건 (N/M PASS)" total must match done_when length (E-8).
+  // - F-4: `## 최근 구현 (vA ~ vB)` header's upper bound must not trail
+  //   package.json.version. MDR-007 says .mission/ is maintainer-facing and
+  //   Korean-only, so the 최근 구현 label stays Korean-coupled by policy.
   const currentStatePath = join(projectDir, ".mission", "CURRENT_STATE.md");
   if (existsSync(currentStatePath)) {
     const body = readFileSync(currentStatePath, "utf-8");
 
     if (truth.missionTitle != null) {
-      const titleMatch = body.match(/^\s*-\s*\*\*Title:\*\*\s*(.+?)\s*$/m);
-      if (titleMatch) {
+      const titleMatch = body.match(
+        /^\s*-\s*\*\*(?:Title|제목|标题|タイトル):\*\*\s*(.+?)\s*$/m,
+      );
+      if (!titleMatch) {
+        mismatches.push(
+          "CURRENT_STATE.md exists but no Title label found " +
+            "(expected one of: `- **Title:** …`, `- **제목:** …`, " +
+            "`- **标题:** …`, `- **タイトル:** …`).",
+        );
+      } else {
         const claim = titleMatch[1].trim();
         if (claim !== truth.missionTitle) {
           mismatches.push(
@@ -272,6 +309,24 @@ function check() {
         if (claimPass > claimTotal) {
           mismatches.push(
             `CURRENT_STATE.md completion-condition count: PASS (${claimPass}) exceeds TOTAL (${claimTotal})`,
+          );
+        }
+      }
+    }
+
+    // F-4: version range of `## 최근 구현 (vA ~ vB)` must include current
+    // package.json.version. If absent, skip (graceful). If upper bound
+    // trails current, the section is stale by construction.
+    const currentVersion = loadPackageVersion();
+    if (currentVersion) {
+      const recentMatch = body.match(
+        /^##\s*최근\s*구현\s*\(v([\d.]+)\s*~\s*v([\d.]+)\)/m,
+      );
+      if (recentMatch) {
+        const upperBound = recentMatch[2];
+        if (compareSemver(upperBound, currentVersion) < 0) {
+          mismatches.push(
+            `CURRENT_STATE.md 최근 구현 header upper bound v${upperBound} is behind current package.json version v${currentVersion}`,
           );
         }
       }
