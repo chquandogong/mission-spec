@@ -78,6 +78,35 @@ describe("generateMdrDraft", () => {
     expect(result.slug).toBe("adopt-tdd-remove-orchestration");
   });
 
+  it("preserves Unicode letters in the generated slug and path", () => {
+    const result = generateMdrDraft({
+      title: "의존성 정책 변경",
+      projectDir: tempDir,
+    });
+    expect(result.slug).toBe("의존성-정책-변경");
+    expect(result.suggestedPath).toMatch(/MDR-001-의존성-정책-변경\.md$/u);
+  });
+
+  it("counts existing MDR files whose slugs contain Unicode letters", () => {
+    writeFile(".mission/decisions/MDR-004-의존성-정책-변경.md", "# MDR-004");
+
+    const result = generateMdrDraft({
+      title: "New Decision",
+      projectDir: tempDir,
+    });
+    expect(result.nextMdrNumber).toBe(5);
+    expect(result.suggestedPath).toMatch(/MDR-005-new-decision\.md$/);
+  });
+
+  it("falls back to a stable slug when title punctuation removes all tokens", () => {
+    const result = generateMdrDraft({
+      title: "!!!",
+      projectDir: tempDir,
+    });
+    expect(result.slug).toBe("decision");
+    expect(result.suggestedPath).toMatch(/MDR-001-decision\.md$/);
+  });
+
   it("fills provided sections and leaves placeholders for missing ones", () => {
     const result = generateMdrDraft({
       title: "Minimal Deps",

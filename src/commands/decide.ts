@@ -26,7 +26,8 @@ export interface DecideResult {
   slug: string;
 }
 
-const MDR_FILENAME = /^MDR-(\d+)-[\w-]+\.md$/;
+const MDR_FILENAME = /^MDR-(\d+)-[^/]+\.md$/u;
+const FALLBACK_SLUG = "decision";
 
 function findNextMdrNumber(projectDir: string): number {
   const dir = join(projectDir, ".mission", "decisions");
@@ -42,12 +43,15 @@ function findNextMdrNumber(projectDir: string): number {
 }
 
 function slugify(title: string): string {
-  return title
+  const slug = title
+    .trim()
+    .normalize("NFC")
     .toLowerCase()
-    .replace(/[^\w\s-]+/g, "")
+    .replace(/[^\p{Letter}\p{Number}\s-]+/gu, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+  return slug || FALLBACK_SLUG;
 }
 
 function placeholder(key: string): string {

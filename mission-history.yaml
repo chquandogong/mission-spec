@@ -4,15 +4,60 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.14 — MDR Skill, Platform Breadth, Migration & Reconstruction"
+  mission_title: "Mission Spec v1.14.1 — Unicode Slugify Fix"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 15
-  latest_version: "1.14.0"
+  total_revisions: 16
+  latest_version: "1.14.1"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-17-008"
+    semantic_version: "1.14.1"
+    change_sequence: 20
+    date: "2026-04-17"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "bugfix"
+    motivation_type: "compliance"
+    persistence: "permanent"
+    intent: "Fix ms-decide slug generation so it works on Korean/Chinese/Japanese titles — the exact case this trilingual project is most likely to hit."
+    decision: "Replace ASCII-only regex classes (\\w, [\\w-]+) in src/commands/decide.ts with Unicode property classes (\\p{Letter}, \\p{Number}) under the /u flag, add NFC normalization, add an explicit fallback slug ('decision') for titles that are pure punctuation. Tighten MDR_FILENAME to [^/]+ with /u so filenames with non-ASCII slugs are counted when auto-incrementing."
+    triggered_by: "Post-v1.14.0 review noted that 'decide.ts slugify + MDR_FILENAME are ASCII-only — the exact case a trilingual project cares about most is the one that was untested'."
+    issue_or_context: "Before this fix, title '의존성 정책 변경' would slugify to an empty string, producing MDR-001-.md, and an existing MDR with a Korean slug would not be counted toward the next number."
+    changes:
+      added:
+        - "tests/commands/decide.test.ts: 3 new tests (Unicode slug preservation, Unicode-filename counting, punctuation-only fallback)"
+      modified:
+        - "src/commands/decide.ts: Unicode-aware slugify with NFC normalization + 'decision' fallback; MDR_FILENAME regex broadened with /u flag"
+        - ".mission/CURRENT_STATE.md: synced to v1.14 state (title, goal, recent implementation section)"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: updated with v1.14 test counts"
+        - ".mission/architecture/{ARCHITECTURE_CURRENT,DEPENDENCY_GRAPH}.yaml: header Last-updated 2026-04-17 | Version 1.14.1"
+        - ".mission/interfaces/API_REGISTRY.yaml: header Last-updated 2026-04-17 | Version 1.14.1"
+        - "mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.0 → 1.14.1"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified:
+        - "ms-decide now correctly handles non-ASCII titles (was latent-broken for Korean/Chinese/Japanese inputs)"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: false
+      runtime: true
+    breaking: false
+    risk: "low — fix only; no existing MDR filename changes since v1.14.0 was only released minutes before this patch."
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-17_v1.14.1_mission.yaml"
+    follow_up:
+      - "Consider the same Unicode-slugify treatment for any future generators that derive filenames from user text"
+
   - change_id: "MSC-2026-04-17-007"
     semantic_version: "1.14.0"
     change_sequence: 19

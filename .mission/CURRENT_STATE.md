@@ -1,20 +1,20 @@
 # Mission Spec — Current State
 
-> Last updated: 2026-04-15 | Version: 1.8.0
+> Last updated: 2026-04-17 | Version: 1.14.0
 
 ## 현재 상태
 
-- **Title:** Mission Spec v1.8 — Internationalization
-- **Phase:** internationalization
+- **Title:** Mission Spec v1.14 — MDR Skill, Platform Breadth, Migration & Reconstruction
+- **Phase:** governed portability
 - **Author:** Dr. QUAN
 - **Created:** 2026-04-01
 
 ## 현재 목표
 
-Mission Spec을 core library와 Claude Code skill bundle로 구현.
-누구나 쉽게 설치하여 사용할 수 있는 portable한 task contract 도구로 유지.
-mission.yaml의 변경 이력을 Living Asset Registry로 관리.
-문서 접근성은 다국어로 확장하되, 런타임/스키마/메타데이터는 일관된 영어 표면으로 유지.
+Mission Spec을 core library, CLI, Claude Code skill bundle로 유지한다.
+누구나(사람/AI)가 설치해 기존 워크플로에 붙일 수 있는 portable한 task contract 도구로 유지한다.
+mission.yaml의 변경 이력과 구조 자산을 Living Asset Registry로 관리한다.
+문서 접근성은 다국어로 유지하되, 런타임/스키마/메타데이터는 일관된 영어 표면으로 유지한다.
 
 ## 핵심 제약 (활성)
 
@@ -41,30 +41,26 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 
 - (없음)
 
-## 최근 구현 (v1.8.0)
+## 최근 구현 (v1.14.0)
 
-- [x] `README.md`를 영어 기본 문서로 재작성하고 `README.ko.md`, `README.zh.md` 추가
-- [x] 5개 skill 문서에 `SKILL.ko.md`, `SKILL.zh.md` 추가
-- [x] 런타임 메시지, 스키마 설명, 패키지 메타데이터를 영어로 통일
-- [x] `ms-init`의 한국어 입력 감지 정규식은 유지하여 기존 한국어 프롬프트 호환성 보존
-- [x] `mission-history.yaml`, snapshot, 상태/검증 메타데이터를 `v1.8.0` 기준으로 동기화
+- [x] `ms-decide` 명령과 trilingual skill 추가 — MDR 초안 생성 자동화
+- [x] 플랫폼 변환 대상을 6개로 확장: Cursor, Codex, OpenCode, Cline, Continue, Aider
+- [x] `src/core/migration.ts` + `scripts/migrate-mission.js` 추가 — 차기 schema v2용 migration 기반 확보
+- [x] `src/core/reconstruction-verifier.ts` + `scripts/verify-reconstruction.js` 추가 — REBUILD_PLAYBOOK 참조 무결성 검증
+- [x] `README.md`에 adoption scaffold 추가 — 실제 도입 사례 기록 위치 확보
 
-## 이전 구현 (v1.7.0)
+## 직전 구현 (v1.13.x)
 
-- [x] `design_refs` 스키마 필드 — 설계 문서 위치 포인터
-- [x] `architecture_doc_freshness` llm-eval — 설계 문서 stale 자동 감지
-- [x] `architecture_delta` history 스키마 필드 — 모듈/인터페이스 변경 추적
-- [x] Architecture Registry (`.mission/architecture/ARCHITECTURE_CURRENT.yaml`)
-- [x] Dependency Graph (`.mission/architecture/DEPENDENCY_GRAPH.yaml`)
-- [x] API/Interface Registry (`.mission/interfaces/API_REGISTRY.yaml`)
-- [x] Traceability Matrix (`.mission/traceability/TRACE_MATRIX.yaml`)
-- [x] `ms-context`, Reconstruction Playbook, Verification Evidence Ledger, Architecture Diff, history commit validation
+- [x] `release.yml` 추가 — tag 기반 npm publish 검증 경로
+- [x] `mission-history.yaml`의 `intent` / `decision` 영문화 + `intent_ko` / `decision_ko` 보존
+- [x] `arch:verify` 강화 — phantom `depends_on` 및 `API_REGISTRY.yaml` drift 탐지
+- [x] `CHANGELOG.md` 자동 생성과 pre-commit / CI parity 연결
 
 ## 다음 변경 후보
 
-- `ms-context` 출력을 clipboard/파일로 직접 내보내는 UX
-- CI/CD에서 VERIFICATION_LOG 자동 갱신
-- versioned architecture snapshots (`.mission/architecture/snapshots/`)
+- 첫 실제 schema migration 등록 (`v2` 결정 이후)
+- `reconstruction:verify`의 fast mode를 pre-commit / CI parity에 연결
+- release 과정에서 `CURRENT_STATE.md` / `VERIFICATION_LOG.yaml` 자동 동기화
 
 ## 자기 검증
 
@@ -74,3 +70,4 @@ mission.yaml의 변경 이력을 Living Asset Registry로 관리.
 - [x] 임시 조치인지 영구 정책인지 구분되는가?
 - [x] 코드를 읽지 않고도 모듈 구조를 알 수 있는가? (v1.7.0+)
 - [x] 한국어/영어/중국어 사용자 모두 설치 문서를 따라갈 수 있는가? (v1.8.0+)
+- [x] MDR 작성과 재구성 검증까지 Living Asset Registry 안에서 닫히는가? (v1.14.0+)

@@ -6,6 +6,22 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.14.1] - 2026-04-17
+_Fix ms-decide slug generation so it works on Korean/Chinese/Japanese titles — the exact case this trilingual project is most likely to hit._
+
+### Added
+
+- tests/commands/decide.test.ts: 3 new tests (Unicode slug preservation, Unicode-filename counting, punctuation-only fallback)
+
+### Changed
+
+- src/commands/decide.ts: Unicode-aware slugify with NFC normalization + 'decision' fallback; MDR_FILENAME regex broadened with /u flag
+- .mission/CURRENT_STATE.md: synced to v1.14 state (title, goal, recent implementation section)
+- .mission/evidence/VERIFICATION_LOG.yaml: updated with v1.14 test counts
+- .mission/architecture/{ARCHITECTURE_CURRENT,DEPENDENCY_GRAPH}.yaml: header Last-updated 2026-04-17 | Version 1.14.1
+- .mission/interfaces/API_REGISTRY.yaml: header Last-updated 2026-04-17 | Version 1.14.1
+- mission.yaml + package.json + plugin.json + marketplace.json: version 1.14.0 → 1.14.1
+
 ## [1.14.0] - 2026-04-17
 _Close the C-series from PROJECT_REVIEW_V1.8.0_2026-04-17 — long-term items: MDR authoring skill, platform breadth, schema migration infrastructure, reconstruction verification, adoption advisory._
 

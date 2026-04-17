@@ -10,7 +10,7 @@
       "name": "mission-spec",
       "source": "./",
       "description": "Mission Spec core API + Claude Code skills (ms-init, ms-eval, ms-status, ms-report) + Living Asset Registry + Architecture Registry",
-      "version": "1.14.0"
+      "version": "1.14.1"
     }
   ]
 }
