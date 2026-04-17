@@ -51,7 +51,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — docs-only change + 2-line source comment; no functional change to any validator or script; 237/237 full suite green before and after; all validators (arch:verify, plugin:verify, metadata:check, registry:check, validate:history-commits) green. Semantic version: patch per MDR-006 §PATCH 6 (docs / MDR update — no consumer surface change) + §PATCH 1 (existing script comment addition, no behaviour change)."
-    related_commits: []
+    related_commits: ["eb08d05"]
     related_decisions:
       [
         "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
