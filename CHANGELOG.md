@@ -20,13 +20,17 @@ _Governance hardening — close the gaps between the v1.8 Living Asset Registry 
 - .github/workflows/test.yml (Node 20 + 22 matrix, build + lint + test:coverage + platforms verify)
 - .github/workflows/pre-commit-parity.yml (validate-history-commits + snapshot dedup check)
 - scripts/generate-changelog.js (Keep-a-Changelog formatter, idempotent)
-- tests/scripts/generate-changelog.test.ts (5 tests — format, BREAKING label, idempotency, missing history, empty subsections)
+- tests/scripts/generate-changelog.test.ts (6 tests — format, BREAKING label, idempotency, missing history, empty subsections, absolute --output paths)
 
 ### Changed
 
 - package.json: add changelog and test:coverage scripts; add @vitest/coverage-v8 devDependency; version 1.8.0 → 1.9.0
 - vitest.config.ts: v8 coverage provider, thresholds lines=80 / functions=80 / branches=75 / statements=80
 - mission.yaml: title and version bumped to v1.9.0
+- .githooks/pre-commit: auto-regenerate CHANGELOG.md and git add before validate; Korean comment translated to English
+- .github/workflows/pre-commit-parity.yml: added CHANGELOG determinism verification step (git diff --exit-code after regen)
+- scripts/generate-changelog.js: --output handles absolute paths and auto-creates parent directories via mkdirSync(recursive: true)
+- tests/scripts/generate-changelog.test.ts: added 6th test covering absolute --output paths with nested directory
 
 ## [1.8.0] - 2026-04-15
 _Trilingual documentation (en/zh/ko) and English-only codebase — internationalize user-facing docs while unifying all source code, schemas, metadata, and error messages to English_

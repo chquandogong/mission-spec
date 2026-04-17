@@ -37,11 +37,15 @@ timeline:
         - ".github/workflows/test.yml (Node 20 + 22 matrix, build + lint + test:coverage + platforms verify)"
         - ".github/workflows/pre-commit-parity.yml (validate-history-commits + snapshot dedup check)"
         - "scripts/generate-changelog.js (Keep-a-Changelog formatter, idempotent)"
-        - "tests/scripts/generate-changelog.test.ts (5 tests — format, BREAKING label, idempotency, missing history, empty subsections)"
+        - "tests/scripts/generate-changelog.test.ts (6 tests — format, BREAKING label, idempotency, missing history, empty subsections, absolute --output paths)"
       modified:
         - "package.json: add changelog and test:coverage scripts; add @vitest/coverage-v8 devDependency; version 1.8.0 → 1.9.0"
         - "vitest.config.ts: v8 coverage provider, thresholds lines=80 / functions=80 / branches=75 / statements=80"
         - "mission.yaml: title and version bumped to v1.9.0"
+        - ".githooks/pre-commit: auto-regenerate CHANGELOG.md and git add before validate; Korean comment translated to English"
+        - ".github/workflows/pre-commit-parity.yml: added CHANGELOG determinism verification step (git diff --exit-code after regen)"
+        - "scripts/generate-changelog.js: --output handles absolute paths and auto-creates parent directories via mkdirSync(recursive: true)"
+        - "tests/scripts/generate-changelog.test.ts: added 6th test covering absolute --output paths with nested directory"
       removed: []
     changed_sections: [title, version, lineage]
     done_when_delta:
@@ -61,7 +65,8 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — no API or schema changes; CI may surface pre-existing coverage regressions but current baseline is 93%/87% statements/branches"
-    related_commits: ["2a969e7", "ff74c03", "1106646", "39adc45", "ebef0e4"]
+    related_commits:
+      ["2a969e7", "ff74c03", "1106646", "39adc45", "ebef0e4", "2cb0c9f"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-17_v1.9.0_mission.yaml"
     follow_up:

@@ -208,4 +208,30 @@ describe("generate-changelog", () => {
     expect(content).not.toContain("### Removed");
     expect(content).toContain("### Changed");
   });
+
+  it("supports absolute --output paths", () => {
+    writeMissionYaml(tempDir);
+    writeHistory(tempDir, [
+      {
+        change_id: "MSC-2026-04-17-001",
+        semantic_version: "1.9.0",
+        date: "2026-04-17",
+        author: "Dr. QUAN",
+        change_type: "enhancement",
+        persistence: "permanent",
+        intent: "Absolute output path support",
+        changes: { added: ["CHANGELOG.md"], modified: [], removed: [] },
+        done_when_delta: { added: [], modified: [], removed: [] },
+        impact_scope: {},
+        breaking: false,
+      },
+    ]);
+
+    const outputPath = join(tempDir, "nested", "CHANGELOG.abs.md");
+    execFileSync("node", [scriptPath, "--output", outputPath], { cwd: tempDir });
+
+    expect(existsSync(outputPath)).toBe(true);
+    const content = readFileSync(outputPath, "utf-8");
+    expect(content).toContain("## [1.9.0] - 2026-04-17");
+  });
 });

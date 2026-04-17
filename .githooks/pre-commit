@@ -1,8 +1,10 @@
 #!/bin/sh
 set -e
 npm run snapshot --silent
-# 디렉토리 형태로 git add — 글롭 확장 이슈 없이 신규 스냅샷만 스테이징.
+# Add the directory itself so newly created snapshots are staged without relying on shell globs.
 if [ -d .mission/snapshots ]; then
   git add .mission/snapshots
 fi
+npm run changelog --silent
+git add CHANGELOG.md
 npm run validate:history-commits --silent

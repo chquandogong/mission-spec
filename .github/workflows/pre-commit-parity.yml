@@ -41,3 +41,13 @@ jobs:
             or the dedup logic regressed."
             exit 1
           }
+
+      - name: Verify CHANGELOG generation is deterministic
+        run: |
+          npm run changelog --silent
+          git diff --exit-code CHANGELOG.md || {
+            echo "::error::Running changelog generation produced unstaged changes. \
+            mission-history.yaml may have changed without regenerating CHANGELOG.md, \
+            or the generator regressed."
+            exit 1
+          }

@@ -2,8 +2,8 @@
 // Idempotent: same history → same output. Keep-a-Changelog-style sections.
 // Usage: node scripts/generate-changelog.js [--output CHANGELOG.md]
 
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { parse } from "yaml";
 
 const projectDir = process.cwd();
@@ -16,9 +16,12 @@ if (!existsSync(historyPath)) {
 
 const args = process.argv.slice(2);
 const outputIdx = args.indexOf("--output");
+const requestedOutput = outputIdx >= 0 ? args[outputIdx + 1] : null;
 const outputPath =
-  outputIdx >= 0 && args[outputIdx + 1]
-    ? join(projectDir, args[outputIdx + 1])
+  requestedOutput
+    ? isAbsolute(requestedOutput)
+      ? requestedOutput
+      : resolve(projectDir, requestedOutput)
     : join(projectDir, "CHANGELOG.md");
 
 const history = parse(readFileSync(historyPath, "utf-8"));
@@ -75,5 +78,6 @@ const head = [
 const body = timeline.map(renderEntry).join("\n\n");
 const content = head + body + "\n";
 
+mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, content);
 console.log(`Wrote ${outputPath} (${timeline.length} entries)`);
