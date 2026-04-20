@@ -52,7 +52,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — docs-only change on README.md (EN) 'Who uses' 섹션 1줄 교체; no consumer API / schema / test impact. KO/ZH README에 같은 섹션 추가는 IMP-6로 별도 관리 (trilingual gap은 pre-existing, 본 릴리스가 도입한 것 아님). Semantic version: patch per MDR-006 §PATCH 6 (docs/README 업데이트, no consumer surface change)."
-    related_commits: []
+    related_commits: ["a31c29d"]
     related_decisions: ["MDR-002-ms-prefix-adoption"]
     snapshot_after: ".mission/snapshots/2026-04-21_v1.16.16_mission.yaml"
     follow_up:
