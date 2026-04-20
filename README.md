@@ -360,7 +360,7 @@ npm run build
 
 This is an early-stage tool. If your project uses `mission.yaml` as a durable task contract, open a PR adding your project name + one-line use case below — adoption signals drive priority more than feature requests.
 
-- _(your project here)_
+- [qmonster](https://github.com/chquandogong/qmonster) — Rust TUI for multi-CLI tmux observability; uses `mission.yaml` as the phase contract and `mission-history.yaml` as the 3-vendor (Claude / Codex / Gemini) adversarial-review ledger across 9 revisions (Phase 1 → 3B).
 
 ## License
 

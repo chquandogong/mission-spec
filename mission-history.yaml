@@ -4,15 +4,63 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.15 — README ms-decide Usage + Korean fragment fix"
+  mission_title: "Mission Spec v1.16.16 — README Who uses: qmonster first-party dogfooding entry"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 35
-  latest_version: "1.16.15"
+  total_revisions: 36
+  latest_version: "1.16.16"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-20-001"
+    semantic_version: "1.16.16"
+    change_sequence: 40
+    date: "2026-04-20"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "documentation"
+    motivation_type: "adoption-signal"
+    persistence: "permanent"
+    intent: "README 'Who uses Mission Spec' 섹션에 qmonster를 첫 번째 adopter로 등재. 2026-04-20 qmonster audit에서 확인된 first-party dogfooding을 공식 기록 — placeholder `_(your project here)_`를 실체 있는 entry로 교체."
+    decision: |
+      README.md (EN) 'Who uses Mission Spec' 섹션의 placeholder 한 줄을 qmonster entry로 교체.
+      Format: `- [qmonster](URL) — <role summary>; uses mission.yaml + mission-history.yaml as <usage summary> across N revisions (Phase scope).`
+      KO/ZH README에는 해당 섹션 자체가 부재하므로 본 릴리스에는 미포함 — IMP-6 (trilingual 동기화) 후속 릴리스에서 처리.
+      qmonster는 Dr. QUAN 본인의 2nd project (Rust TUI, /home/chquan/Qmonster) — first-party dogfooding. mission-spec 자체도 self-dogfood이므로 선례 일치. 엄격한 E-4 external adopter 카운트에는 해당하지 않으나 zero→one 전환의 심리적/실례적 가치가 있고, third-party adopter가 실제 사용 레퍼런스를 확인할 수 있는 효용 존재.
+    triggered_by: "사용자 요청: 'mission-spec 개선안 제시하고, 동시에 Who uses Mission Spec 항목 업데이트해줘' — qmonster × mission-spec 통합 검증 리포트 후속."
+    issue_or_context: "2026-04-20 qmonster 감사 결과 (memory: project_qmonster_adoption.md): qmonster는 기록+handoff 축은 충실하나 자동 검증 축(ms-eval 0/42)은 비활성. 이 사례 자체가 mission-spec E-4 병목의 구체 sample이자 향후 UX 개선 입력 (IMP-1 ~ IMP-6). README adoption list에 등재함으로써 (a) dogfooding proof 가시화, (b) adopter zero → one 전환, (c) 향후 third-party adopter에게 실제 사용례 제공."
+    changes:
+      added: []
+      modified:
+        - "README.md (EN): 'Who uses Mission Spec' 섹션 placeholder `_(your project here)_` → qmonster entry 교체"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.15 → 1.16.16"
+        - "mission-history.yaml: meta bump"
+        - ".mission/ Version 헤더 auto-synced to 1.16.16 via metadata:sync"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — docs-only change on README.md (EN) 'Who uses' 섹션 1줄 교체; no consumer API / schema / test impact. KO/ZH README에 같은 섹션 추가는 IMP-6로 별도 관리 (trilingual gap은 pre-existing, 본 릴리스가 도입한 것 아님). Semantic version: patch per MDR-006 §PATCH 6 (docs/README 업데이트, no consumer surface change)."
+    related_commits: []
+    related_decisions: ["MDR-002-ms-prefix-adoption"]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.16.16_mission.yaml"
+    follow_up:
+      - "IMP-1 ~ IMP-6 sequential execution — qmonster audit에서 도출된 6개 UX 개선 항목"
+      - "IMP-6 (trilingual README 'Who uses' 섹션 동기화) — KO/ZH에도 동일 섹션 추가"
+      - "E-4 외부 adopter 추가 확보 — qmonster는 first-party dogfooding이므로 strict external count는 여전히 0"
+      - "qmonster 본체에 mission-spec tool UX feedback loop — IMP 적용 후 qmonster ms-eval 0/42 개선 여부 재측정"
+
   - change_id: "MSC-2026-04-18-008"
     semantic_version: "1.16.15"
     change_sequence: 39

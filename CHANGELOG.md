@@ -6,6 +6,16 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.16] - 2026-04-20
+_README 'Who uses Mission Spec' 섹션에 qmonster를 첫 번째 adopter로 등재. 2026-04-20 qmonster audit에서 확인된 first-party dogfooding을 공식 기록 — placeholder `_(your project here)_`를 실체 있는 entry로 교체._
+
+### Changed
+
+- README.md (EN): 'Who uses Mission Spec' 섹션 placeholder `_(your project here)_` → qmonster entry 교체
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.15 → 1.16.16
+- mission-history.yaml: meta bump
+- .mission/ Version 헤더 auto-synced to 1.16.16 via metadata:sync
+
 ## [1.16.15] - 2026-04-18
 _사용자가 최종 일관성 검토에서 지목한 2 issue 해소: (1) 3 README 모두 Usage 섹션에 `ms-decide` 예시 누락 — 설치/Providing 섹션에만 언급됨, (2) README.md(영문) + README.zh.md(중문)에 verify-registry bullet의 한국어 조각(`완료 조건`, `최근 구현`)이 번역 없이 노출됨._
 
