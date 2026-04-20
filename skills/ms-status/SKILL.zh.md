@@ -73,9 +73,23 @@ console.log(s.markdown);
 
 返回值中包含 `phase`、`phaseTheme` 和 `totalRevisions` 字段。
 
+## Scaffolding 部分（v1.16.17+）
+
+如果 `.mission/decisions/` 或 `.mission/snapshots/` **存在但为空**，将附加一个 Scaffolding 部分，并为每个目录给出 remediation 提示：
+
+```markdown
+## Scaffolding
+
+- ⚠ `.mission/decisions/` exists but empty — run `ms-decide` to record material decisions as MDRs
+- ⚠ `.mission/snapshots/` exists but empty — run `npm run snapshot` (or wire into pre-commit) to capture per-revision snapshots
+```
+
+背景：qmonster 采用审计（2026-04-21）发现采用者常常 scaffold Living Asset Registry 目录却从不填充，形成"记录契约充实但验证契约失效"的复发模式。警告**仅在目录存在时**触发；目录缺失视为 opt-out，不会警告。返回值通过 `scaffoldingWarnings: Array<{ path, hint }>` 字段提供同一数据。
+
 ## 注意
 
 - 如果 `mission.yaml` 不存在则返回错误。
 - 如果没有定义约束条件则省略 Constraints 部分。
 - 如果 `mission-history.yaml` 不存在则省略 Evolution 部分。
 - 如果 `mission-history.yaml` 不符合 Schema（v1.6.0+），不会失败，而是在 Evolution 部分显示 `History unavailable: ...` 警告并继续正常执行状态评估。也可通过返回值中的 `historyWarning` 字段获取。
+- 如果未检测到 scaffolded-but-empty 目录，则省略 Scaffolding 部分。

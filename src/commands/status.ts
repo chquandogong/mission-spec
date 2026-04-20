@@ -1,7 +1,14 @@
 // ms-status — mission progress summary
+import { existsSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
 import { loadHistory, getCurrentPhase } from "../core/history.js";
+
+export interface ScaffoldingWarning {
+  path: string;
+  hint: string;
+}
 
 export interface StatusResult {
   title: string;
@@ -15,7 +22,40 @@ export interface StatusResult {
   phaseTheme?: string;
   totalRevisions?: number;
   historyWarning?: string;
+  scaffoldingWarnings?: ScaffoldingWarning[];
   markdown: string;
+}
+
+// Paths that mission-spec scaffolds and expects the adopter to populate.
+// Warning fires only when the directory EXISTS AND IS EMPTY — absent dirs
+// are not warned (adopter chose not to use that facility).
+const SCAFFOLDED_DIRS: Array<{ path: string; hint: string }> = [
+  {
+    path: ".mission/decisions",
+    hint: "exists but empty — run `ms-decide` to record material decisions as MDRs",
+  },
+  {
+    path: ".mission/snapshots",
+    hint: "exists but empty — run `npm run snapshot` (or wire into pre-commit) to capture per-revision snapshots",
+  },
+];
+
+export function detectScaffoldedButEmpty(
+  projectDir: string,
+): ScaffoldingWarning[] {
+  const warnings: ScaffoldingWarning[] = [];
+  for (const { path, hint } of SCAFFOLDED_DIRS) {
+    const abs = join(projectDir, path);
+    if (!existsSync(abs)) continue;
+    try {
+      if (!statSync(abs).isDirectory()) continue;
+      const entries = readdirSync(abs).filter((f) => !f.startsWith("."));
+      if (entries.length === 0) warnings.push({ path, hint });
+    } catch {
+      // Permission or transient IO errors: treat as no-warning (not mission-spec's job to block).
+    }
+  }
+  return warnings;
 }
 
 export function getMissionStatus(projectDir: string): StatusResult {
@@ -85,6 +125,14 @@ export function getMissionStatus(projectDir: string): StatusResult {
     md.push("", "## Evolution", "", historyWarning);
   }
 
+  const scaffoldingWarnings = detectScaffoldedButEmpty(projectDir);
+  if (scaffoldingWarnings.length > 0) {
+    md.push("", "## Scaffolding", "");
+    scaffoldingWarnings.forEach((w) => {
+      md.push(`- ⚠ \`${w.path}/\` ${w.hint}`);
+    });
+  }
+
   return {
     title,
     goal: goal.trim(),
@@ -97,6 +145,7 @@ export function getMissionStatus(projectDir: string): StatusResult {
     phaseTheme,
     totalRevisions,
     historyWarning,
+    scaffoldingWarnings,
     markdown: md.join("\n"),
   };
 }

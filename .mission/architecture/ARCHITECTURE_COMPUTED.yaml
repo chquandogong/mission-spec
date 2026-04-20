@@ -218,7 +218,9 @@ modules:
       - history
       - parser
     exports:
+      - ScaffoldingWarning
       - StatusResult
+      - detectScaffoldedButEmpty
       - getMissionStatus
   - id: validator
     path: src/schema/validator.ts

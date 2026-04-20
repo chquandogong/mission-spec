@@ -6,6 +6,21 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.17] - 2026-04-21
+_`ms-status`에 scaffolded-but-empty 디렉터리 경고 추가. qmonster 감사(2026-04-21, memory: project_qmonster_adoption.md §5 + recommendation 2)에서 확인된 anti-pattern — `.mission/decisions/`, `.claude/rules/` 등 scaffold 선언만 있고 비어 있는 폴더 — 를 adopter가 stale 상태로 방치하지 않도록 status 출력 단계에서 즉시 감지._
+
+### Added
+
+- src/commands/status.ts: `detectScaffoldedButEmpty(projectDir)` helper (exported), `ScaffoldingWarning` interface (exported), `StatusResult.scaffoldingWarnings?` optional field, markdown `## Scaffolding` section (조건부 렌더)
+- tests/commands/status.test.ts: 4 신규 테스트 — empty decisions warn / empty snapshots warn / populated no-warn / absent no-warn (기존 8 유지, 총 12)
+- skills/ms-status/SKILL.md + SKILL.ko.md + SKILL.zh.md: `## Scaffolding Section (v1.16.17+)` 섹션 3개 언어 동시 추가 (MDR-007 trilingual policy)
+
+### Changed
+
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.16 → 1.16.17
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.16.17 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.16.16] - 2026-04-20
 _README 'Who uses Mission Spec' 섹션에 qmonster를 첫 번째 adopter로 등재. 2026-04-20 qmonster audit에서 확인된 first-party dogfooding을 공식 기록 — placeholder `_(your project here)_`를 실체 있는 entry로 교체._
 

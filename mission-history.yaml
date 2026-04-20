@@ -4,15 +4,73 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.16 — README Who uses: qmonster first-party dogfooding entry"
+  mission_title: "Mission Spec v1.16.17 — ms-status scaffolded-but-empty warning"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 36
-  latest_version: "1.16.16"
+  total_revisions: 37
+  latest_version: "1.16.17"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-001"
+    semantic_version: "1.16.17"
+    change_sequence: 41
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "`ms-status`에 scaffolded-but-empty 디렉터리 경고 추가. qmonster 감사(2026-04-21, memory: project_qmonster_adoption.md §5 + recommendation 2)에서 확인된 anti-pattern — `.mission/decisions/`, `.claude/rules/` 등 scaffold 선언만 있고 비어 있는 폴더 — 를 adopter가 stale 상태로 방치하지 않도록 status 출력 단계에서 즉시 감지."
+    decision: |
+      `getMissionStatus(projectDir)` 결과에 `scaffoldingWarnings: Array<{ path, hint }>` 필드 + markdown `## Scaffolding` 섹션을 추가.
+      감지 규칙: `.mission/decisions/` 또는 `.mission/snapshots/`가 **존재하지만 dotfile이 아닌 엔트리가 0개**일 때만 경고. 아예 없는 디렉터리는 opt-out으로 간주해 경고하지 않는다 (adopter가 그 facility를 사용하지 않기로 선택).
+      remediation hint는 디렉터리별로 고정:
+        - decisions: "run `ms-decide` to record material decisions as MDRs"
+        - snapshots: "run `npm run snapshot` (or wire into pre-commit) to capture per-revision snapshots"
+      신규 helper `detectScaffoldedButEmpty(projectDir)`는 commands/status.ts 내부 API로 유지 — `src/index.ts`에 재노출하지 않는다 (consumer surface는 `StatusResult.scaffoldingWarnings` 하나만).
+    triggered_by: "사용자 요청: '방금 하던 작업을 계속해줘' — qmonster audit 기반 IMP 시퀀스의 'ms-status scaffolded-but-empty 경고' 항목 (memory: project_qmonster_adoption.md line 26) 실현."
+    issue_or_context: "2026-04-20 qmonster 감사에서 5번째 anti-pattern으로 기록된 'scaffolded-but-empty 폴더 — 설계 선언만 있고 실체 없음'이 qmonster 로컬 상태의 ms-eval 0/42 근본 원인 중 하나였음. mission-spec 본체 도구가 이를 감지하지 못하면 E-4 외부 adopter도 동일한 stale scaffold 상태에 빠질 확률이 높다. Claude + Codex + Gemini 3벤더 리뷰와 별개로, 실제 first-party dogfooding 데이터에서 도출된 UX 개선 항목."
+    changes:
+      added:
+        - "src/commands/status.ts: `detectScaffoldedButEmpty(projectDir)` helper (exported), `ScaffoldingWarning` interface (exported), `StatusResult.scaffoldingWarnings?` optional field, markdown `## Scaffolding` section (조건부 렌더)"
+        - "tests/commands/status.test.ts: 4 신규 테스트 — empty decisions warn / empty snapshots warn / populated no-warn / absent no-warn (기존 8 유지, 총 12)"
+        - "skills/ms-status/SKILL.md + SKILL.ko.md + SKILL.zh.md: `## Scaffolding Section (v1.16.17+)` 섹션 3개 언어 동시 추가 (MDR-007 trilingual policy)"
+      modified:
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.16 → 1.16.17"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.16.17 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — 경고는 순수 additive (exit code 영향 없음, 기존 `StatusResult` 필드 변경 없음, markdown은 empty dir 존재할 때만 appended). dotfile 제외 로직으로 `.gitkeep` 등 tooling 파일은 not-empty로 처리. 권한 오류/transient IO는 no-warning 처리(mission-spec이 adopter filesystem 정책을 판단하지 않는다). Semantic version: patch per MDR-006 §PATCH (기존 `ms-status` 서피스 확장, 신규 top-level npm script / 신규 CLI subcommand / src/index.ts 신규 export 없음 — `detectScaffoldedButEmpty`와 `ScaffoldingWarning`은 commands/status.ts 모듈 수준에서만 노출)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.16.17_mission.yaml"
+    follow_up:
+      - "IMP 시퀀스의 나머지 항목 — done_when prose drift lint, evals[].name 매칭 guard, related_commits backfill 자동화, tracking_mode/constraints staleness detection, MDR 승격 rule of thumb (각각 별도 릴리스)"
+      - "E-4 외부 adopter 1+ — qmonster(first-party dogfooding) 외 strict external 여전히 0"
+      - "F-1 cold-build gate CI 실전 호출 (tag push)"
+      - "MDR-008 후보: Living Asset Registry 크기 원칙 (F-9)"
+      - "Rev.5 3벤더 재리뷰 baseline — v1.16.17이 새 baseline (Rev.4 §8 전수 closure + qmonster IMP 시퀀스 첫 항목 반영)"
+
   - change_id: "MSC-2026-04-20-001"
     semantic_version: "1.16.16"
     change_sequence: 40

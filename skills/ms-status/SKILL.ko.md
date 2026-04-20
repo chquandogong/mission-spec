@@ -73,6 +73,19 @@ console.log(s.markdown);
 
 반환값에 `phase`, `phaseTheme`, `totalRevisions` 필드가 추가됩니다.
 
+## Scaffolding 섹션 (v1.16.17+)
+
+`.mission/decisions/` 또는 `.mission/snapshots/` 디렉터리가 **존재하지만 비어 있을 때**, 각 디렉터리에 대한 remediation 힌트와 함께 Scaffolding 섹션이 추가됩니다:
+
+```markdown
+## Scaffolding
+
+- ⚠ `.mission/decisions/` exists but empty — run `ms-decide` to record material decisions as MDRs
+- ⚠ `.mission/snapshots/` exists but empty — run `npm run snapshot` (or wire into pre-commit) to capture per-revision snapshots
+```
+
+배경: qmonster 채택 감사(2026-04-21)에서 adopter가 Living Asset Registry 디렉터리를 scaffold만 하고 populate하지 않아 "기록 계약은 충실하나 검증 계약은 비활성" 패턴이 재발하는 것을 확인했습니다. 경고는 **디렉터리가 존재할 때만** 발생하며, 아예 없는 경우는 opt-out으로 간주해 경고하지 않습니다. 반환값에서는 같은 데이터를 `scaffoldingWarnings: Array<{ path, hint }>` 필드로 제공합니다.
+
 ## 주의
 
 - `mission.yaml`이 없으면 에러를 반환합니다.
@@ -81,3 +94,4 @@ console.log(s.markdown);
 - `mission-history.yaml`이 스키마에 맞지 않으면 (v1.6.0+) 실패 대신
   Evolution 섹션에 `History unavailable: ...` 경고만 표시하고 상태 평가는 정상 수행합니다.
   반환값의 `historyWarning` 필드로도 전달됩니다.
+- scaffolded-but-empty 디렉터리가 하나도 없으면 Scaffolding 섹션은 생략됩니다.
