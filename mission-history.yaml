@@ -56,7 +56,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 경고는 순수 additive (exit code 영향 없음, 기존 `StatusResult` 필드 변경 없음, markdown은 empty dir 존재할 때만 appended). dotfile 제외 로직으로 `.gitkeep` 등 tooling 파일은 not-empty로 처리. 권한 오류/transient IO는 no-warning 처리(mission-spec이 adopter filesystem 정책을 판단하지 않는다). Semantic version: patch per MDR-006 §PATCH (기존 `ms-status` 서피스 확장, 신규 top-level npm script / 신규 CLI subcommand / src/index.ts 신규 export 없음 — `detectScaffoldedButEmpty`와 `ScaffoldingWarning`은 commands/status.ts 모듈 수준에서만 노출)."
-    related_commits: []
+    related_commits: ["54658ca"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
