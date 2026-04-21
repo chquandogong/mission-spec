@@ -773,3 +773,41 @@ describe("getMissionStatus", () => {
     expect(hint).not.toContain('"Copilot (suggest)"');
   });
 });
+
+describe("ms-status — IMP-10 refs integration", () => {
+  it("reclassifies drift via resolved_by=manual, not marker string", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["vague prose criterion that cannot be auto-evaluated"],
+    });
+    const result = getMissionStatus(tempDir);
+    expect(result.doneWhenDrift).toBeDefined();
+    expect(result.doneWhenDrift?.[0]).toMatch(/vague prose/);
+  });
+
+  it("renders refs coverage section when done_when_refs present", () => {
+    writeFileSync(join(tempDir, "README.md"), "# Hi");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["README.md 파일 존재", "shell ok"],
+      done_when_refs: [{ index: 1, kind: "command", value: "true" }],
+    });
+    const result = getMissionStatus(tempDir);
+    expect(result.markdown).toMatch(/## refs coverage/);
+    expect(result.markdown).toMatch(/1\/2/);
+    expect(result.markdown).toMatch(/command/);
+  });
+
+  it("omits refs coverage section when no refs", () => {
+    writeFileSync(join(tempDir, "README.md"), "# Hi");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["README.md 파일 존재"],
+    });
+    const result = getMissionStatus(tempDir);
+    expect(result.markdown).not.toMatch(/## refs coverage/);
+  });
+});

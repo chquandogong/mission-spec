@@ -373,6 +373,26 @@ git add .mission/snapshots/
 
 已安装 v1.17.0 的采用者：编辑本地 `.git/hooks/pre-commit`，仅添加 `snapshot` 与 `git add` 两行即可。包内 `templates/pre-commit` 保持不变（单步 validate），无需 `cp` 重装。
 
+## 显式 gate 绑定（v1.21.0+）
+
+`mission.yaml` 支持可选的 `done_when_refs` 同级字段，将每条 prose `done_when` 条件绑定到显式校验器。支持四种 `kind`：`command`（POSIX shell，退出码 0）、`file-exists`（文件路径）、`file-contains`（`path::substring` 格式）、`eval-ref`（委托到 `mission.evals[].name`）。每条 ref 通过 `index` 映射到目标 `done_when` 条目。
+
+```yaml
+mission:
+  done_when:
+    - "cargo test 通过"
+    - "README 具备 installation 章节"
+  done_when_refs:
+    - index: 0
+      kind: command
+      value: "cargo test"
+    - index: 1
+      kind: file-contains
+      value: "README.md::## Installation"
+```
+
+绑定的 index 会直接运行对应校验器（`resolved_by: "ref"`）；未绑定的 index 回退到 v1.20.0 推理链。存在 refs 时 `ms-status` 会追加 `## refs coverage` 段落，并以 `resolved_by === "manual"` 作为 drift 判定标准；`validateProject` 强制三项不变式（index 范围、唯一性、`eval-ref` 孤立）。发布等级：MDR-006 §MINOR。
+
 ## 跨平台转换
 
 ```bash

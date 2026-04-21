@@ -285,6 +285,70 @@ describe("validateMission", () => {
   });
 });
 
+describe("done_when_refs schema", () => {
+  const base = {
+    mission: {
+      title: "T",
+      goal: "G",
+      done_when: ["one", "two"],
+    },
+  };
+
+  it("accepts mission without done_when_refs (field is optional)", () => {
+    expect(validateMission(base).valid).toBe(true);
+  });
+
+  it("accepts empty done_when_refs array", () => {
+    const data = {
+      mission: { ...base.mission, done_when_refs: [] },
+    };
+    expect(validateMission(data).valid).toBe(true);
+  });
+
+  it("accepts well-formed done_when_refs items (all four kinds)", () => {
+    const data = {
+      mission: {
+        ...base.mission,
+        done_when_refs: [
+          { index: 0, kind: "command", value: "cargo test" },
+          { index: 1, kind: "file-exists", value: "README.md" },
+        ],
+      },
+    };
+    expect(validateMission(data).valid).toBe(true);
+  });
+
+  it("rejects ref with unknown kind", () => {
+    const data = {
+      mission: {
+        ...base.mission,
+        done_when_refs: [{ index: 0, kind: "lol", value: "x" }],
+      },
+    };
+    expect(validateMission(data).valid).toBe(false);
+  });
+
+  it("rejects ref with missing required fields", () => {
+    const data = {
+      mission: {
+        ...base.mission,
+        done_when_refs: [{ index: 0, kind: "command" }], // no value
+      },
+    };
+    expect(validateMission(data).valid).toBe(false);
+  });
+
+  it("rejects ref with extra property (additionalProperties false)", () => {
+    const data = {
+      mission: {
+        ...base.mission,
+        done_when_refs: [{ index: 0, kind: "command", value: "x", extra: "y" }],
+      },
+    };
+    expect(validateMission(data).valid).toBe(false);
+  });
+});
+
 describe("validateHistory", () => {
   it("accepts a minimal valid history", () => {
     const result = validateHistory({

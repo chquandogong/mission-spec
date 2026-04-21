@@ -80,6 +80,31 @@
         "design_refs": {
           "$ref": "#/definitions/DesignRefs",
           "description": "Design document location pointers (optional) — architecture, API, type definitions, etc."
+        },
+        "done_when_refs": {
+          "type": "array",
+          "description": "Optional explicit bindings from done_when[index] to a validator. Each item maps a prose criterion to a concrete kind of check.",
+          "items": {
+            "type": "object",
+            "required": ["index", "kind", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "0-based index into done_when[]"
+              },
+              "kind": {
+                "enum": ["command", "file-exists", "file-contains", "eval-ref"],
+                "description": "Validator type"
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Validator argument — command string, file path, 'path::substring', or evals[].name"
+              }
+            }
+          }
         }
       }
     }

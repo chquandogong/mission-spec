@@ -178,3 +178,96 @@ describe("validateProject", () => {
     expect(r.allValid).toBe(true);
   });
 });
+
+describe("validateProject — done_when_refs invariants", () => {
+  it("fails when ref index exceeds done_when.length", () => {
+    writeFileSync(
+      join(tempDir, "mission.yaml"),
+      stringify({
+        mission: {
+          title: "T",
+          goal: "G",
+          done_when: ["one"],
+          done_when_refs: [{ index: 5, kind: "command", value: "true" }],
+        },
+      }),
+    );
+    const result = validateProject(tempDir);
+    expect(result.missionValid).toBe(false);
+    expect(result.missionErrors.join("\n")).toMatch(/index.*out of range/i);
+  });
+
+  it("fails when two refs share the same index", () => {
+    writeFileSync(
+      join(tempDir, "mission.yaml"),
+      stringify({
+        mission: {
+          title: "T",
+          goal: "G",
+          done_when: ["one", "two"],
+          done_when_refs: [
+            { index: 0, kind: "command", value: "true" },
+            { index: 0, kind: "command", value: "false" },
+          ],
+        },
+      }),
+    );
+    const result = validateProject(tempDir);
+    expect(result.missionValid).toBe(false);
+    expect(result.missionErrors.join("\n")).toMatch(/duplicate.*index/i);
+  });
+
+  it("fails when eval-ref references unknown evals[].name", () => {
+    writeFileSync(
+      join(tempDir, "mission.yaml"),
+      stringify({
+        mission: {
+          title: "T",
+          goal: "G",
+          done_when: ["one"],
+          evals: [
+            {
+              name: "present_eval",
+              type: "automated",
+              command: "true",
+              pass_criteria: "exit 0",
+            },
+          ],
+          done_when_refs: [
+            { index: 0, kind: "eval-ref", value: "missing_eval" },
+          ],
+        },
+      }),
+    );
+    const result = validateProject(tempDir);
+    expect(result.missionValid).toBe(false);
+    expect(result.missionErrors.join("\n")).toMatch(/missing_eval/);
+  });
+
+  it("passes when invariants satisfied", () => {
+    writeFileSync(
+      join(tempDir, "mission.yaml"),
+      stringify({
+        mission: {
+          title: "T",
+          goal: "G",
+          done_when: ["one", "two"],
+          evals: [
+            {
+              name: "present_eval",
+              type: "automated",
+              command: "true",
+              pass_criteria: "exit 0",
+            },
+          ],
+          done_when_refs: [
+            { index: 0, kind: "command", value: "true" },
+            { index: 1, kind: "eval-ref", value: "present_eval" },
+          ],
+        },
+      }),
+    );
+    const result = validateProject(tempDir);
+    expect(result.missionValid).toBe(true);
+  });
+});

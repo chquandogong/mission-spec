@@ -59,6 +59,7 @@ modules:
       - parser
     exports:
       - CriterionResult
+      - DoneWhenRef
       - EvalResult
       - EvaluateOptions
       - evaluateMission
@@ -68,7 +69,10 @@ modules:
     depends_on: []
     exports:
       - CriterionResult
+      - DoneWhenRef
       - EvaluateOptions
+      - RefKind
+      - ResolvedBy
       - evaluateAllCriteria
       - evaluateCriterion
   - id: history
@@ -97,6 +101,7 @@ modules:
       - context
       - decide
       - eval
+      - evaluator
       - history
       - init
       - migration
@@ -112,8 +117,10 @@ modules:
       - BackfillProposal
       - BackfillResult
       - CommitCandidate
+      - CriterionResult
       - DecideOptions
       - DecideResult
+      - DoneWhenRef
       - EvaluateOptions
       - ExtractedArchitecture
       - ExtractedEdge
@@ -123,6 +130,8 @@ modules:
       - PluginValidationResult
       - ReconstructionOptions
       - ReconstructionResult
+      - RefKind
+      - ResolvedBy
       - SchemaVersion
       - SnapshotResult
       - ValidateResult
@@ -251,10 +260,12 @@ modules:
       - parser
     exports:
       - MetaStaleness
+      - RefsCoverage
       - ScaffoldingWarning
       - StatusResult
       - detectDoneWhenDrift
       - detectMetaStaleness
+      - detectRefsCoverage
       - detectScaffoldedButEmpty
       - getMissionStatus
   - id: validate
@@ -299,6 +310,8 @@ edges:
     to: decide
   - from: index
     to: eval
+  - from: index
+    to: evaluator
   - from: index
     to: history
   - from: index
@@ -378,8 +391,10 @@ public_api:
     - BackfillProposal
     - BackfillResult
     - CommitCandidate
+    - CriterionResult
     - DecideOptions
     - DecideResult
+    - DoneWhenRef
     - EvaluateOptions
     - ExtractedArchitecture
     - ExtractedEdge
@@ -389,6 +404,8 @@ public_api:
     - PluginValidationResult
     - ReconstructionOptions
     - ReconstructionResult
+    - RefKind
+    - ResolvedBy
     - SchemaVersion
     - SnapshotResult
     - ValidateResult

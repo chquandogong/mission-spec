@@ -373,6 +373,26 @@ git add .mission/snapshots/
 
 기존 v1.17.0 adopter는 설치된 `.git/hooks/pre-commit`에 `snapshot` + `git add` 두 줄만 추가. 패키지에 포함된 `templates/pre-commit` 파일은 그대로(단일 validate 호출) 유지되므로 `cp` 재설치는 필요 없음.
 
+## 명시적 gate 연결 (v1.21.0+)
+
+`mission.yaml`은 optional `done_when_refs` sibling 필드를 지원합니다. 각 prose `done_when` 조건을 explicit validator에 바인딩할 수 있습니다. 4가지 `kind` 지원: `command` (POSIX shell, exit 0), `file-exists` (파일 경로), `file-contains` (`path::substring` 형식), `eval-ref` (`mission.evals[].name`으로 위임). 각 ref는 `index`로 대상 `done_when` 엔트리에 연결됩니다.
+
+```yaml
+mission:
+  done_when:
+    - "cargo test가 통과한다"
+    - "README에 installation 섹션이 있다"
+  done_when_refs:
+    - index: 0
+      kind: command
+      value: "cargo test"
+    - index: 1
+      kind: file-contains
+      value: "README.md::## Installation"
+```
+
+바인딩된 index는 해당 validator를 직접 실행(`resolved_by: "ref"`)하고, 바인딩 없는 index는 v1.20.0 inference chain으로 fallback 합니다. `ms-status`는 refs가 있을 때 `## refs coverage` 섹션을 추가하고 drift 판정을 `resolved_by === "manual"` 기준으로 재분류하며, `validateProject`는 3가지 invariant(index 범위, 중복, `eval-ref` orphan)를 강제합니다. 릴리스 등급: MDR-006 §MINOR.
+
 ## Cross-Platform 변환
 
 ```bash

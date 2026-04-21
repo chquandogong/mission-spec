@@ -1,9 +1,46 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-21 | Version: 1.20.1
+# Last updated: 2026-04-22 | Version: 1.21.0
 
 entries:
+  - version: "1.21.0"
+    date: "2026-04-22"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 349
+        failed: 0
+        files: 24
+      npm_build: "success"
+      npm_lint: "success"
+      validate_schema: "all schema validations passed"
+      validate_history_commits: "pass"
+      arch_verify: "ARCHITECTURE_CURRENT.yaml and API_REGISTRY.yaml are in sync with src/."
+      plugin_verify: "Plugin manifest and skills structure are valid."
+      metadata_check: ".mission/ Version headers in sync with package.json (1.21.0)"
+      registry_check: "modules 21, public API 25+3 types, skills 6, platforms 6, test files 24, tests 349 — refsCount 0 (mission-spec repo itself has no refs)"
+      registry_check_verify_live: "livePassed 10/10 (matches CURRENT_STATE claim)"
+      verify_reconstruction_references: "19 paths checked, cold-build + test succeeded"
+      convert_platforms_verify: "all platform conversions verified successfully"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+    notes: |
+      IMP-10 explicit gate linkage. `mission.yaml.done_when_refs` optional sibling
+      field binds each prose done_when criterion to an explicit validator (command /
+      file-exists / file-contains / eval-ref). Refs short-circuit above the v1.20.0
+      inference chain; unbound indices preserve legacy behavior. `CriterionResult`
+      gains `resolved_by` + `ref_kind` for downstream reporting (ms-status drift
+      reclassification + new ## refs coverage section). `validateProject` +
+      `verify-registry` added three invariants (index range / uniqueness / eval-ref
+      orphan). 316 → 349 tests. §MINOR per MDR-006.
+
   - version: "1.20.1"
     date: "2026-04-22"
     verified_by: "Claude Opus 4.7"

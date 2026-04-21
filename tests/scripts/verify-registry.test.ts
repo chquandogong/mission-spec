@@ -649,3 +649,109 @@ describe.concurrent("verify-registry script", () => {
     expect(stdout).toContain("live evaluator: 1/1");
   });
 });
+
+// IMP-10: done_when_refs drift detection at registry-check layer. Mirrors the
+// library-side invariants in src/commands/validate.ts (index bounds, uniqueness,
+// eval-ref orphan) so drift is caught even when validate command isn't invoked.
+describe.concurrent("verify-registry — IMP-10 done_when_refs drift", () => {
+  it("fails when ref index out of range", async ({ fx }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture(
+      "mission.yaml",
+      [
+        "mission:",
+        '  title: "X"',
+        '  version: "0.0.0"',
+        "  goal: x",
+        "  constraints: []",
+        "  done_when:",
+        '    - "one"',
+        "  done_when_refs:",
+        "    - index: 5",
+        '      kind: "command"',
+        '      value: "true"',
+        "",
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript()).rejects.toThrow(/index.*out of range/i);
+  });
+
+  it("fails when ref index duplicated", async ({ fx }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture(
+      "mission.yaml",
+      [
+        "mission:",
+        '  title: "X"',
+        '  version: "0.0.0"',
+        "  goal: x",
+        "  constraints: []",
+        "  done_when:",
+        '    - "one"',
+        '    - "two"',
+        "  done_when_refs:",
+        "    - index: 0",
+        '      kind: "command"',
+        '      value: "true"',
+        "    - index: 0",
+        '      kind: "command"',
+        '      value: "false"',
+        "",
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript()).rejects.toThrow(/duplicate.*index/i);
+  });
+
+  it("fails when eval-ref orphan", async ({ fx }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture(
+      "mission.yaml",
+      [
+        "mission:",
+        '  title: "X"',
+        '  version: "0.0.0"',
+        "  goal: x",
+        "  constraints: []",
+        "  done_when:",
+        '    - "one"',
+        "  done_when_refs:",
+        "    - index: 0",
+        '      kind: "eval-ref"',
+        '      value: "missing_eval"',
+        "",
+      ].join("\n"),
+    );
+
+    await expect(fx.runScript()).rejects.toThrow(/eval-ref.*not found/i);
+  });
+
+  it("ground truth output includes refsCount / refsByKind / refsCoverage", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture(
+      "mission.yaml",
+      [
+        "mission:",
+        '  title: "X"',
+        '  version: "0.0.0"',
+        "  goal: x",
+        "  constraints: []",
+        "  done_when:",
+        '    - "one"',
+        "  done_when_refs:",
+        "    - index: 0",
+        '      kind: "command"',
+        '      value: "true"',
+        "",
+      ].join("\n"),
+    );
+
+    const stdout = await fx.runScript(["--list"]);
+    expect(stdout).toMatch(/refsCount/);
+    expect(stdout).toMatch(/refsByKind/);
+    expect(stdout).toMatch(/refsCoverage/);
+  });
+});

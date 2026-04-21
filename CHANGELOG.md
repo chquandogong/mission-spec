@@ -6,6 +6,33 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.0] - 2026-04-22
+_qmonster adopter review에서 드러난 prose-heavy done_when의 구조화 부재(shared eval 14/86 중 나머지 72개가 manual)를 해결하기 위해 mission.yaml에 optional `done_when_refs` sibling field를 도입한다. 각 ref는 done_when[index]에 대한 explicit validator 바인딩(command / file-exists / file-contains / eval-ref 4 kind)을 제공한다. refs가 있는 index는 그 결과가 truth이고, refs가 없는 index는 v1.20.0 inference fallback을 유지한다._
+
+### Added
+
+- .mission/snapshots/2026-04-22_v1.21.0_mission.yaml
+
+### Changed
+
+- src/schema/mission.schema.json: done_when_refs field 추가 (array of {index, kind, value})
+- src/core/evaluator.ts: DoneWhenRef/ResolvedBy/RefKind types; runRef dispatcher + 4 kind helpers; CriterionResult에 resolved_by/ref_kind 추가; 모든 return path에 resolved_by 세팅; llm-eval awaiting의 resolved_by를 'inference'로 보정
+- src/commands/eval.ts: evaluateMission이 mission.done_when_refs를 읽어 전달; DoneWhenRef import + 재수출
+- src/commands/validate.ts: checkRefsInvariants 추가 (index range / duplicate / eval-ref orphan)
+- src/commands/status.ts: detectDoneWhenDrift를 resolved_by='manual' 기반으로 재분류; detectRefsCoverage + ## refs coverage 섹션 추가; StatusResult에 refsCoverage 필드
+- src/index.ts: DoneWhenRef/ResolvedBy/RefKind/CriterionResult 타입 재수출
+- scripts/verify-registry.js: 3 drift axis + refsCount/refsByKind/refsCoverage ground truth 확장
+- tests/schema.test.ts + tests/commands/{eval,validate,status}.test.ts + tests/bin/cli.test.ts + tests/scripts/verify-registry.test.ts: 총 +33 tests (316 → 349)
+- .mission/architecture/{ARCHITECTURE_CURRENT,ARCHITECTURE_COMPUTED,DEPENDENCY_GRAPH}.yaml: done_when_refs 반영
+- .mission/interfaces/API_REGISTRY.yaml: DoneWhenRef/ResolvedBy/RefKind/CriterionResult.resolved_by/ref_kind 반영
+- .mission/traceability/TRACE_MATRIX.yaml: 24 test files, 349 cases로 업데이트
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: 349 tests / 25 public API + 3 types 반영
+- .mission/CURRENT_STATE.md: 최근 구현 bullet + version range v1.14.2~v1.21.0
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.0 entry 추가
+- README.md + README.ko.md + README.zh.md: 신규 Explicit gate linkage (v1.21.0+) 섹션 (MDR-007 trilingual)
+- CHANGELOG.md: v1.21.0 entry 추가 (mission-history.yaml에서 자동 생성)
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.20.1 → 1.21.0
+
 ## [1.20.1] - 2026-04-22
 _정적 검토에서 드러난 self-description drift를 정리하고, MDR-006 §PATCH 규칙에 맞게 docs-only correction을 v1.20.1로 정식 bump한다. ms-context skill의 Public API 표기를 실제 구현에 맞추고, README/CONTRIBUTING/API registry/CLI 주석이 현재 CLI surface와 저장소 pre-commit 동작을 정확히 반영하도록 수정한다. 동시에 CHANGELOG의 중복 [1.20.0] 섹션을 제거한다._
 

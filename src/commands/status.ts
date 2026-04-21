@@ -3,7 +3,11 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
-import type { EvaluateOptions } from "../core/evaluator.js";
+import type {
+  EvaluateOptions,
+  ResolvedBy,
+  RefKind,
+} from "../core/evaluator.js";
 import {
   loadHistory,
   getCurrentPhase,
@@ -20,6 +24,13 @@ export interface MetaStaleness {
   hint: string;
 }
 
+export interface RefsCoverage {
+  bound: number;
+  total: number;
+  byKind: Record<string, number>;
+  unboundIndices: number[];
+}
+
 export interface StatusResult {
   title: string;
   goal: string;
@@ -27,7 +38,13 @@ export interface StatusResult {
   passed: number;
   total: number;
   progress: string;
-  criteria: Array<{ criterion: string; passed: boolean; reason: string }>;
+  criteria: Array<{
+    criterion: string;
+    passed: boolean;
+    reason: string;
+    resolved_by?: ResolvedBy;
+    ref_kind?: RefKind;
+  }>;
   phase?: string;
   phaseTheme?: string;
   totalRevisions?: number;
@@ -35,6 +52,7 @@ export interface StatusResult {
   scaffoldingWarnings?: ScaffoldingWarning[];
   doneWhenDrift?: string[];
   metaStaleness?: MetaStaleness[];
+  refsCoverage?: RefsCoverage;
   markdown: string;
 }
 
@@ -98,13 +116,37 @@ export function detectScaffoldedButEmpty(
 }
 
 export function detectDoneWhenDrift(
-  criteria: Array<{ criterion: string; passed: boolean; reason: string }>,
+  criteria: StatusResult["criteria"],
 ): string[] {
   return criteria
-    .filter((c) =>
-      c.reason.toLowerCase().includes("manual verification required"),
+    .filter(
+      (c) =>
+        !c.passed &&
+        (c as { resolved_by?: ResolvedBy }).resolved_by === "manual",
     )
     .map((c) => c.criterion);
+}
+
+export function detectRefsCoverage(
+  criteria: StatusResult["criteria"],
+): RefsCoverage | null {
+  const total = criteria.length;
+  if (total === 0) return null;
+  const byKind: Record<string, number> = {};
+  const unbound: number[] = [];
+  let bound = 0;
+  criteria.forEach((c, i) => {
+    const resolved = (c as { resolved_by?: ResolvedBy }).resolved_by;
+    const kind = (c as { ref_kind?: RefKind }).ref_kind;
+    if (resolved === "ref" && kind) {
+      bound++;
+      byKind[kind] = (byKind[kind] ?? 0) + 1;
+    } else {
+      unbound.push(i);
+    }
+  });
+  if (bound === 0) return null; // omit section when no refs
+  return { bound, total, byKind, unboundIndices: unbound };
 }
 
 function formatDriftSample(entry: string): string {
@@ -270,6 +312,31 @@ export function getMissionStatus(
     metaStaleness.forEach((m) => md.push(`- ⚠ \`${m.field}\` — ${m.hint}`));
   }
 
+  const criteria = evalResult.criteria.map((c) => ({
+    criterion: c.criterion,
+    passed: c.passed,
+    reason: c.reason,
+    resolved_by: c.resolved_by,
+    ref_kind: c.ref_kind,
+  }));
+
+  const refsCoverage = detectRefsCoverage(criteria);
+  if (refsCoverage) {
+    const kindSummary = Object.entries(refsCoverage.byKind)
+      .map(([k, n]) => `${k} ${n}`)
+      .join(", ");
+    md.push(
+      "",
+      "## refs coverage",
+      "",
+      `done_when ${refsCoverage.bound}/${refsCoverage.total} bound via done_when_refs (${kindSummary}).${
+        refsCoverage.unboundIndices.length > 0
+          ? ` ${refsCoverage.unboundIndices.length}개는 inference fallback 중: ${refsCoverage.unboundIndices.map((i) => `[index ${i}]`).join(", ")}`
+          : ""
+      }`,
+    );
+  }
+
   return {
     title,
     goal: goal.trim(),
@@ -277,7 +344,7 @@ export function getMissionStatus(
     passed: evalResult.passed,
     total: evalResult.total,
     progress: `${evalResult.passed}/${evalResult.total}`,
-    criteria: evalResult.criteria,
+    criteria,
     phase,
     phaseTheme,
     totalRevisions,
@@ -285,6 +352,7 @@ export function getMissionStatus(
     scaffoldingWarnings,
     doneWhenDrift,
     metaStaleness,
+    refsCoverage: refsCoverage ?? undefined,
     markdown: md.join("\n"),
   };
 }

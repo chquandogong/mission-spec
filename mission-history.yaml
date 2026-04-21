@@ -4,15 +4,88 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.20.1 — docs correction retag (MDR-006 §PATCH)"
+  mission_title: "Mission Spec v1.21.0 — explicit gate linkage (done_when_refs)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 47
-  latest_version: "1.20.1"
+  total_revisions: 48
+  latest_version: "1.21.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-22-002"
+    semantic_version: "1.21.0"
+    change_sequence: 52
+    date: "2026-04-22"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "qmonster adopter review에서 드러난 prose-heavy done_when의 구조화 부재(shared eval 14/86 중 나머지 72개가 manual)를 해결하기 위해 mission.yaml에 optional `done_when_refs` sibling field를 도입한다. 각 ref는 done_when[index]에 대한 explicit validator 바인딩(command / file-exists / file-contains / eval-ref 4 kind)을 제공한다. refs가 있는 index는 그 결과가 truth이고, refs가 없는 index는 v1.20.0 inference fallback을 유지한다."
+    decision: |
+      IMP-10 explicit gate linkage (spec: docs/superpowers/specs/2026-04-22-imp10-prose-gate-linkage-design.md, plan: docs/superpowers/plans/2026-04-22-imp10-prose-gate-linkage.md — 둘 다 로컬 전용, gitignored).
+      1. Schema: `src/schema/mission.schema.json`의 mission 객체에 optional `done_when_refs` array 추가. item은 `{index, kind, value}` with `additionalProperties: false` + kind enum 4종.
+      2. Evaluator: `CriterionResult`에 `resolved_by: "ref" | "inference" | "manual"` + `ref_kind?: RefKind` 추가. `evaluateCriterion`에 `ref?` param, `evaluateAllCriteria`에 `refs?` param과 Map 기반 dispatch. 기존 모든 return path에 resolved_by 세팅 (additive, behavior 불변).
+      3. `runRef` dispatcher + 4 kind helper: `runRefCommand` (execSync, 180s timeout, stdio pipe), `runRefFileExists`, `runRefFileContains` (path::substring), `runRefEvalRef` (기존 evals[] 엔트리 재사용).
+      4. Wiring: `evaluateMission`이 `doc.mission.done_when_refs`를 읽어 전달.
+      5. `validateProject`에 3 invariant 추가: index range / duplicate index / eval-ref orphan. 기존 ajv schema 검증 다음에 실행.
+      6. `ms-status`: drift detection을 `resolved_by === "manual"` 기반으로 재분류; `## refs coverage` 섹션 추가 (refs 있을 때만); `llm-eval awaiting verdict`의 resolved_by를 "inference"로 보정 (evals[]-backed은 drift 아님).
+      7. `verify-registry`: mission.yaml의 refs를 파싱해 3 drift 확인 + ground truth에 refsCount/refsByKind/refsCoverage 추가.
+      8. Public API: `DoneWhenRef`, `ResolvedBy`, `RefKind`, `CriterionResult` 타입을 `src/index.ts`에서 재수출.
+      Semantic version: MINOR per MDR-006 §MINOR (새 schema field + 새 public type + additive CLI-consumed behavior).
+    triggered_by: "사용자가 IMP-10 brainstorming → writing-plans → subagent-driven-development 워크플로우로 full implementation을 지시."
+    issue_or_context: "v1.20.0 adopter-compat이 shared-scope evaluator + safe inferred command clauses로 qmonster eval을 0/86에서 14/86까지 끌어올렸으나 남은 72개는 prose 구조 부재로 인한 manual gate였다. MSC-2026-04-21-010 follow_up §1이 `done_when_refs`를 다음 axis로 명시 지목. IMP-10은 그 axis를 실제 schema + evaluator 레이어로 구현."
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-22_v1.21.0_mission.yaml"
+      modified:
+        - "src/schema/mission.schema.json: done_when_refs field 추가 (array of {index, kind, value})"
+        - "src/core/evaluator.ts: DoneWhenRef/ResolvedBy/RefKind types; runRef dispatcher + 4 kind helpers; CriterionResult에 resolved_by/ref_kind 추가; 모든 return path에 resolved_by 세팅; llm-eval awaiting의 resolved_by를 'inference'로 보정"
+        - "src/commands/eval.ts: evaluateMission이 mission.done_when_refs를 읽어 전달; DoneWhenRef import + 재수출"
+        - "src/commands/validate.ts: checkRefsInvariants 추가 (index range / duplicate / eval-ref orphan)"
+        - "src/commands/status.ts: detectDoneWhenDrift를 resolved_by='manual' 기반으로 재분류; detectRefsCoverage + ## refs coverage 섹션 추가; StatusResult에 refsCoverage 필드"
+        - "src/index.ts: DoneWhenRef/ResolvedBy/RefKind/CriterionResult 타입 재수출"
+        - "scripts/verify-registry.js: 3 drift axis + refsCount/refsByKind/refsCoverage ground truth 확장"
+        - "tests/schema.test.ts + tests/commands/{eval,validate,status}.test.ts + tests/bin/cli.test.ts + tests/scripts/verify-registry.test.ts: 총 +33 tests (316 → 349)"
+        - ".mission/architecture/{ARCHITECTURE_CURRENT,ARCHITECTURE_COMPUTED,DEPENDENCY_GRAPH}.yaml: done_when_refs 반영"
+        - ".mission/interfaces/API_REGISTRY.yaml: DoneWhenRef/ResolvedBy/RefKind/CriterionResult.resolved_by/ref_kind 반영"
+        - ".mission/traceability/TRACE_MATRIX.yaml: 24 test files, 349 cases로 업데이트"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: 349 tests / 25 public API + 3 types 반영"
+        - ".mission/CURRENT_STATE.md: 최근 구현 bullet + version range v1.14.2~v1.21.0"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.0 entry 추가"
+        - "README.md + README.ko.md + README.zh.md: 신규 Explicit gate linkage (v1.21.0+) 섹션 (MDR-007 trilingual)"
+        - "CHANGELOG.md: v1.21.0 entry 추가 (mission-history.yaml에서 자동 생성)"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.20.1 → 1.21.0"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: false
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — done_when_refs는 optional field이고, refs 없는 저장소는 완전 동일하게 동작 (349/349 tests 포함 mission-spec 자체 저장소도 10/10 PASS 유지). 새로 노출한 4 kind(command/file-exists/file-contains/eval-ref)는 각각 pass+fail 케이스로 커버됨 + partial refs + override + shared-scope + 3 invariants(index range/duplicate/eval-ref orphan)도 모두 테스트로 보장. 기존 behavior 변경은 llm-eval awaiting verdict의 resolved_by 'manual' → 'inference' 1지점뿐이며 이는 evals[]-backed ≠ drift 원칙 복원. Semantic version: minor per MDR-006 §MINOR (새 schema field + 새 public type + additive CLI-consumed behavior). 관찰된 잠재 문제: command kind가 shared-scope에서 실제 git repo + gitignored path 시나리오에서 shared-skip에 선점될 가능성 — 현재 테스트는 tempDir가 git 아님이라 우연히 패스. 추후 fix task에서 `if (ref) return runRef(...)`를 shared-scope skip 이전으로 swap 권고."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-004-done-when-eval-linking",
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-22_v1.21.0_mission.yaml"
+    follow_up:
+      - "shared-scope + command kind + gitignored path 시나리오: ref 우선순위가 shared-skip보다 앞서도록 evaluator ordering swap (IMP-10 follow-up, §PATCH)."
+      - "IMP-11 후보: shared/local visibility를 done_when_refs entry-level field로 승격 (adopter 사례 추가 관찰 후)."
+      - "IMP-12 후보: done_when_refs strict mode — 전 done_when이 refs 커버 강제."
+      - "qmonster에서 eval --shared 14/86 → ? 실측: adopter가 refs 작성한 이후 측정."
+
   - change_id: "MSC-2026-04-22-001"
     semantic_version: "1.20.1"
     change_sequence: 51

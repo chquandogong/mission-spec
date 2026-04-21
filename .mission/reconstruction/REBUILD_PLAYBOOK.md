@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-21 | Version: 1.20.1
+> Last updated: 2026-04-22 | Version: 1.21.0
 
 ## 전제 조건
 
@@ -23,7 +23,7 @@
 7. **`.mission/architecture/ARCHITECTURE_CURRENT.yaml`** — 21개 모듈(hand-curated registry; src/ 실제 `.ts`는 22개 — `src/index.ts` barrel 포함)의 id, path, responsibility, exports
 8. **`.mission/architecture/DEPENDENCY_GRAPH.yaml`** — 모듈 간 import 관계 (directed edges)
 9. **`.mission/architecture/ARCHITECTURE_COMPUTED.yaml`** (v1.10+) — `extractArchitecture()` 자동 생성 결과 (hand-curated와 대칭 drift 검증 대상)
-10. **`.mission/interfaces/API_REGISTRY.yaml`** — public API 25개 함수(type export 포함), skill 6개, file_contracts 다수(`.cursorrules`, `AGENTS.md`, `opencode.toml`, `plugin.json`, `SKILL.md`, `.clinerules`, `.continuerules`, `.aider.conf.yml`, `.aider-mission.md`), `package_exports` (라이브러리 subpath) 포함
+10. **`.mission/interfaces/API_REGISTRY.yaml`** — public API 25개 함수 + 3개 type(`DoneWhenRef` / `ResolvedBy` / `RefKind` — v1.21.0+), skill 6개, file_contracts 다수(`.cursorrules`, `AGENTS.md`, `opencode.toml`, `plugin.json`, `SKILL.md`, `.clinerules`, `.continuerules`, `.aider.conf.yml`, `.aider-mission.md`), `package_exports` (라이브러리 subpath) 포함
 11. **`mission.yaml`의 `design_refs`** — architecture, api_surface, type_definitions 파일 위치
 
 ## Phase 3: 스캐폴딩
@@ -48,7 +48,7 @@
 ## Phase 4: 스키마 → 검증 (TDD)
 
 17. `mission.schema.json` + `mission-history.schema.json` 작성 — ARCHITECTURE_CURRENT.yaml의 `validator` 모듈 exports 참조
-18. `tests/schema.test.ts` 먼저 작성(RED, 36 tests)
+18. `tests/schema.test.ts` 먼저 작성(RED, 42 tests — v1.21.0 기준, `done_when_refs` schema 포함)
 19. `src/schema/validator.ts` 구현 — `validateMission()`, `validateHistory()` (+ sparse legacy history normalization)
 20. `npm test` GREEN 확인
 
@@ -57,7 +57,7 @@
 DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → adapters → index`.
 
 21. `parser.ts` — YAML parse + schema validate
-22. `evaluator.ts` — done_when 7-단계 평가 (shared-mode local-only skip → llm-eval override → automated execSync → file-existence regex → safe inferred command clause → test-pattern → fallback). `ARCHITECTURE_CURRENT.yaml` 의 `evaluation_rules` 참조
+22. `evaluator.ts` — done_when 8-단계 평가 (v1.21.0+: done_when_refs explicit binding → shared-mode local-only skip → llm-eval override → automated execSync → file-existence regex → safe inferred command clause → test-pattern → fallback). `ARCHITECTURE_CURRENT.yaml` 의 `evaluation_rules` 참조. `CriterionResult`는 `resolved_by: "ref" | "inference" | "manual"` + `ref_kind?: RefKind`를 기록
 23. `history.ts` — `mission-history.yaml` 로더 + sparse legacy normalization + `getCurrentPhase()` / `getLatestEntry()`
 24. `reporter.ts` — markdown 렌더링 (`TRACE_MATRIX.yaml` 연동 포함)
 25. `init.ts` → `eval.ts` → `status.ts` → `report.ts` → `context.ts` → `decide.ts` 순서
@@ -73,7 +73,7 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 
 ## Phase 7: 검증 (총 9+ 축)
 
-32. `npm test` — 현재 기준 316 tests 전수 통과 (24 test files)
+32. `npm test` — 현재 기준 349 tests 전수 통과 (24 test files)
 33. `npm run test:coverage` — stmts/branches/functions/lines ≥ 80/75/80/80 (현 baseline 93.95 / 83.59 / 95.52 / 93.95)
 34. `node scripts/validate-schema.js` — 스키마 검증 (3 fixtures)
 35. `node scripts/convert-platforms.js --verify` — 6개 플랫폼

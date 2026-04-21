@@ -311,7 +311,9 @@ describe("evaluateMission", () => {
 
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(true);
-    expect(result.criteria[0].reason).toContain("Inferred command clause(s) succeeded");
+    expect(result.criteria[0].reason).toContain(
+      "Inferred command clause(s) succeeded",
+    );
     expect(result.criteria[0].reason).toContain('node -e "process.exit(0)"');
   });
 
@@ -324,6 +326,244 @@ describe("evaluateMission", () => {
 
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(false);
-    expect(result.criteria[0].reason).toContain("Inferred command clause failed");
+    expect(result.criteria[0].reason).toContain(
+      "Inferred command clause failed",
+    );
+  });
+
+  it("sets resolved_by=inference on file-existence passes", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["README.md 파일 존재"],
+    });
+    writeFileSync(join(tempDir, "README.md"), "# Hi");
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("inference");
+  });
+
+  it("sets resolved_by=manual on fallback", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["something vague that cannot auto-evaluate"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].resolved_by).toBe("manual");
+  });
+});
+
+describe("done_when_refs — command kind", () => {
+  it("passes when command exits 0 (via direct evaluateMission read of mission.yaml)", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["shell ok"],
+      done_when_refs: [{ index: 0, kind: "command", value: "true" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("ref");
+    expect(result.criteria[0].ref_kind).toBe("command");
+  });
+
+  it("fails when command exits non-zero", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["shell fail"],
+      done_when_refs: [{ index: 0, kind: "command", value: "false" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].resolved_by).toBe("ref");
+    expect(result.criteria[0].ref_kind).toBe("command");
+    expect(result.criteria[0].reason).toMatch(/command/i);
+  });
+});
+
+describe("done_when_refs — file-exists kind", () => {
+  it("passes when the referenced path exists", () => {
+    writeFileSync(join(tempDir, "SECURITY.md"), "");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["security doc present"],
+      done_when_refs: [{ index: 0, kind: "file-exists", value: "SECURITY.md" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].ref_kind).toBe("file-exists");
+  });
+
+  it("fails when path missing", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["security doc present"],
+      done_when_refs: [{ index: 0, kind: "file-exists", value: "SECURITY.md" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].ref_kind).toBe("file-exists");
+  });
+});
+
+describe("done_when_refs — file-contains kind", () => {
+  it("passes when file contains the substring after '::'", () => {
+    writeFileSync(
+      join(tempDir, "README.md"),
+      "# Project\n\n## Installation\nnpm install foo",
+    );
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["readme has installation section"],
+      done_when_refs: [
+        {
+          index: 0,
+          kind: "file-contains",
+          value: "README.md::## Installation",
+        },
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].ref_kind).toBe("file-contains");
+  });
+
+  it("fails when substring absent", () => {
+    writeFileSync(join(tempDir, "README.md"), "# Project\n");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["readme has installation section"],
+      done_when_refs: [
+        {
+          index: 0,
+          kind: "file-contains",
+          value: "README.md::## Installation",
+        },
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].ref_kind).toBe("file-contains");
+  });
+
+  it("fails with clear reason when value has no '::' separator", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["bad ref"],
+      done_when_refs: [{ index: 0, kind: "file-contains", value: "README.md" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toMatch(/::/);
+  });
+});
+
+describe("done_when_refs — eval-ref kind", () => {
+  it("delegates to automated evals entry", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["tests pass"],
+      evals: [
+        {
+          name: "unit_tests",
+          type: "automated",
+          command: "true",
+          pass_criteria: "exit 0",
+        },
+      ],
+      done_when_refs: [{ index: 0, kind: "eval-ref", value: "unit_tests" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("ref");
+    expect(result.criteria[0].ref_kind).toBe("eval-ref");
+  });
+
+  it("delegates to llm-eval entry with override file", () => {
+    mkdirSync(join(tempDir, ".mission", "evals"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "evals", "arch_review.result.yaml"),
+      "passed: true\nreason: reviewed\n",
+    );
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["arch ok"],
+      evals: [
+        {
+          name: "arch_review",
+          type: "llm-eval",
+          pass_criteria: "reviewer approval",
+        },
+      ],
+      done_when_refs: [{ index: 0, kind: "eval-ref", value: "arch_review" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].ref_kind).toBe("eval-ref");
+  });
+
+  it("fails when eval-ref value has no matching evals[] entry (orphan at runtime)", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["tests pass"],
+      done_when_refs: [{ index: 0, kind: "eval-ref", value: "nonexistent" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].ref_kind).toBe("eval-ref");
+    expect(result.criteria[0].reason).toMatch(/nonexistent/);
+  });
+});
+
+describe("done_when_refs — partial coverage and overrides", () => {
+  it("uses inference for indices with no ref (partial refs)", () => {
+    writeFileSync(join(tempDir, "README.md"), "# Hi");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["README.md 파일 존재", "shell ok"],
+      done_when_refs: [{ index: 1, kind: "command", value: "true" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("inference");
+    expect(result.criteria[1].passed).toBe(true);
+    expect(result.criteria[1].resolved_by).toBe("ref");
+  });
+
+  it("ref result overrides inference that would have passed", () => {
+    writeFileSync(join(tempDir, "README.md"), "# Hi");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["README.md 파일 존재"],
+      done_when_refs: [{ index: 0, kind: "command", value: "false" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].resolved_by).toBe("ref");
+  });
+
+  it("refs in shared scope still execute (command kind is not shared-skipped)", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: [".mission/CURRENT_STATE.md exists"],
+      done_when_refs: [{ index: 0, kind: "command", value: "true" }],
+    });
+    const result = evaluateMission(tempDir, { scope: "shared" });
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("ref");
   });
 });

@@ -137,6 +137,12 @@ async function groundTruth() {
   let missionTitle = null;
   let doneWhenCount = null;
   let lineageTotalRevisions = null;
+  // IMP-10: refs invariants — expose raw refs, done_when length, and eval
+  // names so check() can run the 3 drift detectors that mirror
+  // src/commands/validate.ts (index out-of-range / duplicate / eval-ref
+  // orphan).
+  let doneWhenRefs = [];
+  let evalNames = [];
   const missionPath = join(projectDir, "mission.yaml");
   if (existsSync(missionPath)) {
     try {
@@ -149,6 +155,14 @@ async function groundTruth() {
       }
       if (typeof parsed?.mission?.lineage?.total_revisions === "number") {
         lineageTotalRevisions = parsed.mission.lineage.total_revisions;
+      }
+      if (Array.isArray(parsed?.mission?.done_when_refs)) {
+        doneWhenRefs = parsed.mission.done_when_refs;
+      }
+      if (Array.isArray(parsed?.mission?.evals)) {
+        evalNames = parsed.mission.evals
+          .map((e) => (e && typeof e === "object" ? e.name : undefined))
+          .filter((n) => typeof n === "string");
       }
     } catch {
       // malformed mission.yaml — leave fields null, CURRENT_STATE checks skip.
@@ -207,6 +221,17 @@ async function groundTruth() {
     }
   }
 
+  // IMP-10: refsByKind aggregates kind distribution (command / eval-ref / …)
+  // for at-a-glance inspection; refsCoverage is "refs.length/done_when.length"
+  // so stale refs vs unreferenced criteria are visible in --list output.
+  const refsByKind = doneWhenRefs.reduce((acc, r) => {
+    if (r && typeof r === "object" && typeof r.kind === "string") {
+      acc[r.kind] = (acc[r.kind] ?? 0) + 1;
+    }
+    return acc;
+  }, {});
+  const refsCoverage = `${doneWhenRefs.length}/${doneWhenCount ?? 0}`;
+
   return {
     moduleCount: arch.modules.length,
     apiCount: arch.public_api.functions.length,
@@ -220,6 +245,14 @@ async function groundTruth() {
     historyTotalRevisions,
     latestVerificationVersion,
     livePassed,
+    refsCount: doneWhenRefs.length,
+    refsByKind,
+    refsCoverage,
+    // Raw refs + eval names passed through for check()'s drift detectors;
+    // not part of the --list contract (numeric/string ground truth only),
+    // but harmless for humans who inspect the JSON dump.
+    doneWhenRefs,
+    evalNames,
   };
 }
 
@@ -336,6 +369,37 @@ async function check() {
     mismatches.push(
       `mission.yaml lineage.total_revisions: claims ${truth.lineageTotalRevisions}, actual ${truth.historyTotalRevisions} (mission-history.yaml meta.total_revisions)`,
     );
+  }
+
+  // IMP-10: done_when_refs invariants (mirrors src/commands/validate.ts so
+  // drift is caught by registry:check even if `validate` isn't run). Uses
+  // the "collect all drifts then report" pattern already established above —
+  // each violation pushes into mismatches without aborting the loop.
+  const refs = Array.isArray(truth.doneWhenRefs) ? truth.doneWhenRefs : [];
+  if (refs.length > 0) {
+    const doneWhenLen =
+      typeof truth.doneWhenCount === "number" ? truth.doneWhenCount : 0;
+    const evalNameSet = new Set(
+      Array.isArray(truth.evalNames) ? truth.evalNames : [],
+    );
+    const seen = new Set();
+    for (const r of refs) {
+      if (!r || typeof r !== "object" || typeof r.index !== "number") continue;
+      if (r.index >= doneWhenLen) {
+        mismatches.push(
+          `mission.done_when_refs[${r.index}]: index out of range (done_when.length = ${doneWhenLen})`,
+        );
+      }
+      if (seen.has(r.index)) {
+        mismatches.push(`mission.done_when_refs: duplicate index ${r.index}`);
+      }
+      seen.add(r.index);
+      if (r.kind === "eval-ref" && !evalNameSet.has(r.value)) {
+        mismatches.push(
+          `mission.done_when_refs: eval-ref value '${r.value}' not found in mission.evals[].name`,
+        );
+      }
+    }
   }
 
   // E-8 (v1.16.2) + C-4/F-4 (v1.16.9): CURRENT_STATE.md content checks.

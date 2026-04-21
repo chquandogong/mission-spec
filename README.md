@@ -372,6 +372,26 @@ git add .mission/snapshots/
 
 Existing v1.17.0 adopters: edit your installed `.git/hooks/pre-commit` to add the `snapshot` + `git add` lines. The `templates/pre-commit` file shipped with the package is unchanged (still single-step validate) so `cp` re-installation is not forced.
 
+## Explicit gate linkage (v1.21.0+)
+
+`mission.yaml` supports an optional `done_when_refs` sibling field that binds each prose `done_when` criterion to an explicit validator. Four `kind`s are supported: `command` (POSIX shell, exit 0), `file-exists` (path), `file-contains` (`path::substring` format), and `eval-ref` (delegates to a `mission.evals[].name` entry). Each ref maps via `index` to the target `done_when` entry.
+
+```yaml
+mission:
+  done_when:
+    - "cargo test passes"
+    - "README has an Installation section"
+  done_when_refs:
+    - index: 0
+      kind: command
+      value: "cargo test"
+    - index: 1
+      kind: file-contains
+      value: "README.md::## Installation"
+```
+
+Bound indices run their validator directly (`resolved_by: "ref"`); unbound indices fall back to the v1.20.0 inference chain. `ms-status` surfaces a `## refs coverage` section when refs are present and reclassifies drift via `resolved_by === "manual"`, and `validateProject` enforces three invariants (index range, uniqueness, `eval-ref` orphan). Release grade: §MINOR per MDR-006.
+
 ## Cross-Platform Conversion
 
 ```bash

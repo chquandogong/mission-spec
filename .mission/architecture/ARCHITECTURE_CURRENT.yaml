@@ -3,7 +3,7 @@
 # mission-history.yaml의 architecture_delta와 연동: delta는 변경 추적, 이 파일은 현재 상태.
 # 자동 검증: `npm run arch:verify` 로 src/ 와 이 파일의 모듈 목록 + depends_on 동기 확인.
 # 파생 파일: .mission/architecture/ARCHITECTURE_COMPUTED.yaml (src/ 에서 자동 추출).
-# Last updated: 2026-04-21 | Version: 1.20.1
+# Last updated: 2026-04-22 | Version: 1.21.0
 
 system:
   name: "mission-spec"
@@ -37,21 +37,27 @@ modules:
 
   - id: evaluator
     path: "src/core/evaluator.ts"
-    responsibility: "done_when 조건 평가 엔진 (shared-clone skip + rule-based + automated + llm-eval override)"
+    responsibility: "done_when 조건 평가 엔진 (done_when_refs explicit binding + shared-clone skip + rule-based + automated + llm-eval override; resolved_by/ref_kind 어트리뷰션 포함)"
     depends_on: []
     exports:
-      - "evaluateCriterion(criterion, projectDir, evals?, options?): CriterionResult"
-      - "evaluateAllCriteria(criteria, projectDir, evals?, options?): CriterionResult[]"
+      - "evaluateCriterion(criterion, projectDir, evals?, options?, ref?): CriterionResult"
+      - "evaluateAllCriteria(criteria, projectDir, evals?, options?, refs?): CriterionResult[]"
     types:
       - "CriterionResult"
       - "EvaluateOptions"
+      - "DoneWhenRef"
+      - "ResolvedBy"
+      - "RefKind"
     evaluation_rules:
+      - priority: 0
+        type: "done_when_refs (explicit binding)"
+        mechanism: "done_when[index]에 바인딩된 ref가 있으면 4 kind(command / file-exists / file-contains / eval-ref) dispatch, resolved_by='ref' + ref_kind 기록"
       - priority: 1
         type: "shared local-only skip"
         mechanism: "scope==='shared' 이고 criterion이 missing gitignored local-only artifact만 가리키면 skipped PASS"
       - priority: 2
         type: "llm-eval / llm-judge"
-        mechanism: ".mission/evals/<name>.result.yaml 오버라이드 조회"
+        mechanism: ".mission/evals/<name>.result.yaml 오버라이드 조회 (awaiting verdict는 resolved_by='inference')"
       - priority: 3
         type: "automated"
         mechanism: "execSync(command)"
@@ -66,7 +72,7 @@ modules:
         mechanism: "정규식 /테스트\\s*통과|test.*pass/i"
       - priority: 7
         type: "fallback"
-        mechanism: "자동 평가 불가 — 수동 확인 필요"
+        mechanism: "자동 평가 불가 — resolved_by='manual'로 수동 확인 필요"
 
   - id: history
     path: "src/core/history.ts"
@@ -255,6 +261,7 @@ modules:
         parser,
         init,
         eval,
+        evaluator,
         status,
         report,
         context,
@@ -270,7 +277,7 @@ modules:
         snapshot,
       ]
     exports:
-      - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor, core/plugin-validator"
+      - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor, core/plugin-validator, core/evaluator (DoneWhenRef / ResolvedBy / RefKind / CriterionResult types)"
 
 data_flow:
   pipeline: "parse → validate → evaluate → render"

@@ -164,6 +164,24 @@ describe("mission-spec CLI", () => {
     expect(combined).toContain("mission.yaml:");
   });
 
+  it("validate subcommand exits non-zero when done_when_refs invariant fails", () => {
+    writeFile(
+      "mission.yaml",
+      `mission:
+  title: T
+  goal: G
+  done_when:
+    - one
+  done_when_refs:
+    - index: 5
+      kind: command
+      value: "true"
+`,
+    );
+    const combined = runCli(["validate"], { expectFail: true });
+    expect(combined).toMatch(/index.*out of range/i);
+  });
+
   it("validate subcommand accepts legacy mission-history entries with omitted changes arrays", () => {
     writeMission();
     writeFile(
@@ -303,7 +321,10 @@ describe("mission-spec CLI", () => {
 
     const out = runCli(["backfill-commits", "--apply"]);
     expect(out).toContain("Applying 1 single-candidate proposals");
-    const updated = readFileSync(join(tempDir, "mission-history.yaml"), "utf-8");
+    const updated = readFileSync(
+      join(tempDir, "mission-history.yaml"),
+      "utf-8",
+    );
     expect(updated).not.toContain("related_commits: []");
   });
 });
