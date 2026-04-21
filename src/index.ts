@@ -50,3 +50,5 @@ export type {
   BackfillProposal,
   BackfillResult,
 } from "./commands/backfill-commits.js";
+export { createSnapshot } from "./commands/snapshot.js";
+export type { SnapshotResult } from "./commands/snapshot.js";

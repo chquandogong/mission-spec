@@ -102,6 +102,7 @@ modules:
       - plugin-validator
       - reconstruction-verifier
       - report
+      - snapshot
       - status
       - validate
       - validator
@@ -120,9 +121,11 @@ modules:
       - ReconstructionOptions
       - ReconstructionResult
       - SchemaVersion
+      - SnapshotResult
       - ValidateResult
       - ValidationResult
       - backfillRelatedCommits
+      - createSnapshot
       - detectSchemaVersion
       - diffArchitectureFromGit
       - diffArchitectures
@@ -228,6 +231,13 @@ modules:
       - ReportData
       - TraceEntry
       - renderReport
+  - id: snapshot
+    path: src/commands/snapshot.ts
+    layer: commands
+    depends_on: []
+    exports:
+      - SnapshotResult
+      - createSnapshot
   - id: status
     path: src/commands/status.ts
     layer: commands
@@ -299,6 +309,8 @@ edges:
   - from: index
     to: report
   - from: index
+    to: snapshot
+  - from: index
     to: status
   - from: index
     to: validate
@@ -331,6 +343,7 @@ edges:
 public_api:
   functions:
     - backfillRelatedCommits
+    - createSnapshot
     - detectSchemaVersion
     - diffArchitectureFromGit
     - diffArchitectures
@@ -369,5 +382,6 @@ public_api:
     - ReconstructionOptions
     - ReconstructionResult
     - SchemaVersion
+    - SnapshotResult
     - ValidateResult
     - ValidationResult

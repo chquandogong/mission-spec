@@ -6,6 +6,30 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.19.0] - 2026-04-21
+_mission.yaml 버전별 snapshot 생성을 portable library API + CLI subcommand로 노출. 기존 `scripts/snapshot-mission.js` 로직을 `createSnapshot(projectDir)` public API로 병행 제공 (script 자체는 self-hook 안정성 보호 차원에서 변경 안 함). qmonster B-3 IMP 시퀀스의 6번째 axis이자 최종 항목._
+
+### Added
+
+- src/commands/snapshot.ts: `SnapshotResult` interface (exported) + `createSnapshot(projectDir): SnapshotResult` helper (exported) + internal `formatDate` helper
+- tests/commands/snapshot.test.ts: 7 신규 unit tests — 새 snapshot 생성 / 동일 버전 dedup / mission.yaml 부재 throw / version 필드 부재 throw / .mission/snapshots/ 자동 생성 / 반환 필드 정확성 / 파일명 형식
+- tests/bin/cli.test.ts: 1 신규 integration test — `snapshot` subcommand 성공 시 'snapshot created' 출력 + 파일명 패턴 확인 (기존 11 유지, 총 12)
+- bin/mission-spec.js: `snapshot` case + HELP 업데이트 + `createSnapshot` import
+- src/index.ts: `createSnapshot` function + `SnapshotResult` type export 추가 (public API 24 → 25 functions)
+- README.md + README.ko.md + README.zh.md: 신규 `## Snapshot on commit (v1.19.0+)` (EN) / `## 커밋 시 snapshot (v1.19.0+)` (KO) / `## 提交时快照（v1.19.0+）` (ZH) 섹션 (MDR-007 trilingual) — 2-step pre-commit hook 예시 포함
+- docs/superpowers/specs/2026-04-21-imp7-snapshot-cli-design.md + docs/superpowers/plans/2026-04-21-imp7-snapshot-cli.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)
+
+### Changed
+
+- .mission/architecture/ARCHITECTURE_CURRENT.yaml: `snapshot` 모듈 entry 추가 (modules 20 → 21) + index depends_on에 snapshot 추가
+- .mission/architecture/DEPENDENCY_GRAPH.yaml: `snapshot` node 추가 (edges 없음 — 모듈이 src/ 내 다른 모듈에 의존하지 않음)
+- .mission/interfaces/API_REGISTRY.yaml: `createSnapshot` function entry 추가 (public API 24 → 25)
+- .mission/traceability/TRACE_MATRIX.yaml: `snapshot.test.ts` entry 신규 (cases 7); `cli.test.ts` cases 11 → 12 + 'snapshot subcommand (v1.19.0)' category; header total 296 → 304, files 23 → 24; version header v1.18.0 → v1.19.0
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 296 → 304 tests, 23 → 24 files; 모듈 수 20 → 21; public API 24 → 25
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.18.0 → 1.19.0
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.19.0 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.18.0] - 2026-04-21
 _adopter가 mission-history.yaml의 빈 related_commits 배열을 git log 날짜 매칭으로 retrofit할 수 있도록 `backfill-commits` CLI subcommand + `backfillRelatedCommits` public API를 제공. qmonster B-3 IMP 시퀀스의 5번째 axis — 이전 4개(v1.16.17/18/19/v1.17.0)와 달리 과거 이력의 traceability 공백을 소급 보완하는 repair 도구._
 

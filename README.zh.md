@@ -338,6 +338,27 @@ git commit -m "chore: backfill related_commits via ms-backfill-commits"
 
 已填充的 `related_commits` 数组**绝不会**被覆盖。
 
+## 提交时快照（v1.19.0+）
+
+在 `.mission/snapshots/` 下生成 `mission.yaml` 的逐版本副本。按 `mission.version` 幂等——相同版本再次调用返回已存在的快照（不产生重复文件）。语言无关——任何安装了 Node 与 mission-spec 的项目都可使用。
+
+```bash
+# 独立调用
+npx mission-spec snapshot
+```
+
+2-step pre-commit hook（结合 v1.17.0 validate 与 v1.19.0 snapshot）：
+
+```sh
+#!/bin/sh
+set -e
+npx mission-spec validate
+npx mission-spec snapshot
+git add .mission/snapshots/
+```
+
+已安装 v1.17.0 的采用者：编辑本地 `.git/hooks/pre-commit`，仅添加 `snapshot` 与 `git add` 两行即可。包内 `templates/pre-commit` 保持不变（单步 validate），无需 `cp` 重装。
+
 ## 跨平台转换
 
 ```bash

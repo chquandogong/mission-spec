@@ -17,6 +17,7 @@ import {
   generateMissionReport,
   validateProject,
   backfillRelatedCommits,
+  createSnapshot,
 } from "../dist/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,8 @@ Commands:
   validate         [dir]  Schema-check mission.yaml (+ mission-history.yaml if present); fast, for pre-commit
   backfill-commits [dir]  Scan empty related_commits arrays; propose git SHAs by ±1-day date match.
                           Dry-run by default; add --apply to write single-candidate proposals.
+  snapshot         [dir]  Create a version snapshot of mission.yaml in .mission/snapshots/
+                          (no-op if a snapshot for the current version already exists)
 
 Options:
   --version       Print package version
@@ -185,6 +188,25 @@ try {
         );
       }
       process.exit(0);
+      break;
+    }
+    case "snapshot": {
+      try {
+        const r = createSnapshot(projectDir);
+        const base = r.path.split("/").pop();
+        if (r.created) {
+          process.stdout.write(`mission-spec: snapshot created (${base})\n`);
+        } else {
+          process.stdout.write(
+            `mission-spec: snapshot already exists for v${r.version} (${base})\n`,
+          );
+        }
+        process.exit(0);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        process.stderr.write(`mission-spec snapshot failed: ${msg}\n`);
+        process.exit(1);
+      }
       break;
     }
     default: {

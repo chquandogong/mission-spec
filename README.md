@@ -338,6 +338,27 @@ Classification per entry:
 
 The tool NEVER overwrites already-populated `related_commits` arrays.
 
+## Snapshot on commit (v1.19.0+)
+
+Populate `.mission/snapshots/` with a per-version copy of `mission.yaml`. Idempotent per version — re-running with the same `mission.version` returns the existing snapshot (no duplicate files). Language-independent — works anywhere Node + mission-spec is installed.
+
+```bash
+# Standalone invocation
+npx mission-spec snapshot
+```
+
+2-step pre-commit hook (combines v1.17.0 validate + v1.19.0 snapshot):
+
+```sh
+#!/bin/sh
+set -e
+npx mission-spec validate
+npx mission-spec snapshot
+git add .mission/snapshots/
+```
+
+Existing v1.17.0 adopters: edit your installed `.git/hooks/pre-commit` to add the `snapshot` + `git add` lines. The `templates/pre-commit` file shipped with the package is unchanged (still single-step validate) so `cp` re-installation is not forced.
+
 ## Cross-Platform Conversion
 
 ```bash

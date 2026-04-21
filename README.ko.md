@@ -338,6 +338,27 @@ git commit -m "chore: backfill related_commits via ms-backfill-commits"
 
 이미 채워진 `related_commits` 배열은 **절대 덮어쓰지 않습니다**.
 
+## 커밋 시 snapshot (v1.19.0+)
+
+`.mission/snapshots/`에 `mission.yaml`의 버전별 사본을 생성합니다. `mission.version`별 idempotent — 같은 버전으로 재호출하면 기존 snapshot을 반환(중복 생성 없음). 언어 독립적 — Node + mission-spec 설치된 어느 프로젝트에서도 동작.
+
+```bash
+# 단독 호출
+npx mission-spec snapshot
+```
+
+2-step pre-commit hook (v1.17.0 validate + v1.19.0 snapshot 결합):
+
+```sh
+#!/bin/sh
+set -e
+npx mission-spec validate
+npx mission-spec snapshot
+git add .mission/snapshots/
+```
+
+기존 v1.17.0 adopter는 설치된 `.git/hooks/pre-commit`에 `snapshot` + `git add` 두 줄만 추가. 패키지에 포함된 `templates/pre-commit` 파일은 그대로(단일 validate 호출) 유지되므로 `cp` 재설치는 필요 없음.
+
 ## Cross-Platform 변환
 
 ```bash

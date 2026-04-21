@@ -137,6 +137,13 @@ describe("mission-spec CLI", () => {
     expect(combined).toContain("mission.yaml:");
   });
 
+  it("snapshot subcommand exits 0 and prints 'snapshot created' on a valid project", () => {
+    writeMission();
+    const out = runCli(["snapshot"]);
+    expect(out).toContain("mission-spec: snapshot created");
+    expect(out).toMatch(/\d{4}-\d{2}-\d{2}_v1\.0\.0_mission\.yaml/);
+  });
+
   it("backfill-commits dry-run prints proposals on a git-initialized project", () => {
     writeMission();
     execFileSync("git", ["init", "-q"], { cwd: tempDir });

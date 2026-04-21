@@ -4,15 +4,81 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.18.0 — ms-backfill-commits helper"
+  mission_title: "Mission Spec v1.19.0 — snapshot CLI"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 41
-  latest_version: "1.18.0"
+  total_revisions: 42
+  latest_version: "1.19.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-006"
+    semantic_version: "1.19.0"
+    change_sequence: 46
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "mission.yaml 버전별 snapshot 생성을 portable library API + CLI subcommand로 노출. 기존 `scripts/snapshot-mission.js` 로직을 `createSnapshot(projectDir)` public API로 병행 제공 (script 자체는 self-hook 안정성 보호 차원에서 변경 안 함). qmonster B-3 IMP 시퀀스의 6번째 axis이자 최종 항목."
+    decision: |
+      새 CLI subcommand `mission-spec snapshot [dir]` — `createSnapshot(projectDir)` 순수 함수 + bin/mission-spec.js dispatcher case. mission.yaml 읽기 → version 추출 → `{date}_v{version}_mission.yaml` 파일명 → .mission/snapshots/에 dedup check 후 copyFileSync. git 미관여(staging은 호출자 책임).
+      3-way divergence 의도적 설계: `scripts/snapshot-mission.js` (mission-spec self-hook용)는 mission.yaml 부재 시 silent exit 0, 신규 CLI는 exit 1, library API는 throw. adopter가 `mission-spec snapshot` 호출 시 silent exit은 혼란 유발이므로 explicit 실패가 옳음.
+      새 module `src/commands/snapshot.ts` (modules 20 → 21). 새 public API export `createSnapshot` + type `SnapshotResult` via src/index.ts (functions 24 → 25).
+      `templates/pre-commit` 파일 **수정 안 함** — v1.17.0 adopter 기존 hook 불변. 2-step hook은 README 예시로만 제공 (adopter가 본인 설치 파일에 2줄 추가).
+      MDR-006 §MINOR 확정 — 신규 CLI subcommand + 신규 public API function.
+      YAGNI: `--retroactive` / `--force` / `--dry-run` / `--no-git-add` 플래그는 모두 out-of-scope — retroactive는 IMP-8 후보 (수요 검증 후).
+    triggered_by: "사용자 요청: 'imp-7 진행' — 2026-04-21 qmonster 2차 감사 개선안 B-3(upstream IMP 시퀀스)의 5번째이자 마지막 항목. superpowers brainstorming → writing-plans → executing-plans 워크플로우 dogfood 계속."
+    issue_or_context: "qmonster 로컬(v1.7.6, 15 revisions) 감사에서 `.mission/snapshots/` 완전 empty 확인 — 15개 버전 전수 snapshot 누락. mission-spec 자체는 `npm run snapshot` + pre-commit hook 조합으로 자동 populate되지만, Rust/Python/Go 등 npm 사용 안 하는 프로젝트는 이 패턴 적용 불가. IMP-7은 `createSnapshot` library API + `npx mission-spec snapshot` CLI로 이 gap 해결. 다만 IMP-7은 forward-looking만 지원 — qmonster 과거 15 snapshot 공백은 IMP-8(retroactive) 후보. mission-spec 자체는 41/41 snapshots populated이라 self-healthy."
+    changes:
+      added:
+        - "src/commands/snapshot.ts: `SnapshotResult` interface (exported) + `createSnapshot(projectDir): SnapshotResult` helper (exported) + internal `formatDate` helper"
+        - "tests/commands/snapshot.test.ts: 7 신규 unit tests — 새 snapshot 생성 / 동일 버전 dedup / mission.yaml 부재 throw / version 필드 부재 throw / .mission/snapshots/ 자동 생성 / 반환 필드 정확성 / 파일명 형식"
+        - "tests/bin/cli.test.ts: 1 신규 integration test — `snapshot` subcommand 성공 시 'snapshot created' 출력 + 파일명 패턴 확인 (기존 11 유지, 총 12)"
+        - "bin/mission-spec.js: `snapshot` case + HELP 업데이트 + `createSnapshot` import"
+        - "src/index.ts: `createSnapshot` function + `SnapshotResult` type export 추가 (public API 24 → 25 functions)"
+        - "README.md + README.ko.md + README.zh.md: 신규 `## Snapshot on commit (v1.19.0+)` (EN) / `## 커밋 시 snapshot (v1.19.0+)` (KO) / `## 提交时快照（v1.19.0+）` (ZH) 섹션 (MDR-007 trilingual) — 2-step pre-commit hook 예시 포함"
+        - "docs/superpowers/specs/2026-04-21-imp7-snapshot-cli-design.md + docs/superpowers/plans/2026-04-21-imp7-snapshot-cli.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)"
+      modified:
+        - ".mission/architecture/ARCHITECTURE_CURRENT.yaml: `snapshot` 모듈 entry 추가 (modules 20 → 21) + index depends_on에 snapshot 추가"
+        - ".mission/architecture/DEPENDENCY_GRAPH.yaml: `snapshot` node 추가 (edges 없음 — 모듈이 src/ 내 다른 모듈에 의존하지 않음)"
+        - ".mission/interfaces/API_REGISTRY.yaml: `createSnapshot` function entry 추가 (public API 24 → 25)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: `snapshot.test.ts` entry 신규 (cases 7); `cli.test.ts` cases 11 → 12 + 'snapshot subcommand (v1.19.0)' category; header total 296 → 304, files 23 → 24; version header v1.18.0 → v1.19.0"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 296 → 304 tests, 23 → 24 files; 모듈 수 20 → 21; public API 24 → 25"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.18.0 → 1.19.0"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.19.0 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — 순수 additive (신규 CLI subcommand은 기존 명령에 영향 없음, 신규 public API는 barrel export 추가만, `templates/pre-commit` 파일 불변이므로 기존 v1.17.0 adopter hook 재설치 강제 없음). 3-way divergence(script silent-exit / CLI exit 1 / library throw)는 의도적 — mission-spec self-workflow 안정성 + adopter explicit 실패 양쪽 요구 균형. Concurrent invocation은 dedup check + copyFileSync TOCTOU window 존재하나 실전 (pre-commit serial) 해당 사례 없음. Semantic version: MINOR per MDR-006."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.19.0_mission.yaml"
+    follow_up:
+      - "IMP-8 후보: `mission-spec snapshot --retroactive` — git log 순회하며 각 과거 버전 mission.yaml을 checkout해 snapshot 대량 생성. qmonster 15 revisions 일괄 backfill 대응. 별도 MINOR (수요 검증 후)."
+      - "`scripts/snapshot-mission.js` → `createSnapshot()` wrapper로 리팩터 — 내부 중복 제거. post-v1.19.0 PATCH."
+      - "E-4 외부 adopter 1+ — qmonster(first-party dogfooding) 외 strict external 여전히 0. v1.17.0~v1.19.0 3 MINOR로 IMP 시퀀스 5개 axis 전부 shipped — qmonster가 5 tools(validate hook, backfill-commits, meta staleness detection, done_when drift detection, scaffolded-but-empty, snapshot CLI)을 전부 설치하면 B-3 audit gap 100% closure."
+      - "Rev.5 3벤더 재리뷰 baseline — v1.19.0이 IMP 시퀀스 완료 baseline. v1.16.x PATCH 4 + v1.17.0/v1.18.0/v1.19.0 MINOR 3 합쳐 총 7 releases의 adopter UX 개선 축."
+
   - change_id: "MSC-2026-04-21-005"
     semantic_version: "1.18.0"
     change_sequence: 45
