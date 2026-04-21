@@ -60,7 +60,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — behavior is additive and backward-compatible. Workspace mode remains default, malformed history values still fail schema validation, and shared-mode skips only trigger for missing gitignored local-only artifacts. New safe inferred commands are tightly allowlisted and covered by regression tests. Verified on mission-spec itself (316/316 tests) and on qmonster fresh clone (`validate` pass, `eval --shared` 14/86). Semantic version: minor per MDR-006 §MINOR (new exported type + additive CLI surface)."
-    related_commits: []
+    related_commits: ["f845089"]
     related_decisions:
       [
         "MDR-004-done-when-eval-linking",
