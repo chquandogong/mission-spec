@@ -29,6 +29,8 @@ interface Fixture {
   writePlaybook: (text: string) => void;
   writeTrace: (text: string) => void;
   writeMission: (title: string, doneWhen: string[]) => void;
+  writeHistory: (totalRevisions: number, latestVersion?: string) => void;
+  writeVerificationLog: (version: string) => void;
   writeCurrentState: (text: string) => void;
 }
 
@@ -98,6 +100,33 @@ const it = base.extend<{ fx: Fixture }>({
             "  constraints: []",
             "  done_when:",
             ...doneWhen.map((c) => `    - "${c}"`),
+            "  lineage:",
+            '    initial_version: "0.0.0"',
+            "    total_revisions: 1",
+            '    history: "mission-history.yaml"',
+            "",
+          ].join("\n"),
+        ),
+      writeHistory: (totalRevisions: number, latestVersion = "0.0.0") =>
+        writeFixture(
+          "mission-history.yaml",
+          [
+            "meta:",
+            '  mission_id: "fx"',
+            `  total_revisions: ${totalRevisions}`,
+            `  latest_version: "${latestVersion}"`,
+            "timeline: []",
+            "",
+          ].join("\n"),
+        ),
+      writeVerificationLog: (version: string) =>
+        writeFixture(
+          ".mission/evidence/VERIFICATION_LOG.yaml",
+          [
+            "entries:",
+            `  - version: "${version}"`,
+            '    date: "2026-04-21"',
+            '    verified_by: "test"',
             "",
           ].join("\n"),
         ),
@@ -234,6 +263,47 @@ describe.concurrent("verify-registry script", () => {
     fx.writeStandardFixture();
     const stdout = await fx.runScript();
     expect(stdout).toContain("Registry freshness check passed");
+  });
+
+  it("detects drift when mission.yaml lineage.total_revisions diverges from mission-history.yaml", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeMission("X", ["a"]);
+    fx.writeFixture(
+      "mission.yaml",
+      [
+        "mission:",
+        '  title: "X"',
+        '  version: "0.0.0"',
+        "  goal: x",
+        "  constraints: []",
+        "  done_when:",
+        '    - "a"',
+        "  lineage:",
+        '    initial_version: "0.0.0"',
+        "    total_revisions: 7",
+        '    history: "mission-history.yaml"',
+        "",
+      ].join("\n"),
+    );
+    fx.writeHistory(9);
+
+    await expect(fx.runScript()).rejects.toThrow(
+      /lineage\.total_revisions.*claims 7.*actual 9/s,
+    );
+  });
+
+  it("detects drift when VERIFICATION_LOG top entry version trails package.json", async ({
+    fx,
+  }) => {
+    fx.writeStandardFixture();
+    fx.writeFixture("package.json", '{"name":"fx","version":"1.2.3"}\n');
+    fx.writeVerificationLog("1.2.2");
+
+    await expect(fx.runScript()).rejects.toThrow(
+      /VERIFICATION_LOG latest entry version.*1\.2\.2.*1\.2\.3/s,
+    );
   });
 
   it("errors when TRACE_MATRIX.yaml is malformed YAML", async ({ fx }) => {

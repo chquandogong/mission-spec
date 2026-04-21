@@ -1,4 +1,4 @@
 passed: true
-reason: "2026-04-14 기준 docs/internal/ARCHITECTURE.md 와 docs/internal/CLAUDE.md를 v1.7.0 codebase, registry, test count에 맞게 동기화함"
+reason: "2026-04-21 기준 docs/internal/ARCHITECTURE.md 와 docs/internal/CLAUDE.md를 v1.19.3 surface(21 modules, 25 public API items, 7 CLI commands, 6 skills) 및 현재 registry 설명과 맞게 동기화함"
 evaluated_by: "codex"
-evaluated_at: "2026-04-14"
+evaluated_at: "2026-04-21"

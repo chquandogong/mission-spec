@@ -136,6 +136,7 @@ async function groundTruth() {
   // E-8: read mission.yaml for fields that CURRENT_STATE.md mirrors.
   let missionTitle = null;
   let doneWhenCount = null;
+  let lineageTotalRevisions = null;
   const missionPath = join(projectDir, "mission.yaml");
   if (existsSync(missionPath)) {
     try {
@@ -146,8 +147,43 @@ async function groundTruth() {
       if (Array.isArray(parsed?.mission?.done_when)) {
         doneWhenCount = parsed.mission.done_when.length;
       }
+      if (typeof parsed?.mission?.lineage?.total_revisions === "number") {
+        lineageTotalRevisions = parsed.mission.lineage.total_revisions;
+      }
     } catch {
       // malformed mission.yaml — leave fields null, CURRENT_STATE checks skip.
+    }
+  }
+
+  let historyTotalRevisions = null;
+  const historyPath = join(projectDir, "mission-history.yaml");
+  if (existsSync(historyPath)) {
+    try {
+      const parsed = parse(readFileSync(historyPath, "utf-8"));
+      if (typeof parsed?.meta?.total_revisions === "number") {
+        historyTotalRevisions = parsed.meta.total_revisions;
+      }
+    } catch {
+      // malformed history — leave null, lineage checks skip.
+    }
+  }
+
+  let latestVerificationVersion = null;
+  const verificationPath = join(
+    projectDir,
+    ".mission",
+    "evidence",
+    "VERIFICATION_LOG.yaml",
+  );
+  if (existsSync(verificationPath)) {
+    try {
+      const parsed = parse(readFileSync(verificationPath, "utf-8"));
+      const top = Array.isArray(parsed?.entries) ? parsed.entries[0] : null;
+      if (typeof top?.version === "string") {
+        latestVerificationVersion = top.version;
+      }
+    } catch {
+      // malformed verification log — leave null, dedicated checks skip.
     }
   }
 
@@ -180,6 +216,9 @@ async function groundTruth() {
     testCount: countItCalls(join(projectDir, "tests")),
     missionTitle,
     doneWhenCount,
+    lineageTotalRevisions,
+    historyTotalRevisions,
+    latestVerificationVersion,
     livePassed,
   };
 }
@@ -289,6 +328,16 @@ async function check() {
     }
   }
 
+  if (
+    truth.lineageTotalRevisions != null &&
+    truth.historyTotalRevisions != null &&
+    truth.lineageTotalRevisions !== truth.historyTotalRevisions
+  ) {
+    mismatches.push(
+      `mission.yaml lineage.total_revisions: claims ${truth.lineageTotalRevisions}, actual ${truth.historyTotalRevisions} (mission-history.yaml meta.total_revisions)`,
+    );
+  }
+
   // E-8 (v1.16.2) + C-4/F-4 (v1.16.9): CURRENT_STATE.md content checks.
   // - Title line mirrors mission.yaml title. C-4: accept Title / 제목 / 标题 /
   //   タイトル labels; fail if CURRENT_STATE.md exists but no recognisable
@@ -369,6 +418,17 @@ async function check() {
     }
   }
 
+  const currentVersion = loadPackageVersion();
+  if (
+    currentVersion &&
+    truth.latestVerificationVersion != null &&
+    truth.latestVerificationVersion !== currentVersion
+  ) {
+    mismatches.push(
+      `VERIFICATION_LOG latest entry version: claims ${truth.latestVerificationVersion}, actual ${currentVersion} (package.json.version)`,
+    );
+  }
+
   return { mismatches, truth };
 }
 
@@ -403,7 +463,7 @@ async function main() {
   }
   process.stderr.write(
     `\nGround truth: ${JSON.stringify(truth)}\n` +
-      `\nUpdate REBUILD_PLAYBOOK.md / TRACE_MATRIX.yaml to match.\n`,
+      `\nUpdate REBUILD_PLAYBOOK.md / TRACE_MATRIX.yaml / mission.yaml / VERIFICATION_LOG.yaml to match.\n`,
   );
   process.exit(1);
 }

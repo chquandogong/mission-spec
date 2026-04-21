@@ -6,6 +6,18 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.19.3] - 2026-04-21
+_정밀 검토에서 드러난 self-description drift를 정식 PATCH로 정리한다. `backfill-commits --apply` 실제 실패를 수정하고, registry/evidence 메타데이터 drift를 기계적으로 잡도록 강화하며, `architecture_doc_freshness`를 실제 완료 게이트로 승격해 저장소가 주장하는 mission complete 상태와 실제 평가 기준을 일치시킨다._
+
+### Changed
+
+- bin/mission-spec.js: positional arg 해석을 non-flag 기반으로 수정해 `backfill-commits --apply` 경로 파싱 버그 해소
+- tests/bin/cli.test.ts: `backfill-commits --apply` without projectDir 회귀 테스트 추가
+- scripts/verify-registry.js + tests/scripts/verify-registry.test.ts: lineage.total_revisions drift + VERIFICATION_LOG top-entry version drift 감지 추가
+- mission.yaml: version/title 1.19.3로 bump, lineage.total_revisions 45 반영, `architecture_doc_freshness`를 실제 done_when gate로 기록
+- .mission/CURRENT_STATE.md + TRACE_MATRIX.yaml + REBUILD_PLAYBOOK.md + VERIFICATION_LOG.yaml + architecture_doc_freshness.result.yaml: 10/10 completion gate, 최신 evidence, 버전/설명 문구 정렬
+- mission-history.yaml + CHANGELOG.md + package.json + plugin.json + marketplace.json + package-lock.json: 정식 PATCH revision 메타데이터로 동기화
+
 ## [1.19.2] - 2026-04-21
 _v1.19.0에서 `createSnapshot(projectDir)` library API를 도입한 후 `scripts/snapshot-mission.js`의 로직이 API와 중복되어 있었음. 이를 thin wrapper로 리팩터 — 기존 self-hook 동작(mission.yaml 부재 시 silent exit 0, same-day dedup silent) 완전 보존하면서 내부 구현 중복 제거. v1.19.0 IMP-7 follow-up에 예고된 cleanup._
 

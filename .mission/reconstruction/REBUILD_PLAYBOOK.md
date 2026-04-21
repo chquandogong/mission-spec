@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-17 | Version: 1.19.2
+> Last updated: 2026-04-21 | Version: 1.19.3
 
 ## 전제 조건
 
@@ -73,7 +73,7 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 
 ## Phase 7: 검증 (총 9+ 축)
 
-32. `npm test` — 현재 기준 304 tests 전수 통과 (24 test files)
+32. `npm test` — 현재 기준 307 tests 전수 통과 (24 test files)
 33. `npm run test:coverage` — stmts/branches/functions/lines ≥ 80/75/80/80 (현 baseline 93.95 / 83.59 / 95.52 / 93.95)
 34. `node scripts/validate-schema.js` — 스키마 검증 (3 fixtures)
 35. `node scripts/convert-platforms.js --verify` — 6개 플랫폼
@@ -83,7 +83,7 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 39. `npm run registry:check` (v1.16.0+) — REBUILD_PLAYBOOK + TRACE_MATRIX 본문의 수치(module/API/skill/platform/test counts)가 live source와 sync (D-1). TS AST 기반
 40. `npm run reconstruction:verify` — playbook 경로 무결성 (선택: `--cold-build` — temp dir에서 `npm ci && build && test`)
 41. `npm run validate:history-commits` — history ↔ git log cross-check (bootstrap + HEAD self-reference 예외)
-42. `evaluateMission('.')` — 9/9 criteria passed 확인
+42. `evaluateMission('.')` — 10/10 criteria passed 확인
 43. **Traceability Matrix** (`.mission/traceability/TRACE_MATRIX.yaml`) 참조하여 모든 done_when → eval → code → test 연결 확인
 
 ## Phase 8: 크로스 플랫폼 + 플러그인

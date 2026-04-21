@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  rmSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+} from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
@@ -193,5 +199,58 @@ describe("mission-spec CLI", () => {
     const out = runCli(["backfill-commits"]);
     expect(out).toContain("Scanning mission-history.yaml");
     expect(out).toContain("AUTO-APPLY");
+  });
+
+  it("backfill-commits accepts --apply without an explicit projectDir", () => {
+    writeMission();
+    execFileSync("git", ["init", "-q"], { cwd: tempDir });
+    execFileSync("git", ["config", "user.email", "t@t"], { cwd: tempDir });
+    execFileSync("git", ["config", "user.name", "T"], { cwd: tempDir });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+      cwd: tempDir,
+    });
+    writeFile("work.txt", "x");
+    execFileSync("git", ["add", "."], { cwd: tempDir });
+    const iso = "2026-01-01T12:00:00+00:00";
+    execFileSync("git", ["commit", "-q", "-m", "feat: v1.0.0 — foo"], {
+      cwd: tempDir,
+      env: {
+        ...process.env,
+        GIT_AUTHOR_DATE: iso,
+        GIT_COMMITTER_DATE: iso,
+      },
+    });
+    writeFile(
+      "mission-history.yaml",
+      stringify({
+        meta: {
+          mission_id: "t",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-01-01-001",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "t",
+            change_type: "feature",
+            persistence: "permanent",
+            intent: "x",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+            related_commits: [],
+          },
+        ],
+      }),
+    );
+
+    const out = runCli(["backfill-commits", "--apply"]);
+    expect(out).toContain("Applying 1 single-candidate proposals");
+    const updated = readFileSync(join(tempDir, "mission-history.yaml"), "utf-8");
+    expect(updated).not.toContain("related_commits: []");
   });
 });

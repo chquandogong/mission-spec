@@ -4,15 +4,73 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.19.2 — snapshot-mission.js refactor to createSnapshot wrapper"
+  mission_title: "Mission Spec v1.19.3 — completion-gate reconciliation and registry drift hardening"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 44
-  latest_version: "1.19.2"
+  total_revisions: 45
+  latest_version: "1.19.3"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-009"
+    semantic_version: "1.19.3"
+    change_sequence: 49
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Codex"]
+    change_type: "fix"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "정밀 검토에서 드러난 self-description drift를 정식 PATCH로 정리한다. `backfill-commits --apply` 실제 실패를 수정하고, registry/evidence 메타데이터 drift를 기계적으로 잡도록 강화하며, `architecture_doc_freshness`를 실제 완료 게이트로 승격해 저장소가 주장하는 mission complete 상태와 실제 평가 기준을 일치시킨다."
+    decision: |
+      Review follow-up을 하나의 PATCH로 묶었다. 모두 이미 존재하던 계약/경로의 correctness hardening이며 신규 CLI/Public API를 추가하지 않는다.
+      1. `bin/mission-spec.js`는 positional arg를 "첫 non-flag 인자"로 해석하도록 바꿔 `mission-spec backfill-commits --apply`가 더 이상 `--apply`를 projectDir로 오해하지 않는다.
+      2. `scripts/verify-registry.js`는 `mission.yaml.lineage.total_revisions` ↔ `mission-history.yaml.meta.total_revisions`, `package.json.version` ↔ `.mission/evidence/VERIFICATION_LOG.yaml` top entry version drift를 fail-fast로 검출한다.
+      3. `architecture_doc_freshness`는 standalone llm-eval 참고사항이 아니라 `mission.yaml.done_when`의 실제 게이트로 승격한다. 이에 따라 self-dogfooding 완료 기준은 9/9에서 10/10으로 강화된다.
+      4. `.mission/CURRENT_STATE.md`, `TRACE_MATRIX.yaml`, `REBUILD_PLAYBOOK.md`, `VERIFICATION_LOG.yaml`, `architecture_doc_freshness.result.yaml`를 새 gate/검증 수치/버전과 동기화하고, 이 상태를 `v1.19.3` snapshot + changelog + history entry로 고정한다.
+      SemVer는 MDR-006 §PATCH: 기존 surface의 버그 수정 + governance/registry hardening이며 consumer-facing additive change는 없다.
+    triggered_by: "사용자 요청: 상세 프로젝트 검토 후 '정식 revision으로 올리기'. 직전 review에서 재현된 4개 drift/breakage를 수정한 working-tree hardening을 추적 가능한 패치 릴리스로 승격."
+    issue_or_context: "검토 시점에 저장소는 구현상 대체로 healthy였지만 자기기록 계층에 어긋남이 있었다. `backfill-commits --apply`는 README 예시대로 호출하면 실패했고, `architecture_doc_freshness`는 eval 정의만 있고 `done_when`에 연결되지 않아 CURRENT_STATE/VERIFICATION_LOG의 completion claim과 실제 gate가 어긋났다. 추가로 `mission.yaml.lineage.total_revisions`와 VERIFICATION_LOG top entry version이 권위 원장/패키지 버전을 따라가지 못했다. 이번 PATCH는 이 네 축을 한 번에 정렬한다."
+    changes:
+      added: []
+      modified:
+        - "bin/mission-spec.js: positional arg 해석을 non-flag 기반으로 수정해 `backfill-commits --apply` 경로 파싱 버그 해소"
+        - "tests/bin/cli.test.ts: `backfill-commits --apply` without projectDir 회귀 테스트 추가"
+        - "scripts/verify-registry.js + tests/scripts/verify-registry.test.ts: lineage.total_revisions drift + VERIFICATION_LOG top-entry version drift 감지 추가"
+        - "mission.yaml: version/title 1.19.3로 bump, lineage.total_revisions 45 반영, `architecture_doc_freshness`를 실제 done_when gate로 기록"
+        - ".mission/CURRENT_STATE.md + TRACE_MATRIX.yaml + REBUILD_PLAYBOOK.md + VERIFICATION_LOG.yaml + architecture_doc_freshness.result.yaml: 10/10 completion gate, 최신 evidence, 버전/설명 문구 정렬"
+        - "mission-history.yaml + CHANGELOG.md + package.json + plugin.json + marketplace.json + package-lock.json: 정식 PATCH revision 메타데이터로 동기화"
+      removed: []
+    changed_sections: [title, version, lineage, done_when]
+    done_when_delta:
+      added:
+        - "architecture_doc_freshness"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — 새 기능은 없고, 이미 문서/계약에 존재하던 경로를 실제 동작과 맞춘다. 가장 민감한 변화는 `done_when` 9/9 → 10/10 강화인데, override evidence를 함께 갱신하고 `registry:check --verify-live` / `evaluateMission('.')`로 바로 검증했다. `backfill-commits` fix는 regression test로 고정했다. SemVer는 patch per MDR-006."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-004-done-when-eval-linking",
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.19.3_mission.yaml"
+    follow_up:
+      - "Introducing commit이 만들어지면 `related_commits: []`를 실제 SHA로 backfill."
+      - "Rev.5 3벤더 재리뷰 baseline은 이제 v1.19.3 — completion gate와 registry freshness hardening이 포함된 상태로 진행."
+      - "사용자/수요 기반 future work는 IMP-8 (`snapshot --retroactive`) / IMP-9 (`compact`) / E-4 외부 adopter 확보 축으로 한정."
+
   - change_id: "MSC-2026-04-21-008"
     semantic_version: "1.19.2"
     change_sequence: 48

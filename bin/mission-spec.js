@@ -54,6 +54,11 @@ More on the library API and skill bundle: https://github.com/chquandogong/missio
 
 const argv = process.argv.slice(2);
 
+function resolveProjectDir(args) {
+  const positional = args.find((arg) => !arg.startsWith("--"));
+  return resolve(positional ?? process.cwd());
+}
+
 if (argv.length === 0) {
   process.stderr.write(HELP);
   process.exit(1);
@@ -71,7 +76,7 @@ if (first === "--help" || first === "-h") {
   process.exit(0);
 }
 
-const projectDir = resolve(argv[1] ?? process.cwd());
+const projectDir = resolveProjectDir(argv.slice(1));
 
 try {
   switch (first) {
