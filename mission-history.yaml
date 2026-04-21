@@ -66,7 +66,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 순수 additive (신규 CLI subcommand은 기존 명령에 영향 없음, 신규 public API는 barrel export 추가만, 기존 dry-run-only 실행은 파일 변경 없음). `--apply` 경로는 이미 채워진 배열을 skip하는 initial filter + strict regex 매칭으로 manual curation 손상 불가. Git log 실패(empty repo / not-git / git 부재)는 graceful degrade로 empty commits 반환 → no-candidates 분류로 귀결. Timezone edge는 ±1 day window로 흡수. Semantic version: MINOR per MDR-006."
-    related_commits: []
+    related_commits: ["c27498e"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
