@@ -57,7 +57,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 새 기능은 없고, 이미 문서/계약에 존재하던 경로를 실제 동작과 맞춘다. 가장 민감한 변화는 `done_when` 9/9 → 10/10 강화인데, override evidence를 함께 갱신하고 `registry:check --verify-live` / `evaluateMission('.')`로 바로 검증했다. `backfill-commits` fix는 regression test로 고정했다. SemVer는 patch per MDR-006."
-    related_commits: []
+    related_commits: ["3d368bf"]
     related_decisions:
       [
         "MDR-004-done-when-eval-linking",
