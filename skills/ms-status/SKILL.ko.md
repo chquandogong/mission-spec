@@ -124,6 +124,26 @@ Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (
 
 80자를 초과하는 Sample 엔트리는 가독성을 위해 77자 + `…`로 잘라 표시합니다. 원문 전체는 반환값 `doneWhenDrift: string[]` 필드로 제공됩니다.
 
+## meta staleness 섹션 (v1.16.19+)
+
+`mission-history.yaml`이 존재하고 아래 중 하나라도 `history.meta`와 live mission 상태 사이에 drift가 발생하면 `## meta staleness` 섹션이 추가되어 각 drift 필드를 field-specific hint와 함께 나열합니다.
+
+- **Rule 1 — `mission_title` 불일치:** `history.meta.mission_title`(populated된 경우)이 `mission.yaml.title`과 strict `!==` (whitespace normalization 안 함) 기준으로 다름.
+- **Rule 2 — `tracking_mode`의 single-user 선언 + AI contributor 공존:** `history.meta.tracking_mode`에 single-user 키워드(`single-user`, `solo`, `local-first`, `local only`, `personal`, ...) 포함 AND 어느 `timeline[].contributors[]` 항목이든 AI 제공자(`claude`, `codex`, `gemini`, `gpt`, `copilot`, `llm` — case-insensitive substring match) 언급.
+
+출력 예시:
+
+```markdown
+## meta staleness
+
+- ⚠ `mission_title` — history.meta.mission_title ("Qmonster v0.4.0 — planning foundation") differs from mission.yaml.title ("Qmonster v0.4.0 — Phase 3 complete + all gates remediated + Gemini review artifa…") — sync manually or via metadata:sync equivalent
+- ⚠ `tracking_mode` — "local-first (single-user)" claims single-user but contributors include "Claude Code (main pane)", "Codex (codex:1:review, ...)", "Gemini (gemini:1:research, ...)" (+6 more) — update to reflect multi-agent workflow
+```
+
+배경: 2026-04-21 qmonster 감사에서 세 meta 필드가 초기 phase 값으로 굳어지고 실제 프로젝트만 진행하는 fossilization 패턴을 확인했습니다. `mission_id`는 project-scoped라 auto-detect 안 함 (주의 항목 참고). `mission_title`과 `tracking_mode`는 위 두 규칙으로 커버.
+
+인용된 긴 값은 truncate됩니다 — title/mode는 117자 + `…` (120-char budget), contributor 이름은 77자 + `…` (80-char budget). 고유 AI contributor가 3명 초과 시 `(+N more)`로 접힙니다. 반환값은 원문 전체를 `metaStaleness: Array<{ field, hint }>` 필드로 제공합니다.
+
 ## 주의
 
 - `mission.yaml`이 없으면 에러를 반환합니다.
@@ -134,3 +154,5 @@ Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (
   반환값의 `historyWarning` 필드로도 전달됩니다.
 - scaffolded-but-empty 디렉터리가 하나도 없으면 Scaffolding 섹션은 생략됩니다.
 - done_when의 모든 엔트리가 auto-evaluate 가능하면(evals[] 매칭 / 파일 존재 / 기타 "manual verification required"가 아닌 reason) done_when drift 섹션은 생략됩니다.
+- `mission-history.yaml`이 없으면(`metaStaleness`가 `undefined`) 또는 history가 있고 두 규칙 모두 발생 안 하면(`metaStaleness`가 `[]`) meta staleness 섹션은 생략됩니다. Schema-invalid history도 `undefined`로 귀결 — `loadHistory`가 throw하고 `historyWarning`이 대신 세팅됩니다.
+- `mission_id` drift는 auto-detect **안 함** — 필드가 project-scoped이고 네이밍 convention이 프로젝트마다 다름 (예: permanent `-planning` 식별자라면 false-positive). `mission_id`는 adopter가 수동 확인.

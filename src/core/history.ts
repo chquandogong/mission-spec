@@ -63,6 +63,7 @@ export interface MissionHistory {
     mission_id: string;
     mission_title: string;
     tracking_since: string;
+    tracking_mode?: string;
     total_revisions: number;
     latest_version: string;
   };

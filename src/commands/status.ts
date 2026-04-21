@@ -3,10 +3,19 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
-import { loadHistory, getCurrentPhase } from "../core/history.js";
+import {
+  loadHistory,
+  getCurrentPhase,
+  type MissionHistory,
+} from "../core/history.js";
 
 export interface ScaffoldingWarning {
   path: string;
+  hint: string;
+}
+
+export interface MetaStaleness {
+  field: string;
   hint: string;
 }
 
@@ -24,7 +33,35 @@ export interface StatusResult {
   historyWarning?: string;
   scaffoldingWarnings?: ScaffoldingWarning[];
   doneWhenDrift?: string[];
+  metaStaleness?: MetaStaleness[];
   markdown: string;
+}
+
+const SINGLE_USER_TERMS = [
+  "single-user",
+  "single user",
+  "solo",
+  "local-first",
+  "local only",
+  "personal",
+];
+
+const AI_CONTRIBUTOR_TERMS = [
+  "claude",
+  "codex",
+  "gemini",
+  "gpt",
+  "copilot",
+  "llm",
+];
+
+function quoteTruncate(s: string): string {
+  const safe = s.length > 120 ? `${s.slice(0, 117)}…` : s;
+  return `"${safe}"`;
+}
+
+function shortTruncate(s: string): string {
+  return s.length > 80 ? `${s.slice(0, 77)}…` : s;
 }
 
 // Paths that mission-spec scaffolds and expects the adopter to populate.
@@ -74,6 +111,51 @@ function formatDriftSample(entry: string): string {
   return `"${truncated}"`;
 }
 
+export function detectMetaStaleness(
+  history: MissionHistory | null,
+  missionTitle: string,
+): MetaStaleness[] {
+  const warnings: MetaStaleness[] = [];
+  if (!history) return warnings;
+
+  // Rule 1: mission_title mismatch (strict !==; no whitespace normalization)
+  const historyTitle = history.meta.mission_title;
+  if (historyTitle !== undefined && historyTitle !== missionTitle) {
+    warnings.push({
+      field: "mission_title",
+      hint: `history.meta.mission_title (${quoteTruncate(historyTitle)}) differs from mission.yaml.title (${quoteTruncate(missionTitle)}) — sync manually or via metadata:sync equivalent`,
+    });
+  }
+
+  // Rule 2: tracking_mode claims single-user but contributors include AI
+  const mode = history.meta.tracking_mode ?? "";
+  const modeLower = mode.toLowerCase();
+  const claimsSingleUser = SINGLE_USER_TERMS.some((t) => modeLower.includes(t));
+  if (claimsSingleUser) {
+    const aiContributors = new Set<string>();
+    for (const entry of history.timeline ?? []) {
+      for (const c of entry.contributors ?? []) {
+        const cLower = c.toLowerCase();
+        if (AI_CONTRIBUTOR_TERMS.some((t) => cLower.includes(t))) {
+          aiContributors.add(c);
+        }
+      }
+    }
+    if (aiContributors.size > 0) {
+      const sample = Array.from(aiContributors).slice(0, 3);
+      const moreSuffix =
+        aiContributors.size > 3 ? ` (+${aiContributors.size - 3} more)` : "";
+      const sampleText = sample.map((s) => `"${shortTruncate(s)}"`).join(", ");
+      warnings.push({
+        field: "tracking_mode",
+        hint: `${quoteTruncate(mode)} claims single-user but contributors include ${sampleText}${moreSuffix} — update to reflect multi-agent workflow`,
+      });
+    }
+  }
+
+  return warnings;
+}
+
 export function getMissionStatus(projectDir: string): StatusResult {
   const doc = loadAndValidateMission(projectDir);
   const m = doc.mission;
@@ -111,6 +193,7 @@ export function getMissionStatus(projectDir: string): StatusResult {
   let phaseTheme: string | undefined;
   let totalRevisions: number | undefined;
   let historyWarning: string | undefined;
+  let metaStaleness: MetaStaleness[] | undefined = undefined;
 
   try {
     const history = loadHistory(projectDir);
@@ -134,6 +217,8 @@ export function getMissionStatus(projectDir: string): StatusResult {
           md.push(`- **${p.name}** (${p.versions.join(", ")}): ${p.theme}`);
         });
       }
+
+      metaStaleness = detectMetaStaleness(history, title);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -176,6 +261,11 @@ export function getMissionStatus(projectDir: string): StatusResult {
     );
   }
 
+  if (metaStaleness && metaStaleness.length > 0) {
+    md.push("", "## meta staleness", "");
+    metaStaleness.forEach((m) => md.push(`- ⚠ \`${m.field}\` — ${m.hint}`));
+  }
+
   return {
     title,
     goal: goal.trim(),
@@ -190,6 +280,7 @@ export function getMissionStatus(projectDir: string): StatusResult {
     historyWarning,
     scaffoldingWarnings,
     doneWhenDrift,
+    metaStaleness,
     markdown: md.join("\n"),
   };
 }

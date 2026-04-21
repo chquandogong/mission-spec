@@ -124,6 +124,26 @@ Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (
 
 超过 80 字符的 Sample 条目为可读性截断为 77 字符 + `…`。原文通过返回值的 `doneWhenDrift: string[]` 字段完整提供。
 
+## meta staleness 部分（v1.16.19+）
+
+当 `mission-history.yaml` 存在且 `history.meta` 与当前 mission 状态之间出现以下任一 drift 时，将附加 `## meta staleness` 部分列出每个 drift 字段及其 field-specific hint。
+
+- **Rule 1 — `mission_title` 不匹配：** `history.meta.mission_title`（若已填写）与 `mission.yaml.title` 按 strict `!==` 比较不同（不做 whitespace normalization）。
+- **Rule 2 — `tracking_mode` 声称 single-user 但存在 AI contributor：** `history.meta.tracking_mode` 包含 single-user 关键词（`single-user`、`solo`、`local-first`、`local only`、`personal`、...）AND 任意 `timeline[].contributors[]` 条目提及 AI 提供方（`claude`、`codex`、`gemini`、`gpt`、`copilot`、`llm` — case-insensitive substring match）。
+
+输出示例：
+
+```markdown
+## meta staleness
+
+- ⚠ `mission_title` — history.meta.mission_title ("Qmonster v0.4.0 — planning foundation") differs from mission.yaml.title ("Qmonster v0.4.0 — Phase 3 complete + all gates remediated + Gemini review artifa…") — sync manually or via metadata:sync equivalent
+- ⚠ `tracking_mode` — "local-first (single-user)" claims single-user but contributors include "Claude Code (main pane)", "Codex (codex:1:review, ...)", "Gemini (gemini:1:research, ...)" (+6 more) — update to reflect multi-agent workflow
+```
+
+背景：2026-04-21 qmonster 审计中发现三个 meta 字段在项目推进时仍停留在早期 phase 值的 fossilization 模式。`mission_id` 为 project-scoped，不做 auto-detect（见注意）。`mission_title` 与 `tracking_mode` 由上述两条规则覆盖。
+
+超长引用值会被截断 — title/mode 为 117 字符 + `…`（120-char budget），contributor 名为 77 + `…`（80-char budget）。超过 3 个 unique AI contributor 时折叠为 `(+N more)`。返回值通过 `metaStaleness: Array<{ field, hint }>` 字段完整提供。
+
 ## 注意
 
 - 如果 `mission.yaml` 不存在则返回错误。
@@ -132,3 +152,5 @@ Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (
 - 如果 `mission-history.yaml` 不符合 Schema（v1.6.0+），不会失败，而是在 Evolution 部分显示 `History unavailable: ...` 警告并继续正常执行状态评估。也可通过返回值中的 `historyWarning` 字段获取。
 - 如果未检测到 scaffolded-but-empty 目录，则省略 Scaffolding 部分。
 - 如果 done_when 每个条目都可自动评估（evals[] 匹配 / 文件存在 / 其他非"manual verification required" reason），则省略 done_when drift 部分。
+- `mission-history.yaml` 缺失（`metaStaleness` 为 `undefined`）或存在但两条规则均未触发（`metaStaleness` 为 `[]`）时，省略 meta staleness 部分。Schema-invalid history 同样得到 `undefined` — `loadHistory` 抛错，改由 `historyWarning` 填入。
+- `mission_id` drift **不做** auto-detect — 该字段为 project-scoped，命名 convention 因项目而异（例如 `-planning` 为永久标识符会 false-positive）。`mission_id` 由采用者人工复核。

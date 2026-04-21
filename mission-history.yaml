@@ -4,15 +4,77 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.18 — ms-status done_when drift warning"
+  mission_title: "Mission Spec v1.16.19 — ms-status meta staleness warning"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 38
-  latest_version: "1.16.18"
+  total_revisions: 39
+  latest_version: "1.16.19"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-003"
+    semantic_version: "1.16.19"
+    change_sequence: 43
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "`ms-status`에 meta staleness 경고 추가. 2026-04-21 qmonster 2차 감사에서 `mission_title`이 초기 phase값으로 fossilize되어 실제 진행 상태와 drift하는 패턴 + `tracking_mode`가 single-user를 선언하나 실제 contributor에는 AI 제공자가 포함되는 패턴을 확인. v1.16.17 scaffolded-but-empty + v1.16.18 done_when drift에 이은 `ms-status` health-check 서피스의 세 번째 axis."
+    decision: |
+      `StatusResult.metaStaleness?: MetaStaleness[]` 필드와 `## meta staleness` markdown 섹션 추가 (Scaffolding + done_when drift 다음).
+      Rule 1: history.meta.mission_title !== mission.yaml.title (strict !==, whitespace normalization 안 함, optional 필드이면 skip).
+      Rule 2: tracking_mode lowercase가 SINGLE_USER_TERMS 중 하나 포함 AND timeline[].contributors[] 중 AI_CONTRIBUTOR_TERMS 키워드 매칭 항목 ≥1개. dedup 후 첫 3명 + (+N more).
+      mission_id는 non-goal — 프로젝트별 네이밍 convention(예: permanent `-planning` suffix) 때문에 키워드 기반 감지는 false-positive 위험.
+      신규 helper `detectMetaStaleness` + 상수 `SINGLE_USER_TERMS` / `AI_CONTRIBUTOR_TERMS` + truncate helpers(`quoteTruncate` 120-char / `shortTruncate` 80-char)는 `commands/status.ts` 모듈 수준에서만 노출. `src/index.ts` 재노출 없음.
+      또한 `core/history.ts`의 `MissionHistory.meta`에 `tracking_mode?: string` 필드 추가 (schema에는 이미 optional로 존재했으나 TS 타입에는 누락). 기존 코드 영향 없음 — 순수 additive.
+    triggered_by: "사용자 요청: 'imp-4부터 차례로 진행' — 2026-04-21 qmonster 2차 감사 개선안 B-3(upstream IMP 시퀀스)의 2번 항목. superpowers brainstorming → writing-plans → executing-plans 워크플로우 dogfood 계속."
+    issue_or_context: "qmonster 로컬(v1.7.6, 15 revisions) 감사에서 세 meta 필드 fossilization 확인: (a) `mission_title: Qmonster v0.4.0 — planning foundation` vs 실제 mission.yaml title `Qmonster v0.4.0 — Phase 3 complete + all gates remediated + ...`, (b) `tracking_mode: local-first (single-user)` vs Claude/Codex/Gemini contributors, (c) `mission_id: qmonster-v0.4.0-planning` (planning suffix). IMP-4는 (a)(b)만 감지 — (c)는 naming convention 판단 기피. 운영 노트: qmonster의 mission-history.yaml은 40% schema-invalid이라 `loadHistory`가 throw → 현재 구현에서는 `historyWarning` 경로로 먼저 surface되고 `metaStaleness`는 undefined. IMP-5(schema pre-commit hook)이 해결되면 qmonster에도 IMP-4 발화. mission-spec self-check는 healthy이라 `metaStaleness: []` 확인 — false-positive 없음."
+    changes:
+      added:
+        - "src/commands/status.ts: `MetaStaleness` interface (exported), `detectMetaStaleness(history, missionTitle)` helper (exported), `SINGLE_USER_TERMS` + `AI_CONTRIBUTOR_TERMS` module-const, `quoteTruncate` + `shortTruncate` truncate helpers (internal), `StatusResult.metaStaleness?: MetaStaleness[]` optional field, conditional `## meta staleness` markdown render"
+        - "tests/commands/status.test.ts: 10 신규 테스트 — Rule 1 detect (3) / Rule 1 skip-absent (8) / Rule 1 long-truncate (9) / Rule 2 detect (4) / Rule 2 skip-no-AI (6) / Rule 2 skip-no-keyword (7) / no-history undefined (1) / healthy empty-array (2) / both-rules order (5) / Rule 2 dedupe+sample (10) (기존 20 유지, 총 30)"
+        - "skills/ms-status/SKILL.md + SKILL.ko.md + SKILL.zh.md: `## meta staleness Section (v1.16.19+)` 섹션 3개 언어 동시 추가; `## Notes`/`## 주의`/`## 注意`에 omission + mission_id-non-goal bullets 2개씩 추가 (MDR-007 trilingual policy)"
+        - "docs/superpowers/specs/2026-04-21-imp4-meta-staleness-design.md + docs/superpowers/plans/2026-04-21-imp4-meta-staleness.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)"
+      modified:
+        - "src/core/history.ts: `MissionHistory.meta`에 `tracking_mode?: string` 필드 추가 (schema에는 이미 optional이었으나 TS 타입 누락 보정)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: status.test.ts cases 20 → 30 + 'meta staleness (v1.16.19)' category; header total 267 → 277; version header v1.16.18 → v1.16.19"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 267 → 277 tests"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.18 → 1.16.19"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.16.19 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — 순수 additive (`StatusResult.metaStaleness`는 optional, markdown 섹션은 entry > 0일 때만 렌더, exit code 영향 없음). Rule 1은 strict string 비교라 false-positive 없음. Rule 2의 SINGLE_USER_TERMS / AI_CONTRIBUTOR_TERMS 키워드 리스트는 substring match이므로 새 AI 제공자(Mistral/Llama/Qwen) 추가 시 one-edit. `MissionHistory.meta.tracking_mode` 필드 추가는 optional이라 기존 consumer 영향 없음. Semantic version: patch per MDR-006 §PATCH (기존 `ms-status` 서피스 확장; 신규 top-level npm script / 신규 CLI subcommand / src/index.ts 신규 export 없음 — detectMetaStaleness / MetaStaleness는 commands/status.ts 모듈 수준에서만 노출)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.16.19_mission.yaml"
+    follow_up:
+      - "IMP-5 `ms-init` scaffold에 schema-validation pre-commit hook 템플릿 포함 (qmonster 40% invalid mission-history.yaml 대응) — IMP-5 해결 시 qmonster에도 IMP-4 메타 staleness 발화 가능"
+      - "IMP-6 `ms-backfill-commits` helper — git log 날짜 ↔ revision date 매칭으로 related_commits 후보 제시 (qmonster 15/15 [] 대응)"
+      - "IMP-7 language-specific snapshot hook 템플릿 (Rust, Python, Go) — `npm run snapshot` 등가물이 없는 프로젝트 대응"
+      - "E-4 외부 adopter 1+ — qmonster(first-party dogfooding) 외 strict external 여전히 0"
+      - "Rev.5 3벤더 재리뷰 baseline — v1.16.19가 새 baseline (qmonster IMP 시퀀스 3번째 항목 반영)"
+
   - change_id: "MSC-2026-04-21-002"
     semantic_version: "1.16.18"
     change_sequence: 42

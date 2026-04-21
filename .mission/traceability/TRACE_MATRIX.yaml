@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.16.18
+# Last updated: 2026-04-17 | Version: 1.16.19
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 267 tests across 21 files)"
+      - "tests/ (총 277 tests across 21 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.16.18 기준, 21 files / 267 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.16.19 기준, 21 files / 277 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -190,7 +190,7 @@ test_coverage:
       ]
 
   - test_file: "tests/commands/status.test.ts"
-    cases: 20
+    cases: 30
     covers: [status]
     categories:
       [
@@ -200,6 +200,7 @@ test_coverage:
         "history fallback",
         "scaffolded-but-empty (v1.16.17)",
         "done_when drift (v1.16.18)",
+        "meta staleness (v1.16.19)",
       ]
 
   - test_file: "tests/commands/report.test.ts"

@@ -124,6 +124,26 @@ Rationale: the 2026-04-21 qmonster audit (2nd pass) surfaced a recurring pattern
 
 Sample entries longer than 80 characters are truncated to 77 + `…` for readability. The return value exposes the full, untruncated list via `doneWhenDrift: string[]`.
 
+## meta staleness Section (v1.16.19+)
+
+If `mission-history.yaml` is present AND any of the following drifts between `history.meta` and live mission state, a `## meta staleness` section is appended listing each drifted field with a field-specific hint:
+
+- **Rule 1 — `mission_title` mismatch:** `history.meta.mission_title` (if populated) differs from `mission.yaml.title` (strict `!==`, no whitespace normalization).
+- **Rule 2 — `tracking_mode` single-user claim with AI contributors:** `history.meta.tracking_mode` contains a single-user keyword (`single-user`, `solo`, `local-first`, `local only`, `personal`, ...) AND any `timeline[].contributors[]` entry mentions an AI provider (`claude`, `codex`, `gemini`, `gpt`, `copilot`, `llm` — case-insensitive substring match).
+
+Example output:
+
+```markdown
+## meta staleness
+
+- ⚠ `mission_title` — history.meta.mission_title ("Qmonster v0.4.0 — planning foundation") differs from mission.yaml.title ("Qmonster v0.4.0 — Phase 3 complete + all gates remediated + Gemini review artifa…") — sync manually or via metadata:sync equivalent
+- ⚠ `tracking_mode` — "local-first (single-user)" claims single-user but contributors include "Claude Code (main pane)", "Codex (codex:1:review, ...)", "Gemini (gemini:1:research, ...)" (+6 more) — update to reflect multi-agent workflow
+```
+
+Rationale: the 2026-04-21 qmonster audit surfaced three meta fields that fossilize at early-phase values while the project advances. `mission_id` is project-scoped and not auto-detected (see Notes). `mission_title` and `tracking_mode` are covered by the two rules above.
+
+Long quoted values are truncated — titles/modes to 117 chars + `…` (120-char budget), contributor names to 77 + `…` (80-char budget). Unique AI contributors beyond 3 collapse into `(+N more)`. The return value exposes the full data via `metaStaleness: Array<{ field, hint }>`.
+
 ## Notes
 
 - Returns an error if `mission.yaml` is missing.
@@ -132,3 +152,5 @@ Sample entries longer than 80 characters are truncated to 77 + `…` for readabi
 - If `mission-history.yaml` does not conform to the schema (v1.6.0+), instead of failing, shows a `History unavailable: ...` warning in the Evolution section and proceeds with status evaluation. Also available via the `historyWarning` field in the return value.
 - Omits the Scaffolding section if no scaffolded-but-empty directories are detected.
 - Omits the done_when drift section if every criterion is auto-evaluable (resolved via `evals[]`, file-existence match, or otherwise not marked "manual verification required").
+- Omits the meta staleness section when `mission-history.yaml` is absent (`metaStaleness` stays `undefined`) or when history is present and neither rule fires (`metaStaleness` is `[]`). Schema-invalid history also yields `undefined` because `loadHistory` throws and `historyWarning` is set instead.
+- `mission_id` drift is NOT auto-detected — the field is project-scoped and naming conventions vary (e.g., permanent `-planning` identifiers would false-positive). Adopters review `mission_id` manually.

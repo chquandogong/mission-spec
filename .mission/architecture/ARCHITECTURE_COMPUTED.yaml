@@ -218,9 +218,11 @@ modules:
       - history
       - parser
     exports:
+      - MetaStaleness
       - ScaffoldingWarning
       - StatusResult
       - detectDoneWhenDrift
+      - detectMetaStaleness
       - detectScaffoldedButEmpty
       - getMissionStatus
   - id: validator

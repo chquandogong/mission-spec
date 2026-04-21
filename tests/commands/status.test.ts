@@ -352,4 +352,355 @@ describe("getMissionStatus", () => {
     const result = getMissionStatus(tempDir);
     expect(result.doneWhenDrift ?? []).toEqual([]);
   });
+
+  it("detects mission_title mismatch between history.meta and mission.yaml.title (Rule 1)", () => {
+    writeMission(tempDir, {
+      title: "Current Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Old Stale Title",
+          total_revisions: 0,
+          latest_version: "1.0.0",
+        },
+        timeline: [],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toHaveLength(1);
+    expect(result.metaStaleness?.[0].field).toBe("mission_title");
+    expect(result.metaStaleness?.[0].hint).toContain("Current Title");
+    expect(result.metaStaleness?.[0].hint).toContain("Old Stale Title");
+    expect(result.markdown).toContain("## meta staleness");
+    expect(result.markdown).toContain("- ⚠ `mission_title` —");
+  });
+
+  it("skips Rule 1 when history.meta.mission_title is absent (schema-optional field)", () => {
+    writeMission(tempDir, {
+      title: "Current Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          total_revisions: 0,
+          latest_version: "1.0.0",
+        },
+        timeline: [],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toEqual([]);
+    expect(result.markdown).not.toContain("## meta staleness");
+  });
+
+  it("detects tracking_mode drift when single-user claim + AI contributors (Rule 2)", () => {
+    writeMission(tempDir, {
+      title: "Same Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Same Title",
+          tracking_mode: "local-first (single-user)",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "c1",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "Dr. QUAN",
+            contributors: ["Claude Code (main pane)", "Dr. QUAN"],
+            change_type: "initial",
+            persistence: "permanent",
+            intent: "i",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toHaveLength(1);
+    expect(result.metaStaleness?.[0].field).toBe("tracking_mode");
+    expect(result.metaStaleness?.[0].hint).toContain("single-user");
+    expect(result.metaStaleness?.[0].hint).toContain("Claude Code (main pane)");
+    expect(result.markdown).toContain("- ⚠ `tracking_mode` —");
+  });
+
+  it("skips Rule 2 when tracking_mode claims single-user but no AI contributors", () => {
+    writeMission(tempDir, {
+      title: "Same Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Same Title",
+          tracking_mode: "solo",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "c1",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "Dr. QUAN",
+            contributors: ["Dr. QUAN", "Jane Doe"],
+            change_type: "initial",
+            persistence: "permanent",
+            intent: "i",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toEqual([]);
+  });
+
+  it("skips Rule 2 when tracking_mode has no single-user keyword (healthy mode string)", () => {
+    writeMission(tempDir, {
+      title: "Same Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Same Title",
+          tracking_mode: "semantic-version + commit-backed",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "c1",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "Dr. QUAN",
+            contributors: ["Dr. QUAN", "Claude Code"],
+            change_type: "initial",
+            persistence: "permanent",
+            intent: "i",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toEqual([]);
+  });
+
+  it("truncates long mission_title in hint (>120 chars → 117 + ellipsis)", () => {
+    const longTitle = "A".repeat(150);
+    writeMission(tempDir, {
+      title: longTitle,
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Short title",
+          total_revisions: 0,
+          latest_version: "1.0.0",
+        },
+        timeline: [],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toHaveLength(1);
+    const hint = result.metaStaleness?.[0].hint ?? "";
+    expect(hint).toContain("A".repeat(117) + "…");
+    expect(hint).not.toContain("A".repeat(150));
+  });
+
+  it("leaves metaStaleness undefined when mission-history.yaml is absent", () => {
+    writeMission(tempDir, {
+      title: "No History",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toBeUndefined();
+    expect(result.markdown).not.toContain("## meta staleness");
+  });
+
+  it("returns empty metaStaleness when history is present and fully healthy", () => {
+    writeMission(tempDir, {
+      title: "Healthy Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Healthy Title",
+          tracking_mode: "semantic-version + commit-backed",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "c1",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "Dr. QUAN",
+            contributors: ["Dr. QUAN"],
+            change_type: "initial",
+            persistence: "permanent",
+            intent: "i",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toEqual([]);
+    expect(result.markdown).not.toContain("## meta staleness");
+  });
+
+  it("reports both rules in declaration order when both fire", () => {
+    writeMission(tempDir, {
+      title: "Actual Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Stale Title",
+          tracking_mode: "local-first (single-user)",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "c1",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "Dr. QUAN",
+            contributors: ["Dr. QUAN", "Claude Code (main pane)"],
+            change_type: "initial",
+            persistence: "permanent",
+            intent: "i",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toHaveLength(2);
+    expect(result.metaStaleness?.[0].field).toBe("mission_title");
+    expect(result.metaStaleness?.[1].field).toBe("tracking_mode");
+  });
+
+  it("dedupes and samples AI contributors (first 3 + (+N more) when >3 unique)", () => {
+    writeMission(tempDir, {
+      title: "Same Title",
+      goal: "g",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "test",
+          mission_title: "Same Title",
+          tracking_mode: "solo",
+          total_revisions: 5,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "c1",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "Dr. QUAN",
+            contributors: [
+              "Claude Opus 4.7",
+              "Codex (review)",
+              "Gemini (research)",
+              "GPT-4 (peer)",
+              "Copilot (suggest)",
+              "Claude Opus 4.7",
+            ],
+            change_type: "initial",
+            persistence: "permanent",
+            intent: "i",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const result = getMissionStatus(tempDir);
+    expect(result.metaStaleness).toHaveLength(1);
+    const hint = result.metaStaleness?.[0].hint ?? "";
+    expect(hint).toContain("(+2 more)");
+    expect(hint).toContain('"Claude Opus 4.7"');
+    expect(hint).toContain('"Codex (review)"');
+    expect(hint).toContain('"Gemini (research)"');
+    expect(hint).not.toContain('"GPT-4 (peer)"');
+    expect(hint).not.toContain('"Copilot (suggest)"');
+  });
 });

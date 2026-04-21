@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.19] - 2026-04-21
+_`ms-status`에 meta staleness 경고 추가. 2026-04-21 qmonster 2차 감사에서 `mission_title`이 초기 phase값으로 fossilize되어 실제 진행 상태와 drift하는 패턴 + `tracking_mode`가 single-user를 선언하나 실제 contributor에는 AI 제공자가 포함되는 패턴을 확인. v1.16.17 scaffolded-but-empty + v1.16.18 done_when drift에 이은 `ms-status` health-check 서피스의 세 번째 axis._
+
+### Added
+
+- src/commands/status.ts: `MetaStaleness` interface (exported), `detectMetaStaleness(history, missionTitle)` helper (exported), `SINGLE_USER_TERMS` + `AI_CONTRIBUTOR_TERMS` module-const, `quoteTruncate` + `shortTruncate` truncate helpers (internal), `StatusResult.metaStaleness?: MetaStaleness[]` optional field, conditional `## meta staleness` markdown render
+- tests/commands/status.test.ts: 10 신규 테스트 — Rule 1 detect (3) / Rule 1 skip-absent (8) / Rule 1 long-truncate (9) / Rule 2 detect (4) / Rule 2 skip-no-AI (6) / Rule 2 skip-no-keyword (7) / no-history undefined (1) / healthy empty-array (2) / both-rules order (5) / Rule 2 dedupe+sample (10) (기존 20 유지, 총 30)
+- skills/ms-status/SKILL.md + SKILL.ko.md + SKILL.zh.md: `## meta staleness Section (v1.16.19+)` 섹션 3개 언어 동시 추가; `## Notes`/`## 주의`/`## 注意`에 omission + mission_id-non-goal bullets 2개씩 추가 (MDR-007 trilingual policy)
+- docs/superpowers/specs/2026-04-21-imp4-meta-staleness-design.md + docs/superpowers/plans/2026-04-21-imp4-meta-staleness.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)
+
+### Changed
+
+- src/core/history.ts: `MissionHistory.meta`에 `tracking_mode?: string` 필드 추가 (schema에는 이미 optional이었으나 TS 타입 누락 보정)
+- .mission/traceability/TRACE_MATRIX.yaml: status.test.ts cases 20 → 30 + 'meta staleness (v1.16.19)' category; header total 267 → 277; version header v1.16.18 → v1.16.19
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 267 → 277 tests
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.18 → 1.16.19
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.16.19 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.16.18] - 2026-04-21
 _`ms-status`에 done_when drift 경고 추가. 2026-04-21 qmonster 2차 감사에서 ms-eval 0/50의 근본 원인 — done_when이 산문체로 작성되어 evaluator heuristic이 어느 경로에도 매칭 못 함 — 을 status 출력 단계에서 즉시 surface. v1.16.17 scaffolded-but-empty axis에 이어 `ms-status` health-check 서피스의 두 번째 axis._
 
