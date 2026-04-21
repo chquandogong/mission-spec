@@ -71,7 +71,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — done_when_refs는 optional field이고, refs 없는 저장소는 완전 동일하게 동작 (349/349 tests 포함 mission-spec 자체 저장소도 10/10 PASS 유지). 새로 노출한 4 kind(command/file-exists/file-contains/eval-ref)는 각각 pass+fail 케이스로 커버됨 + partial refs + override + shared-scope + 3 invariants(index range/duplicate/eval-ref orphan)도 모두 테스트로 보장. 기존 behavior 변경은 llm-eval awaiting verdict의 resolved_by 'manual' → 'inference' 1지점뿐이며 이는 evals[]-backed ≠ drift 원칙 복원. Semantic version: minor per MDR-006 §MINOR (새 schema field + 새 public type + additive CLI-consumed behavior). 관찰된 잠재 문제: command kind가 shared-scope에서 실제 git repo + gitignored path 시나리오에서 shared-skip에 선점될 가능성 — 현재 테스트는 tempDir가 git 아님이라 우연히 패스. 추후 fix task에서 `if (ref) return runRef(...)`를 shared-scope skip 이전으로 swap 권고."
-    related_commits: []
+    related_commits: ["b429f0c"]
     related_decisions:
       [
         "MDR-004-done-when-eval-linking",
@@ -135,7 +135,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — behavior change 없이 문서/registry 설명만 실제 구현에 맞춘 correction + SemVer 재분류이다. `npm run plugin:verify`, `npm run arch:verify`, `npm run registry:check`, `npm test`로 검증 체인이 계속 green임을 확인한다. Semantic version: patch per MDR-006 §PATCH — docs / MDR / README / CHANGELOG 업데이트 규칙."
-    related_commits: ["055303a"]
+    related_commits: ["055303a", "e48da88"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
