@@ -6,8 +6,12 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-## [1.20.0] - 2026-04-22
-_정적 검토에서 드러난 self-description drift를 정리한다. ms-context skill의 Public API 표기를 실제 구현과 맞추고, README/CONTRIBUTING/API registry/CLI 주석이 현재 CLI surface와 저장소 pre-commit 동작을 정확히 반영하도록 수정한다._
+## [1.20.1] - 2026-04-22
+_정적 검토에서 드러난 self-description drift를 정리하고, MDR-006 §PATCH 규칙에 맞게 docs-only correction을 v1.20.1로 정식 bump한다. ms-context skill의 Public API 표기를 실제 구현에 맞추고, README/CONTRIBUTING/API registry/CLI 주석이 현재 CLI surface와 저장소 pre-commit 동작을 정확히 반영하도록 수정한다. 동시에 CHANGELOG의 중복 [1.20.0] 섹션을 제거한다._
+
+### Added
+
+- .mission/snapshots/2026-04-22_v1.20.1_mission.yaml
 
 ### Changed
 
@@ -15,6 +19,12 @@ _정적 검토에서 드러난 self-description drift를 정리한다. ms-contex
 - README.md + README.ko.md + README.zh.md: 실제 CLI surface와 checked-in `.githooks/pre-commit` 동작 설명으로 정렬
 - CONTRIBUTING.md + .mission/interfaces/API_REGISTRY.yaml: hook contract를 실제 저장소 동작(changelog, metadata sync, arch sync/verify 포함)과 일치시킴
 - bin/mission-spec.js: 상단 지원 명령 주석을 현재 CLI help와 동일하게 정리
+- mission.yaml: title + version + lineage.total_revisions를 1.20.1로 retag
+- mission-history.yaml: 본 entry의 semantic_version 1.20.0 → 1.20.1 retag; meta.total_revisions 46 → 47; meta.latest_version 1.20.0 → 1.20.1; meta.mission_title v1.20.1 title 반영
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.20.0 → 1.20.1
+- .mission/ Version 헤더 + CURRENT_STATE.md Title: metadata:sync 자동 반영 (1.20.1)
+- CHANGELOG.md: `npm run changelog`로 재생성 — 중복 [1.20.0] 섹션 제거, [1.20.1] 2026-04-22 엔트리 단일화
+- CURRENT_STATE.md 최근 구현 섹션에 v1.20.1 retag bullet 추가
 
 ## [1.20.0] - 2026-04-21
 _qmonster adopter review에서 드러난 현실 제약을 Mission Spec 쪽에서 흡수한다. sparse legacy history ledger를 backward-compatible하게 읽고, shared clone에서는 gitignored local-only artifact를 요구하는 criteria를 건너뛰며, prose/backticked command success clauses를 안전 범위에서 자동 평가해 adopter가 self-dogfooding 규범을 그대로 따라야만 하는 구조를 완화한다._
