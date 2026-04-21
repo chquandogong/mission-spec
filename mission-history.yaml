@@ -65,7 +65,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 순수 additive (신규 CLI subcommand은 기존 명령에 영향 없음, 신규 public API는 barrel export 추가만, `templates/pre-commit` 파일 불변이므로 기존 v1.17.0 adopter hook 재설치 강제 없음). 3-way divergence(script silent-exit / CLI exit 1 / library throw)는 의도적 — mission-spec self-workflow 안정성 + adopter explicit 실패 양쪽 요구 균형. Concurrent invocation은 dedup check + copyFileSync TOCTOU window 존재하나 실전 (pre-commit serial) 해당 사례 없음. Semantic version: MINOR per MDR-006."
-    related_commits: []
+    related_commits: ["d2ced70"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
