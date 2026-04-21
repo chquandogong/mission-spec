@@ -16,6 +16,7 @@ import {
   evaluateMission,
   generateMissionReport,
   validateProject,
+  backfillRelatedCommits,
 } from "../dist/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,11 +32,13 @@ function loadVersion() {
 const HELP = `Usage: mission-spec <command> [projectDir]
 
 Commands:
-  context  [dir]  Print AI-agent project context (mission + history + architecture + API)
-  status   [dir]  Print mission progress summary (done_when checklist + evolution)
-  eval     [dir]  Evaluate done_when criteria against current state
-  report   [dir]  Generate run report (PASS/FAIL + traceability)
-  validate [dir]  Schema-check mission.yaml (+ mission-history.yaml if present); fast, for pre-commit
+  context          [dir]  Print AI-agent project context (mission + history + architecture + API)
+  status           [dir]  Print mission progress summary (done_when checklist + evolution)
+  eval             [dir]  Evaluate done_when criteria against current state
+  report           [dir]  Generate run report (PASS/FAIL + traceability)
+  validate         [dir]  Schema-check mission.yaml (+ mission-history.yaml if present); fast, for pre-commit
+  backfill-commits [dir]  Scan empty related_commits arrays; propose git SHAs by ±1-day date match.
+                          Dry-run by default; add --apply to write single-candidate proposals.
 
 Options:
   --version       Print package version
@@ -113,6 +116,75 @@ try {
         }
       }
       process.exit(1);
+      break;
+    }
+    case "backfill-commits": {
+      const applyFlag = argv.includes("--apply");
+      const r = backfillRelatedCommits(projectDir, { apply: applyFlag });
+      const total = r.proposals.length;
+      const autoApply = r.proposals.filter((p) => p.status === "auto-apply");
+      const ambiguous = r.proposals.filter((p) => p.status === "ambiguous");
+      const noCandidates = r.proposals.filter(
+        (p) => p.status === "no-candidates",
+      );
+      if (!applyFlag) {
+        process.stdout.write(
+          "Scanning mission-history.yaml for entries with empty related_commits...\n\n",
+        );
+        process.stdout.write(`Found ${total} entries.\n\n`);
+        if (total > 0) {
+          process.stdout.write("Proposals:\n");
+          for (const p of r.proposals) {
+            process.stdout.write(
+              `  ${p.change_id} (${p.revision_date}, v${p.semantic_version}):\n`,
+            );
+            if (p.status === "auto-apply") {
+              const c = p.candidates[0];
+              process.stdout.write(
+                `    → AUTO-APPLY: ${c.sha} "${c.subject}"\n`,
+              );
+            } else if (p.status === "ambiguous") {
+              process.stdout.write(
+                `    ⚠ AMBIGUOUS: ${p.candidates.length} candidates\n`,
+              );
+              for (const c of p.candidates) {
+                process.stdout.write(`      - ${c.sha} "${c.subject}"\n`);
+              }
+              process.stdout.write("    (edit related_commits manually)\n");
+            } else {
+              process.stdout.write(
+                "    ✗ NO CANDIDATES: no commits in ±1-day window\n",
+              );
+            }
+          }
+          process.stdout.write(
+            `\nSummary:\n  Auto-appliable (single candidate): ${autoApply.length}\n  Ambiguous (>1 candidate): ${ambiguous.length}\n  No candidates: ${noCandidates.length}\n`,
+          );
+          if (autoApply.length > 0) {
+            process.stdout.write(
+              `\nRun with --apply to write the ${autoApply.length} single-candidate proposals.\n`,
+            );
+          }
+        }
+        process.exit(0);
+      }
+      process.stdout.write(
+        `Applying ${autoApply.length} single-candidate proposals to mission-history.yaml...\n\n`,
+      );
+      for (const p of autoApply) {
+        process.stdout.write(
+          `  ✓ ${p.change_id}: ["${p.candidates[0].sha}"]\n`,
+        );
+      }
+      process.stdout.write(
+        '\nWritten. Review:  git diff mission-history.yaml\nTo commit:       git add mission-history.yaml && git commit -m "chore: backfill related_commits via ms-backfill-commits"\n',
+      );
+      if (ambiguous.length + noCandidates.length > 0) {
+        process.stdout.write(
+          `\nSkipped:\n  ${ambiguous.length} ambiguous (multiple candidates — edit manually)\n  ${noCandidates.length} no candidates\n`,
+        );
+      }
+      process.exit(0);
       break;
     }
     default: {

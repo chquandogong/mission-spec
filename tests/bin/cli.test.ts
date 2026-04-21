@@ -136,4 +136,55 @@ describe("mission-spec CLI", () => {
     expect(combined).toContain("mission-spec: schema INVALID");
     expect(combined).toContain("mission.yaml:");
   });
+
+  it("backfill-commits dry-run prints proposals on a git-initialized project", () => {
+    writeMission();
+    execFileSync("git", ["init", "-q"], { cwd: tempDir });
+    execFileSync("git", ["config", "user.email", "t@t"], { cwd: tempDir });
+    execFileSync("git", ["config", "user.name", "T"], { cwd: tempDir });
+    execFileSync("git", ["config", "commit.gpgsign", "false"], {
+      cwd: tempDir,
+    });
+    writeFile("work.txt", "x");
+    execFileSync("git", ["add", "."], { cwd: tempDir });
+    const iso = "2026-01-01T12:00:00+00:00";
+    execFileSync("git", ["commit", "-q", "-m", "feat: v1.0.0 — foo"], {
+      cwd: tempDir,
+      env: {
+        ...process.env,
+        GIT_AUTHOR_DATE: iso,
+        GIT_COMMITTER_DATE: iso,
+      },
+    });
+    writeFile(
+      "mission-history.yaml",
+      stringify({
+        meta: {
+          mission_id: "t",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-01-01-001",
+            semantic_version: "1.0.0",
+            change_sequence: 1,
+            date: "2026-01-01",
+            author: "t",
+            change_type: "feature",
+            persistence: "permanent",
+            intent: "x",
+            changes: { added: [], modified: [], removed: [] },
+            done_when_delta: { added: [], modified: [], removed: [] },
+            impact_scope: {},
+            breaking: false,
+            related_commits: [],
+          },
+        ],
+      }),
+    );
+    const out = runCli(["backfill-commits"]);
+    expect(out).toContain("Scanning mission-history.yaml");
+    expect(out).toContain("AUTO-APPLY");
+  });
 });

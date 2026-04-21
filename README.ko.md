@@ -316,6 +316,28 @@ git config core.hooksPath .githooks
 
 Hook은 `npx mission-spec validate`를 호출하며, 같은 명령을 CI / 수동 검증에 독립적으로 사용할 수도 있습니다.
 
+## related_commits 백필 (v1.18.0+)
+
+`mission-history.yaml`의 빈 `related_commits: []` 항목을 각 revision date의 ±1-day 범위 git commit과 매칭해 채워 넣습니다. 기본은 dry-run, `--apply` 시 단일 후보 엔트리를 파일에 직접 기록.
+
+```bash
+# 제안만 확인 (쓰지 않음)
+npx mission-spec backfill-commits
+
+# 단일 후보 엔트리를 일괄 적용
+npx mission-spec backfill-commits --apply
+git add mission-history.yaml
+git commit -m "chore: backfill related_commits via ms-backfill-commits"
+```
+
+엔트리별 분류:
+
+- **auto-apply** — window 내 commit이 정확히 1개; `--apply` 시 기록.
+- **ambiguous** — window 내 commit이 2개 이상; 나열하되 기록하지 않음 (수동 편집 필요).
+- **no-candidates** — window 내 commit이 0개; 나열하되 작업 없음.
+
+이미 채워진 `related_commits` 배열은 **절대 덮어쓰지 않습니다**.
+
 ## Cross-Platform 변환
 
 ```bash

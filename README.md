@@ -316,6 +316,28 @@ git config core.hooksPath .githooks
 
 The hook runs `npx mission-spec validate`, which also works as a standalone command for CI or manual invocation.
 
+## Backfilling related_commits (v1.18.0+)
+
+Retrofit empty `related_commits: []` arrays in `mission-history.yaml` by matching git commits within a ±1-day date window of each revision date. Dry-run by default; `--apply` writes single-candidate proposals in-place.
+
+```bash
+# Inspect proposals (no writes)
+npx mission-spec backfill-commits
+
+# Apply unambiguous single-candidate proposals
+npx mission-spec backfill-commits --apply
+git add mission-history.yaml
+git commit -m "chore: backfill related_commits via ms-backfill-commits"
+```
+
+Classification per entry:
+
+- **auto-apply** — exactly 1 commit in window; written under `--apply`.
+- **ambiguous** — ≥2 commits in window; listed but NOT written (edit manually).
+- **no-candidates** — 0 commits in window; listed, nothing to do.
+
+The tool NEVER overwrites already-populated `related_commits` arrays.
+
 ## Cross-Platform Conversion
 
 ```bash

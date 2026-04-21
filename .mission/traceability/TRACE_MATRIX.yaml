@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.17.0
+# Last updated: 2026-04-17 | Version: 1.18.0
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 286 tests across 22 files)"
+      - "tests/ (총 296 tests across 23 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.17.0 기준, 22 files / 286 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.18.0 기준, 23 files / 296 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -198,6 +198,17 @@ test_coverage:
         "YAML parse error",
         "schema-invalid",
         "history-present valid/invalid (v1.17.0)",
+      ]
+
+  - test_file: "tests/commands/backfill-commits.test.ts"
+    cases: 9
+    covers: [backfill-commits]
+    categories:
+      [
+        "empty timeline / already populated",
+        "auto-apply / ambiguous / no-candidates classification",
+        "±1 day window",
+        "apply mode safety (v1.18.0)",
       ]
 
   - test_file: "tests/commands/status.test.ts"
@@ -387,7 +398,7 @@ test_coverage:
       ]
 
   - test_file: "tests/bin/cli.test.ts"
-    cases: 10
+    cases: 11
     covers: []
     categories:
       [
@@ -399,6 +410,7 @@ test_coverage:
         "report subcommand",
         "unknown command",
         "validate subcommand (v1.17.0)",
+        "backfill-commits subcommand (v1.18.0)",
         "cwd default",
       ]
 

@@ -39,6 +39,7 @@ export interface HistoryEntry {
   breaking: boolean;
   risk?: string;
   decision?: string;
+  related_commits?: string[];
   architecture_delta?: ArchitectureDelta;
 }
 

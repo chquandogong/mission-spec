@@ -24,6 +24,16 @@ modules:
       - ExtractedEdge
       - ExtractedModule
       - extractArchitecture
+  - id: backfill-commits
+    path: src/commands/backfill-commits.ts
+    layer: commands
+    depends_on:
+      - history
+    exports:
+      - BackfillProposal
+      - BackfillResult
+      - CommitCandidate
+      - backfillRelatedCommits
   - id: context
     path: src/commands/context.ts
     layer: commands
@@ -81,6 +91,7 @@ modules:
     depends_on:
       - arch-diff
       - architecture-extractor
+      - backfill-commits
       - context
       - decide
       - eval
@@ -95,6 +106,9 @@ modules:
       - validate
       - validator
     exports:
+      - BackfillProposal
+      - BackfillResult
+      - CommitCandidate
       - DecideOptions
       - DecideResult
       - ExtractedArchitecture
@@ -108,6 +122,7 @@ modules:
       - SchemaVersion
       - ValidateResult
       - ValidationResult
+      - backfillRelatedCommits
       - detectSchemaVersion
       - diffArchitectureFromGit
       - diffArchitectures
@@ -245,6 +260,8 @@ modules:
       - validateHistory
       - validateMission
 edges:
+  - from: backfill-commits
+    to: history
   - from: context
     to: history
   - from: context
@@ -259,6 +276,8 @@ edges:
     to: arch-diff
   - from: index
     to: architecture-extractor
+  - from: index
+    to: backfill-commits
   - from: index
     to: context
   - from: index
@@ -311,6 +330,7 @@ edges:
     to: validator
 public_api:
   functions:
+    - backfillRelatedCommits
     - detectSchemaVersion
     - diffArchitectureFromGit
     - diffArchitectures
@@ -335,6 +355,9 @@ public_api:
     - validateProject
     - verifyReconstructionReferences
   types:
+    - BackfillProposal
+    - BackfillResult
+    - CommitCandidate
     - DecideOptions
     - DecideResult
     - ExtractedArchitecture

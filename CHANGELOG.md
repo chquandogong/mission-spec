@@ -6,6 +6,31 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.18.0] - 2026-04-21
+_adopter가 mission-history.yaml의 빈 related_commits 배열을 git log 날짜 매칭으로 retrofit할 수 있도록 `backfill-commits` CLI subcommand + `backfillRelatedCommits` public API를 제공. qmonster B-3 IMP 시퀀스의 5번째 axis — 이전 4개(v1.16.17/18/19/v1.17.0)와 달리 과거 이력의 traceability 공백을 소급 보완하는 repair 도구._
+
+### Added
+
+- src/commands/backfill-commits.ts: `CommitCandidate` + `BackfillProposal` + `BackfillResult` interfaces (all exported) + `backfillRelatedCommits(projectDir, options?)` helper (exported) + internal `addDays` + `enumerateCommits` helpers (git log 실패 graceful degrade)
+- tests/commands/backfill-commits.test.ts: 9 신규 unit tests — empty timeline / already-populated skip / auto-apply / ambiguous / no-candidates classification / ±1 day window (before+after) / apply writes / apply safety(ambiguous NOT written)
+- tests/bin/cli.test.ts: 1 신규 integration test — `backfill-commits` dry-run에서 'Scanning' + 'AUTO-APPLY' 출력 확인 (기존 10 유지, 총 11)
+- bin/mission-spec.js: `backfill-commits` case + `--apply` 플래그 파싱 + HELP 업데이트 + `backfillRelatedCommits` import
+- src/index.ts: `backfillRelatedCommits` function + `CommitCandidate`/`BackfillProposal`/`BackfillResult` type exports 추가 (public API 23 → 24 functions)
+- README.md + README.ko.md + README.zh.md: 신규 `## Backfilling related_commits (v1.18.0+)` (EN) / `## related_commits 백필 (v1.18.0+)` (KO) / `## 回填 related_commits（v1.18.0+）` (ZH) 섹션 (MDR-007 trilingual)
+- docs/superpowers/specs/2026-04-21-imp6-backfill-commits-design.md + docs/superpowers/plans/2026-04-21-imp6-backfill-commits.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)
+
+### Changed
+
+- src/core/history.ts: `HistoryEntry` interface에 `related_commits?: string[]` 옵셔널 필드 추가 (TS 타입 보정 — YAML과 schema에는 이미 존재)
+- .mission/architecture/ARCHITECTURE_CURRENT.yaml: `backfill-commits` 모듈 entry 추가 (modules 19 → 20) + index depends_on에 backfill-commits 추가
+- .mission/architecture/DEPENDENCY_GRAPH.yaml: `backfill-commits` node 추가, `backfill-commits → history` edge 추가
+- .mission/interfaces/API_REGISTRY.yaml: `backfillRelatedCommits` function entry 추가 (public API 23 → 24)
+- .mission/traceability/TRACE_MATRIX.yaml: `backfill-commits.test.ts` entry 신규 (cases 9); `cli.test.ts` cases 10 → 11 + 'backfill-commits subcommand (v1.18.0)' category; header total 286 → 296, files 22 → 23; version header v1.17.0 → v1.18.0
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 286 → 296 tests, 22 → 23 files; 모듈 수 19 → 20; public API 23 → 24
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.17.0 → 1.18.0
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.18.0 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.17.0] - 2026-04-21
 _adopter가 mission.yaml + mission-history.yaml의 schema 무결성을 commit boundary에서 강제할 수 있도록 `validate` CLI subcommand + portable pre-commit hook template을 제공. qmonster B-3 IMP 시퀀스의 4번째 axis — 이전 3개(v1.16.17 scaffolding / v1.16.18 done_when drift / v1.16.19 meta staleness)는 모두 `ms-status` 출력 축 확장이었고, IMP-5는 처음으로 `ms-init` / install path를 확장._
 

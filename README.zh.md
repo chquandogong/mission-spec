@@ -316,6 +316,28 @@ git config core.hooksPath .githooks
 
 Hook 调用 `npx mission-spec validate`，同一命令也可独立用于 CI / 手动校验。
 
+## 回填 related_commits（v1.18.0+）
+
+扫描 `mission-history.yaml` 中的空 `related_commits: []` 条目，按每条 revision date 的 ±1-day 时间窗匹配 git commit 并回填。默认 dry-run；`--apply` 将单候选结果直接写入文件。
+
+```bash
+# 仅查看提案（不写入）
+npx mission-spec backfill-commits
+
+# 应用单候选提案
+npx mission-spec backfill-commits --apply
+git add mission-history.yaml
+git commit -m "chore: backfill related_commits via ms-backfill-commits"
+```
+
+每条分类：
+
+- **auto-apply** — 窗口内恰好 1 个 commit；`--apply` 时写入。
+- **ambiguous** — 窗口内 ≥2 个 commit；列出但不写入（手动编辑）。
+- **no-candidates** — 窗口内 0 个 commit；列出，无需处理。
+
+已填充的 `related_commits` 数组**绝不会**被覆盖。
+
 ## 跨平台转换
 
 ```bash

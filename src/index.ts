@@ -44,3 +44,9 @@ export {
 } from "./core/history.js";
 export { validateProject } from "./commands/validate.js";
 export type { ValidateResult } from "./commands/validate.js";
+export { backfillRelatedCommits } from "./commands/backfill-commits.js";
+export type {
+  CommitCandidate,
+  BackfillProposal,
+  BackfillResult,
+} from "./commands/backfill-commits.js";

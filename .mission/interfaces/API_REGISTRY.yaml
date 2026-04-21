@@ -1,6 +1,6 @@
 # Mission Spec — API / Interface Registry
 # 외부와 맺고 있는 모든 계약(public exports, skill surface, file format contracts)을 한 곳에 기록합니다.
-# Last updated: 2026-04-17 | Version: 1.17.0
+# Last updated: 2026-04-17 | Version: 1.18.0
 
 # ── 1. Public Library API (src/index.ts → package.json exports) ──
 
@@ -99,6 +99,9 @@ public_api:
     - name: "validateProject"
       signature: "(projectDir: string) => ValidateResult"
       source: "src/commands/validate.ts"
+    - name: "backfillRelatedCommits"
+      signature: "(projectDir: string, options?: { apply?: boolean }) => BackfillResult"
+      source: "src/commands/backfill-commits.ts"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 
