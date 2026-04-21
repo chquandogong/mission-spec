@@ -53,7 +53,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — behavior change 없이 문서와 registry 설명만 실제 구현에 맞춘 correction이다. `npm run plugin:verify`, `npm run arch:verify`, `npm run registry:check`, `npm test`로 self-description과 검증 체인이 계속 통과함을 확인했다."
-    related_commits: []
+    related_commits: ["055303a"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
@@ -61,7 +61,7 @@ timeline:
         "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
       ]
     follow_up:
-      - "introducing commit이 생성되면 `related_commits`에 실제 SHA를 backfill한다."
+      - "향후 `.githooks/pre-commit`과 `templates/pre-commit`의 역할이 다시 벌어지면 README/API registry/CONTRIBUTING 설명을 함께 갱신한다."
 
   - change_id: "MSC-2026-04-21-010"
     semantic_version: "1.20.0"
