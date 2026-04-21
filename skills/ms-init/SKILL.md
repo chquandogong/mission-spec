@@ -72,6 +72,18 @@ else { console.error('INVALID:', r.errors.join(', ')); process.exit(1); }
 "
 ```
 
+## Post-init: install pre-commit hook (v1.17.0+)
+
+After `ms-init` produces `mission.yaml`, install the schema-validation hook so subsequent edits cannot introduce schema drift:
+
+```bash
+npm install --save-dev mission-spec
+cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+The hook calls `npx mission-spec validate` which exits non-zero on any schema failure in `mission.yaml` or (if present) `mission-history.yaml`. It does NOT run the evaluator — it is fast enough for every commit.
+
 ## Notes
 
 - `execution_hints` are **suggestions**, not directives. Runtime may ignore them.

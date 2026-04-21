@@ -293,6 +293,29 @@ git config core.hooksPath .githooks
 
 该验证还会捕获已提交但历史记录中缺失的相关 commit。为避免自引用问题，有两个例外：首次引入 `mission-history.yaml` 的 **bootstrap commit**，以及 **当前 HEAD** 在修改代码的同时也修改了 `mission-history.yaml` 的情况。后续有新 commit 推入后，之前的 code+history 同时提交也会重新纳入验证范围。
 
+## 提交前校验（v1.17.0+）
+
+在 commit 时强制 `mission.yaml` + `mission-history.yaml` 的 schema 有效性。不调用 evaluator，仅做 schema 检查 — 快速、deterministic — 在 schema drift 进入 repo 之前阻止 commit。
+
+默认安装（`.git/hooks/`）：
+
+```bash
+npm install --save-dev mission-spec
+cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+团队共享变体（`.githooks/` + `core.hooksPath`）：
+
+```bash
+mkdir -p .githooks
+cp node_modules/mission-spec/templates/pre-commit .githooks/pre-commit
+chmod +x .githooks/pre-commit
+git config core.hooksPath .githooks
+```
+
+Hook 调用 `npx mission-spec validate`，同一命令也可独立用于 CI / 手动校验。
+
 ## 跨平台转换
 
 ```bash

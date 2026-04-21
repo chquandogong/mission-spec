@@ -293,6 +293,29 @@ Additionally, `npm run validate:history-commits` cross-references `related_commi
 
 This validation also catches already-committed relevant commits missing from history. To avoid self-reference issues, two exceptions are made: the **bootstrap commit** that first introduced `mission-history.yaml`, and the **current HEAD commit** if it modifies `mission-history.yaml` alongside code. Once additional commits are pushed, the previous code+history commit becomes subject to validation again.
 
+## Pre-commit validation (v1.17.0+)
+
+Enforce `mission.yaml` + `mission-history.yaml` schema validity at commit time. Fast (no evaluator invocation) and deterministic — block commits that would introduce schema drift before they enter the repo.
+
+Install (default `.git/hooks/`):
+
+```bash
+npm install --save-dev mission-spec
+cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+Team-checked-in variant (`.githooks/` + `core.hooksPath`):
+
+```bash
+mkdir -p .githooks
+cp node_modules/mission-spec/templates/pre-commit .githooks/pre-commit
+chmod +x .githooks/pre-commit
+git config core.hooksPath .githooks
+```
+
+The hook runs `npx mission-spec validate`, which also works as a standalone command for CI or manual invocation.
+
 ## Cross-Platform Conversion
 
 ```bash

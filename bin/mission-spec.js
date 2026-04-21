@@ -15,6 +15,7 @@ import {
   getMissionStatus,
   evaluateMission,
   generateMissionReport,
+  validateProject,
 } from "../dist/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,10 +31,11 @@ function loadVersion() {
 const HELP = `Usage: mission-spec <command> [projectDir]
 
 Commands:
-  context [dir]   Print AI-agent project context (mission + history + architecture + API)
-  status  [dir]   Print mission progress summary (done_when checklist + evolution)
-  eval    [dir]   Evaluate done_when criteria against current state
-  report  [dir]   Generate run report (PASS/FAIL + traceability)
+  context  [dir]  Print AI-agent project context (mission + history + architecture + API)
+  status   [dir]  Print mission progress summary (done_when checklist + evolution)
+  eval     [dir]  Evaluate done_when criteria against current state
+  report   [dir]  Generate run report (PASS/FAIL + traceability)
+  validate [dir]  Schema-check mission.yaml (+ mission-history.yaml if present); fast, for pre-commit
 
 Options:
   --version       Print package version
@@ -86,6 +88,31 @@ try {
     case "report": {
       const r = generateMissionReport(projectDir);
       process.stdout.write(r.markdown + "\n");
+      break;
+    }
+    case "validate": {
+      const r = validateProject(projectDir);
+      if (r.allValid) {
+        const files = r.historyPresent
+          ? "mission.yaml + mission-history.yaml"
+          : "mission.yaml";
+        process.stdout.write(`mission-spec: schema valid (${files})\n`);
+        process.exit(0);
+      }
+      process.stderr.write("mission-spec: schema INVALID\n");
+      if (!r.missionValid) {
+        process.stderr.write("  mission.yaml:\n");
+        for (const e of r.missionErrors) {
+          process.stderr.write(`    - ${e}\n`);
+        }
+      }
+      if (r.historyPresent && !r.historyValid) {
+        process.stderr.write("  mission-history.yaml:\n");
+        for (const e of r.historyErrors) {
+          process.stderr.write(`    - ${e}\n`);
+        }
+      }
+      process.exit(1);
       break;
     }
     default: {

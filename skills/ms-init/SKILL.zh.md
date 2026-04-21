@@ -72,6 +72,18 @@ else { console.error('INVALID:', r.errors.join(', ')); process.exit(1); }
 "
 ```
 
+## Post-init：安装 pre-commit hook（v1.17.0+）
+
+用 `ms-init` 生成 `mission.yaml` 后，安装 schema 校验 hook，让后续编辑不会把 schema drift 引入 repo：
+
+```bash
+npm install --save-dev mission-spec
+cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+Hook 调用 `npx mission-spec validate`，当 `mission.yaml` 或（如存在）`mission-history.yaml` 的 schema 失败时 non-zero exit。不运行 evaluator，因此每次 commit 都够快。
+
 ## 注意
 
 - `execution_hints` 是**建议**而非指令。运行时可以忽略。

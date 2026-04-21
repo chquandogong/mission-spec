@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-17 | Version: 1.16.19
+> Last updated: 2026-04-17 | Version: 1.17.0
 
 ## 전제 조건
 
@@ -20,10 +20,10 @@
 
 ## Phase 2: 아키텍처 파악 (읽기만)
 
-7. **`.mission/architecture/ARCHITECTURE_CURRENT.yaml`** — 18개 모듈(hand-curated registry; src/ 실제 `.ts`는 19개 — `src/index.ts` barrel 포함)의 id, path, responsibility, exports
+7. **`.mission/architecture/ARCHITECTURE_CURRENT.yaml`** — 19개 모듈(hand-curated registry; src/ 실제 `.ts`는 20개 — `src/index.ts` barrel 포함)의 id, path, responsibility, exports
 8. **`.mission/architecture/DEPENDENCY_GRAPH.yaml`** — 모듈 간 import 관계 (directed edges)
 9. **`.mission/architecture/ARCHITECTURE_COMPUTED.yaml`** (v1.10+) — `extractArchitecture()` 자동 생성 결과 (hand-curated와 대칭 drift 검증 대상)
-10. **`.mission/interfaces/API_REGISTRY.yaml`** — public API 22개 함수(type export 포함), skill 6개, file_contracts 다수(`.cursorrules`, `AGENTS.md`, `opencode.toml`, `plugin.json`, `SKILL.md`, `.clinerules`, `.continuerules`, `.aider.conf.yml`, `.aider-mission.md`), `package_exports` (라이브러리 subpath) 포함
+10. **`.mission/interfaces/API_REGISTRY.yaml`** — public API 23개 함수(type export 포함), skill 6개, file_contracts 다수(`.cursorrules`, `AGENTS.md`, `opencode.toml`, `plugin.json`, `SKILL.md`, `.clinerules`, `.continuerules`, `.aider.conf.yml`, `.aider-mission.md`), `package_exports` (라이브러리 subpath) 포함
 11. **`mission.yaml`의 `design_refs`** — architecture, api_surface, type_definitions 파일 위치
 
 ## Phase 3: 스캐폴딩
@@ -73,7 +73,7 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 
 ## Phase 7: 검증 (총 9+ 축)
 
-32. `npm test` — 현재 기준 277 tests 전수 통과 (21 test files)
+32. `npm test` — 현재 기준 286 tests 전수 통과 (22 test files)
 33. `npm run test:coverage` — stmts/branches/functions/lines ≥ 80/75/80/80 (현 baseline 93.95 / 83.59 / 95.52 / 93.95)
 34. `node scripts/validate-schema.js` — 스키마 검증 (3 fixtures)
 35. `node scripts/convert-platforms.js --verify` — 6개 플랫폼

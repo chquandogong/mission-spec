@@ -3,7 +3,7 @@
 # mission-history.yaml의 architecture_delta와 연동: delta는 변경 추적, 이 파일은 현재 상태.
 # 자동 검증: `npm run arch:verify` 로 src/ 와 이 파일의 모듈 목록 + depends_on 동기 확인.
 # 파생 파일: .mission/architecture/ARCHITECTURE_COMPUTED.yaml (src/ 에서 자동 추출).
-# Last updated: 2026-04-17 | Version: 1.16.19
+# Last updated: 2026-04-17 | Version: 1.17.0
 
 system:
   name: "mission-spec"
@@ -184,6 +184,15 @@ modules:
       - "DecideOptions"
       - "DecideResult"
 
+  - id: validate
+    path: "src/commands/validate.ts"
+    responsibility: "schema-only 검증 — mission.yaml + mission-history.yaml (evaluator 실행 없음, pre-commit 용도)"
+    depends_on: [validator]
+    exports:
+      - "validateProject(projectDir: string): ValidateResult"
+    types:
+      - "ValidateResult"
+
   - id: migration
     path: "src/core/migration.ts"
     responsibility: "Schema version 간 마이그레이션 인프라 — 등록된 migrator 체인(BFS)으로 mission 문서를 목표 version 으로 업그레이드"
@@ -227,6 +236,7 @@ modules:
         decide,
         migration,
         reconstruction-verifier,
+        validate,
       ]
     exports:
       - "re-exports from schema/validator, core/parser, commands/*, core/history, core/arch-diff, core/architecture-extractor, core/plugin-validator"

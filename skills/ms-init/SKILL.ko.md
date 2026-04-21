@@ -72,6 +72,18 @@ else { console.error('INVALID:', r.errors.join(', ')); process.exit(1); }
 "
 ```
 
+## Post-init: pre-commit hook 설치 (v1.17.0+)
+
+`ms-init`으로 `mission.yaml`을 만든 뒤, 이후 수정이 스키마 drift를 유입시키지 못하도록 검증 hook을 설치합니다:
+
+```bash
+npm install --save-dev mission-spec
+cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+Hook은 `npx mission-spec validate`를 호출하여 `mission.yaml` 또는 (존재 시) `mission-history.yaml`의 스키마가 깨지면 non-zero exit합니다. evaluator는 돌리지 않으므로 매 commit마다 실행해도 빠릅니다.
+
 ## 주의
 
 - `execution_hints`는 **suggestion**이지 directive가 아닙니다. 런타임이 무시 가능해야 합니다.

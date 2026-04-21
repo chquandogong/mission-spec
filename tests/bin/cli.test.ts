@@ -119,4 +119,21 @@ describe("mission-spec CLI", () => {
     const output = runCli(["not-a-command"], { expectFail: true });
     expect(output).toContain("not-a-command");
   });
+
+  it("validate subcommand exits 0 with 'schema valid' line on a valid project", () => {
+    writeMission();
+    const out = runCli(["validate"]);
+    expect(out).toContain("mission-spec: schema valid");
+    expect(out).toContain("mission.yaml");
+  });
+
+  it("validate subcommand exits 1 with 'schema INVALID' on a schema-broken mission.yaml", () => {
+    writeFile(
+      "mission.yaml",
+      stringify({ mission: { title: "missing goal + done_when" } }),
+    );
+    const combined = runCli(["validate"], { expectFail: true });
+    expect(combined).toContain("mission-spec: schema INVALID");
+    expect(combined).toContain("mission.yaml:");
+  });
 });

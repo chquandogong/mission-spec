@@ -92,6 +92,7 @@ modules:
       - reconstruction-verifier
       - report
       - status
+      - validate
       - validator
     exports:
       - DecideOptions
@@ -105,6 +106,7 @@ modules:
       - ReconstructionOptions
       - ReconstructionResult
       - SchemaVersion
+      - ValidateResult
       - ValidationResult
       - detectSchemaVersion
       - diffArchitectureFromGit
@@ -127,6 +129,7 @@ modules:
       - validateHistory
       - validateMission
       - validatePlugin
+      - validateProject
       - verifyReconstructionReferences
   - id: init
     path: src/commands/init.ts
@@ -225,6 +228,14 @@ modules:
       - detectMetaStaleness
       - detectScaffoldedButEmpty
       - getMissionStatus
+  - id: validate
+    path: src/commands/validate.ts
+    layer: commands
+    depends_on:
+      - validator
+    exports:
+      - ValidateResult
+      - validateProject
   - id: validator
     path: src/schema/validator.ts
     layer: schema
@@ -271,6 +282,8 @@ edges:
   - from: index
     to: status
   - from: index
+    to: validate
+  - from: index
     to: validator
   - from: init
     to: validator
@@ -294,6 +307,8 @@ edges:
     to: history
   - from: status
     to: parser
+  - from: validate
+    to: validator
 public_api:
   functions:
     - detectSchemaVersion
@@ -317,6 +332,7 @@ public_api:
     - validateHistory
     - validateMission
     - validatePlugin
+    - validateProject
     - verifyReconstructionReferences
   types:
     - DecideOptions
@@ -330,4 +346,5 @@ public_api:
     - ReconstructionOptions
     - ReconstructionResult
     - SchemaVersion
+    - ValidateResult
     - ValidationResult

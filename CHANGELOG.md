@@ -6,6 +6,32 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.17.0] - 2026-04-21
+_adopter가 mission.yaml + mission-history.yaml의 schema 무결성을 commit boundary에서 강제할 수 있도록 `validate` CLI subcommand + portable pre-commit hook template을 제공. qmonster B-3 IMP 시퀀스의 4번째 axis — 이전 3개(v1.16.17 scaffolding / v1.16.18 done_when drift / v1.16.19 meta staleness)는 모두 `ms-status` 출력 축 확장이었고, IMP-5는 처음으로 `ms-init` / install path를 확장._
+
+### Added
+
+- src/commands/validate.ts: `ValidateResult` interface (exported) + `validateProject(projectDir): ValidateResult` helper (exported) + internal `parseYaml` helper
+- tests/commands/validate.test.ts: 7 신규 unit tests — mission.yaml 부재 / YAML parse error / schema invalid / history 부재 / 둘 다 valid / history schema invalid / history YAML parse error
+- tests/bin/cli.test.ts: 2 신규 integration tests — `validate` subcommand valid (exit 0, 'schema valid' 출력) / invalid (exit 1, 'schema INVALID' 출력) (기존 8 유지, 총 10)
+- templates/pre-commit: POSIX sh 5줄 — shebang + 주석 4줄 + `npx mission-spec validate` 본문. adopter는 `.git/hooks/`로 복사 + chmod +x. npm package에 자동 포함.
+- bin/mission-spec.js: `validate` case + HELP 업데이트 + `validateProject` import
+- src/index.ts: `validateProject` + `ValidateResult` type export 추가 (public API 22 → 23 functions)
+- README.md + README.ko.md + README.zh.md: 신규 `## Pre-commit validation` (EN) / `## 커밋 전 검증` (KO) / `## 提交前校验` (ZH) 섹션 — 3개 언어 동시 추가 (MDR-007)
+- skills/ms-init/SKILL.md + SKILL.ko.md + SKILL.zh.md: 신규 `## Post-init: install pre-commit hook (v1.17.0+)` 섹션 — 3개 언어 동시 추가 (MDR-007)
+- docs/superpowers/specs/2026-04-21-imp5-schema-pre-commit-hook-design.md + docs/superpowers/plans/2026-04-21-imp5-schema-pre-commit-hook.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)
+
+### Changed
+
+- .mission/architecture/ARCHITECTURE_CURRENT.yaml: `validate` 모듈 entry 추가 (modules 18 → 19) + index depends_on에 validate 추가
+- .mission/architecture/DEPENDENCY_GRAPH.yaml: `validate` node 추가, `validate → validator` edge 추가
+- .mission/interfaces/API_REGISTRY.yaml: `validateProject` function entry 추가 (public API 22 → 23)
+- .mission/traceability/TRACE_MATRIX.yaml: `validate.test.ts` entry 신규 (cases 7); `cli.test.ts` cases 8 → 10 + 'validate subcommand (v1.17.0)' category; header total 277 → 286, files 21 → 22; version header v1.16.19 → v1.17.0
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 277 → 286 tests, 21 → 22 files; 모듈 수 18 → 19; public API 22 → 23
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.19 → 1.17.0
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.17.0 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.16.19] - 2026-04-21
 _`ms-status`에 meta staleness 경고 추가. 2026-04-21 qmonster 2차 감사에서 `mission_title`이 초기 phase값으로 fossilize되어 실제 진행 상태와 drift하는 패턴 + `tracking_mode`가 single-user를 선언하나 실제 contributor에는 AI 제공자가 포함되는 패턴을 확인. v1.16.17 scaffolded-but-empty + v1.16.18 done_when drift에 이은 `ms-status` health-check 서피스의 세 번째 axis._
 

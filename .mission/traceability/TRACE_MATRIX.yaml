@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-17 | Version: 1.16.19
+# Last updated: 2026-04-17 | Version: 1.17.0
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 277 tests across 21 files)"
+      - "tests/ (총 286 tests across 22 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -150,7 +150,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.16.19 기준, 21 files / 277 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.17.0 기준, 22 files / 286 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -187,6 +187,17 @@ test_coverage:
         "llm-eval override",
         "schema error",
         "marker-contract invariant (v1.16.18)",
+      ]
+
+  - test_file: "tests/commands/validate.test.ts"
+    cases: 7
+    covers: [validate]
+    categories:
+      [
+        "mission.yaml absent",
+        "YAML parse error",
+        "schema-invalid",
+        "history-present valid/invalid (v1.17.0)",
       ]
 
   - test_file: "tests/commands/status.test.ts"
@@ -376,7 +387,7 @@ test_coverage:
       ]
 
   - test_file: "tests/bin/cli.test.ts"
-    cases: 8
+    cases: 10
     covers: []
     categories:
       [
@@ -387,6 +398,7 @@ test_coverage:
         "eval subcommand",
         "report subcommand",
         "unknown command",
+        "validate subcommand (v1.17.0)",
         "cwd default",
       ]
 

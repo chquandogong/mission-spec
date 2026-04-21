@@ -42,3 +42,5 @@ export {
   getLatestEntry,
   getCurrentPhase,
 } from "./core/history.js";
+export { validateProject } from "./commands/validate.js";
+export type { ValidateResult } from "./commands/validate.js";

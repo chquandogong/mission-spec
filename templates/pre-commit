@@ -1,0 +1,6 @@
+#!/bin/sh
+# mission-spec pre-commit hook — schema validation for mission.yaml + mission-history.yaml
+# Install: cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit && chmod +x $_
+# Source:  https://github.com/chquandogong/mission-spec/blob/main/templates/pre-commit
+set -e
+npx mission-spec validate

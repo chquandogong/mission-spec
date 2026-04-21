@@ -4,15 +4,84 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.19 — ms-status meta staleness warning"
+  mission_title: "Mission Spec v1.17.0 — validate CLI + pre-commit hook template"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 39
-  latest_version: "1.16.19"
+  total_revisions: 40
+  latest_version: "1.17.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-004"
+    semantic_version: "1.17.0"
+    change_sequence: 44
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "adopter가 mission.yaml + mission-history.yaml의 schema 무결성을 commit boundary에서 강제할 수 있도록 `validate` CLI subcommand + portable pre-commit hook template을 제공. qmonster B-3 IMP 시퀀스의 4번째 axis — 이전 3개(v1.16.17 scaffolding / v1.16.18 done_when drift / v1.16.19 meta staleness)는 모두 `ms-status` 출력 축 확장이었고, IMP-5는 처음으로 `ms-init` / install path를 확장."
+    decision: |
+      새 CLI subcommand `mission-spec validate` — `validateProject(projectDir)` 순수 함수 + bin/mission-spec.js dispatcher case 추가. schema-only (evaluator 실행 없음) → fast / deterministic / pre-commit 친화.
+      새 portable hook 템플릿 `templates/pre-commit` — POSIX sh 5줄, `npx mission-spec validate` 한 줄 호출. adopter가 `cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit && chmod +x $_` 2 커맨드로 설치.
+      새 public API export `validateProject` + type `ValidateResult` via src/index.ts (22 → 23 functions). 새 module `src/commands/validate.ts` (18 → 19 modules).
+      MDR-006 §MINOR 확정 — 신규 CLI subcommand + 신규 public API function export. v1.16.x 계열(PATCH) 마감, v1.17.0 진입.
+      YAGNI: `install-hook` CLI / `--quiet` / `--json` 플래그 / Windows .bat 변형 / LLM-eval override 검증은 모두 out-of-scope — 수요 발생 시 후속 PATCH에서 대응.
+    triggered_by: "사용자 요청: 'imp-5 진행' — 2026-04-21 qmonster 2차 감사 개선안 B-3(upstream IMP 시퀀스)의 3번째 항목. superpowers brainstorming → writing-plans → executing-plans 워크플로우 dogfood 계속."
+    issue_or_context: "qmonster 로컬(v1.7.6, 15 revisions) 감사에서 mission-history.yaml의 timeline entries 10~15이 `changes.added` 또는 `changes.removed` 필드 누락으로 40% schema-invalid — `loadHistory()`가 throw하여 v1.16.19의 `detectMetaStaleness`가 `historyWarning` 경로로 fallback되고 `metaStaleness` 검출 불가. IMP-5의 hook이 설치되었다면 10번째 revision commit에서 이미 block되어 애초에 진입 불가. IMP-4 + IMP-5 결합이 qmonster의 3개 meta 회귀 중 2개를 도구 레벨에서 catch 가능 (`mission_id`는 non-goal)."
+    changes:
+      added:
+        - "src/commands/validate.ts: `ValidateResult` interface (exported) + `validateProject(projectDir): ValidateResult` helper (exported) + internal `parseYaml` helper"
+        - "tests/commands/validate.test.ts: 7 신규 unit tests — mission.yaml 부재 / YAML parse error / schema invalid / history 부재 / 둘 다 valid / history schema invalid / history YAML parse error"
+        - "tests/bin/cli.test.ts: 2 신규 integration tests — `validate` subcommand valid (exit 0, 'schema valid' 출력) / invalid (exit 1, 'schema INVALID' 출력) (기존 8 유지, 총 10)"
+        - "templates/pre-commit: POSIX sh 5줄 — shebang + 주석 4줄 + `npx mission-spec validate` 본문. adopter는 `.git/hooks/`로 복사 + chmod +x. npm package에 자동 포함."
+        - "bin/mission-spec.js: `validate` case + HELP 업데이트 + `validateProject` import"
+        - "src/index.ts: `validateProject` + `ValidateResult` type export 추가 (public API 22 → 23 functions)"
+        - "README.md + README.ko.md + README.zh.md: 신규 `## Pre-commit validation` (EN) / `## 커밋 전 검증` (KO) / `## 提交前校验` (ZH) 섹션 — 3개 언어 동시 추가 (MDR-007)"
+        - "skills/ms-init/SKILL.md + SKILL.ko.md + SKILL.zh.md: 신규 `## Post-init: install pre-commit hook (v1.17.0+)` 섹션 — 3개 언어 동시 추가 (MDR-007)"
+        - "docs/superpowers/specs/2026-04-21-imp5-schema-pre-commit-hook-design.md + docs/superpowers/plans/2026-04-21-imp5-schema-pre-commit-hook.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)"
+      modified:
+        - ".mission/architecture/ARCHITECTURE_CURRENT.yaml: `validate` 모듈 entry 추가 (modules 18 → 19) + index depends_on에 validate 추가"
+        - ".mission/architecture/DEPENDENCY_GRAPH.yaml: `validate` node 추가, `validate → validator` edge 추가"
+        - ".mission/interfaces/API_REGISTRY.yaml: `validateProject` function entry 추가 (public API 22 → 23)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: `validate.test.ts` entry 신규 (cases 7); `cli.test.ts` cases 8 → 10 + 'validate subcommand (v1.17.0)' category; header total 277 → 286, files 21 → 22; version header v1.16.19 → v1.17.0"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 277 → 286 tests, 21 → 22 files; 모듈 수 18 → 19; public API 22 → 23"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.19 → 1.17.0"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.17.0 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — 순수 additive (신규 CLI subcommand은 기존 명령에 영향 없음, 신규 public API는 barrel export 추가만, 신규 template 파일은 기존 경로와 충돌 없음). `validateProject` 자체는 throw하지 않는 설계이므로 예외 경로 미정의. Hook은 POSIX sh + `set -e` + `npx` 조합이라 Alpine / Git Bash / WSL / macOS / Linux에서 동작. Windows native CMD는 out-of-scope (README 명시). Semantic version: MINOR per MDR-006 (신규 CLI subcommand + 신규 public API function export 두 조건 중 어느 하나만 충족해도 MINOR; 본 릴리스는 둘 다)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.17.0_mission.yaml"
+    follow_up:
+      - "IMP-6 `ms-backfill-commits` helper — git log 날짜 ↔ revision date 매칭으로 related_commits 후보 제시 (qmonster 15/15 [] 대응)"
+      - "IMP-7 language-specific snapshot hook 템플릿 (Rust, Python, Go) — `npm run snapshot` 등가물이 없는 프로젝트 대응"
+      - "`install-hook` CLI subcommand — adopter demand 확인 후 추가"
+      - "`mission-spec validate --quiet` / `--json` 출력 포맷 — CI 통합 수요 발생 시 추가"
+      - "E-4 외부 adopter 1+ — qmonster(first-party dogfooding) 외 strict external 여전히 0. IMP-5 hook 설치 후 qmonster의 mission-history.yaml 40% invalid가 retroactively 수정되면 IMP-4 meta staleness가 qmonster에도 마침내 발화 가능."
+      - "Rev.5 3벤더 재리뷰 baseline — v1.17.0이 새 baseline (v1.16.x 계열 PATCH 4건 + v1.17.0 MINOR feature 반영)"
+
   - change_id: "MSC-2026-04-21-003"
     semantic_version: "1.16.19"
     change_sequence: 43

@@ -293,6 +293,29 @@ git config core.hooksPath .githooks
 
 이 검증은 이미 커밋된 관련 commit이 history에 누락됐는지도 잡아냅니다. 단, self-reference 문제를 피하기 위해 `mission-history.yaml`을 **처음 도입한 bootstrap commit 1건**과, **현재 HEAD가 `mission-history.yaml`을 함께 수정한 경우**만 예외 처리합니다. 이후 다른 commit이 쌓이면, 그 이전 code+history 동시 commit도 다시 검사 대상이 됩니다.
 
+## 커밋 전 검증 (v1.17.0+)
+
+`mission.yaml` + `mission-history.yaml`의 스키마 무결성을 commit 시점에 강제합니다. evaluator 호출 없이 스키마만 검사하므로 빠르고 deterministic — 스키마 drift가 repo에 유입되기 전 commit을 차단.
+
+기본 설치 (`.git/hooks/`):
+
+```bash
+npm install --save-dev mission-spec
+cp node_modules/mission-spec/templates/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+팀 공유 변형 (`.githooks/` + `core.hooksPath`):
+
+```bash
+mkdir -p .githooks
+cp node_modules/mission-spec/templates/pre-commit .githooks/pre-commit
+chmod +x .githooks/pre-commit
+git config core.hooksPath .githooks
+```
+
+Hook은 `npx mission-spec validate`를 호출하며, 같은 명령을 CI / 수동 검증에 독립적으로 사용할 수도 있습니다.
+
 ## Cross-Platform 변환
 
 ```bash
