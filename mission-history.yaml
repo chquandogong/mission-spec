@@ -4,15 +4,74 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.19.1 — MDR-008 Living Asset Registry retention policy"
+  mission_title: "Mission Spec v1.19.2 — snapshot-mission.js refactor to createSnapshot wrapper"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 43
-  latest_version: "1.19.1"
+  total_revisions: 44
+  latest_version: "1.19.2"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-008"
+    semantic_version: "1.19.2"
+    change_sequence: 48
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "refactor"
+    motivation_type: "cleanup"
+    persistence: "permanent"
+    intent: "v1.19.0에서 `createSnapshot(projectDir)` library API를 도입한 후 `scripts/snapshot-mission.js`의 로직이 API와 중복되어 있었음. 이를 thin wrapper로 리팩터 — 기존 self-hook 동작(mission.yaml 부재 시 silent exit 0, same-day dedup silent) 완전 보존하면서 내부 구현 중복 제거. v1.19.0 IMP-7 follow-up에 예고된 cleanup."
+    decision: |
+      `scripts/snapshot-mission.js` 재작성 (57 lines → 33 lines) — `dist/commands/snapshot.js`의 `createSnapshot`을 import해 delegate.
+      Wrapper 로직:
+        1. mission.yaml 부재 → silent exit 0 (mission-spec self-hook bootstrap 보호 — 이전 script 동작)
+        2. `createSnapshot(cwd)` 호출 → `{ created, path, version, date }` 반환
+        3. `created === true` → "New snapshot created: <basename>" 출력
+        4. `created === false` AND basename !== `<today>_v<version>_mission.yaml` → "Existing version snapshot retained: <basename>" 출력 (이전 script가 다른-날짜 기존 파일 발견 시 출력하던 동일 메시지)
+        5. `created === false` AND basename === today's name → silent (이전 script의 same-day dedup silent 동작 보존)
+      3-way divergence (MDR-008 / IMP-7 spec 기준) 그대로 유지:
+        - script: mission.yaml 부재 silent, 에러 stderr + exit 1
+        - CLI: mission.yaml 부재 stderr + exit 1
+        - library: throw Error
+      기존 tests/scripts/snapshot.test.ts 2 tests (script 직접 execFileSync) 불변 그대로 통과 — refactor 성공 지표.
+      MDR-006 §PATCH 확정: scripts/ 내부 리팩터, consumer surface(CLI + library API + template hook) 모두 불변.
+    triggered_by: "사용자 요청: 'refactor (v1.19.2 PATCH) 진행' — v1.19.0 IMP-7 follow-up에 등재된 'scripts/snapshot-mission.js → createSnapshot() wrapper로 리팩터' 항목. qmonster 실제 적용 진단 후 남은 in-session cleanup."
+    issue_or_context: "v1.19.0 MSC-2026-04-21-006 decision 블록: 'script 자체는 self-hook 안정성 보호 차원에서 변경 안 함'. 안정성 검증이 끝난 시점에 중복 제거를 의도적으로 분리한 단계적 설계. 현재 `createSnapshot`과 `snapshot-mission.js` 모두 같은 로직(read mission.yaml → version extract → dedup check → copyFileSync). 한 곳이 버그나 정책 변경되면 수동 동기화 필요 → single source of truth로 통합."
+    changes:
+      added: []
+      modified:
+        - "scripts/snapshot-mission.js: 57 → 33 lines. createSnapshot(cwd) import + delegate; mission.yaml 부재 silent-exit + same-day dedup silent 로직만 wrapper 본체에 유지. 내부 중복 제거 (yaml parse, filename 계산, dedup, copyFileSync 모두 library 측으로)"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.19.1 → 1.19.2"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.19.2 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: true
+    breaking: false
+    risk: "very low — 내부 리팩터이고 외부 관찰 가능 행동 완전 보존. 기존 tests/scripts/snapshot.test.ts 2 tests가 unchanged 상태로 통과하는 것이 보증 — 테스트가 script를 execFileSync로 직접 실행하므로 내부 구현이 library로 delegate되어도 외부 계약 불변임을 검증. 3-way divergence(script silent-exit / CLI exit 1 / library throw) 의도적 유지. mission-spec self pre-commit hook은 기존대로 `npm run snapshot`을 호출하고 같은 출력 패턴 유지. Semantic version: patch per MDR-006 §PATCH 6 (internal refactor, no consumer surface change)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-008-living-asset-registry-retention-and-compaction-policy",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.19.2_mission.yaml"
+    follow_up:
+      - "남은 in-session 작업: qmonster 실제 적용은 Phase 4 WIP 영향 차원에서 read-only 진단만 수행 후 Dr. QUAN 수동 bootstrap 안내로 마감. 본 PATCH 이후 오늘 세션 IMP/governance 관련 code-side 작업 전수 closure."
+      - "Rev.5 3벤더 재리뷰 baseline — v1.19.2가 최종. v1.16.x PATCH 4 + v1.17.0/v1.18.0/v1.19.0 MINOR 3 + v1.19.1 MDR-008 PATCH + v1.19.2 refactor PATCH 합쳐 오늘 8 releases 전수 반영."
+
   - change_id: "MSC-2026-04-21-007"
     semantic_version: "1.19.1"
     change_sequence: 47

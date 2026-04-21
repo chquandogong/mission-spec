@@ -6,6 +6,16 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.19.2] - 2026-04-21
+_v1.19.0에서 `createSnapshot(projectDir)` library API를 도입한 후 `scripts/snapshot-mission.js`의 로직이 API와 중복되어 있었음. 이를 thin wrapper로 리팩터 — 기존 self-hook 동작(mission.yaml 부재 시 silent exit 0, same-day dedup silent) 완전 보존하면서 내부 구현 중복 제거. v1.19.0 IMP-7 follow-up에 예고된 cleanup._
+
+### Changed
+
+- scripts/snapshot-mission.js: 57 → 33 lines. createSnapshot(cwd) import + delegate; mission.yaml 부재 silent-exit + same-day dedup silent 로직만 wrapper 본체에 유지. 내부 중복 제거 (yaml parse, filename 계산, dedup, copyFileSync 모두 library 측으로)
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.19.1 → 1.19.2
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.19.2 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.19.1] - 2026-04-21
 _F-9 (Living Asset Registry 누적 크기 원칙) 미해결 거버넌스 축을 MDR-008으로 성문화. 기존 MDR-005(scope) / MDR-006(SemVer) / MDR-007(locale)에 이은 4번째 governance 축. qmonster B-3 IMP 시퀀스(v1.16.17~v1.19.0) 완료 후 남은 non-code follow-up 중 본 세션 내 완결 가능한 항목._
 
