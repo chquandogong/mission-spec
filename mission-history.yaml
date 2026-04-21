@@ -61,7 +61,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "very low — 내부 리팩터이고 외부 관찰 가능 행동 완전 보존. 기존 tests/scripts/snapshot.test.ts 2 tests가 unchanged 상태로 통과하는 것이 보증 — 테스트가 script를 execFileSync로 직접 실행하므로 내부 구현이 library로 delegate되어도 외부 계약 불변임을 검증. 3-way divergence(script silent-exit / CLI exit 1 / library throw) 의도적 유지. mission-spec self pre-commit hook은 기존대로 `npm run snapshot`을 호출하고 같은 출력 패턴 유지. Semantic version: patch per MDR-006 §PATCH 6 (internal refactor, no consumer surface change)."
-    related_commits: []
+    related_commits: ["4c1fdaf"]
     related_decisions:
       [
         "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
