@@ -1,6 +1,6 @@
 # Mission Spec — API / Interface Registry
 # 외부와 맺고 있는 모든 계약(public exports, skill surface, file format contracts)을 한 곳에 기록합니다.
-# Last updated: 2026-04-17 | Version: 1.19.3
+# Last updated: 2026-04-21 | Version: 1.20.0
 
 # ── 1. Public Library API (src/index.ts → package.json exports) ──
 
@@ -46,10 +46,10 @@ public_api:
       signature: "(options: InitOptions) => InitResult"
       source: "src/commands/init.ts"
     - name: "evaluateMission"
-      signature: "(projectDir: string) => EvalResult"
+      signature: "(projectDir: string, options?: EvaluateOptions) => EvalResult"
       source: "src/commands/eval.ts"
     - name: "getMissionStatus"
-      signature: "(projectDir: string) => StatusResult"
+      signature: "(projectDir: string, options?: EvaluateOptions) => StatusResult"
       source: "src/commands/status.ts"
     - name: "generateMissionReport"
       signature: "(projectDir: string) => ReportResult"

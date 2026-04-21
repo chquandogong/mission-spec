@@ -360,7 +360,7 @@ describe("validateHistory", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("rejects history with sparse changes objects", () => {
+  it("accepts history with sparse changes objects via normalization", () => {
     const result = validateHistory({
       meta: {
         mission_id: "m",
@@ -383,8 +383,35 @@ describe("validateHistory", () => {
         },
       ],
     });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("rejects history when changes arrays have wrong types", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: { added: "mission.yaml" },
+          done_when_delta: {},
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes("added"))).toBe(true);
+    expect(result.errors.some((e) => e.includes("changes/added"))).toBe(true);
   });
 
   it("rejects null input", () => {

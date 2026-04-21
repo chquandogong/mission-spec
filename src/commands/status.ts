@@ -3,6 +3,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { loadAndValidateMission } from "../core/parser.js";
 import { evaluateMission } from "./eval.js";
+import type { EvaluateOptions } from "../core/evaluator.js";
 import {
   loadHistory,
   getCurrentPhase,
@@ -156,11 +157,14 @@ export function detectMetaStaleness(
   return warnings;
 }
 
-export function getMissionStatus(projectDir: string): StatusResult {
+export function getMissionStatus(
+  projectDir: string,
+  options: EvaluateOptions = {},
+): StatusResult {
   const doc = loadAndValidateMission(projectDir);
   const m = doc.mission;
 
-  const evalResult = evaluateMission(projectDir);
+  const evalResult = evaluateMission(projectDir, options);
 
   const title = m.title;
   const goal = m.goal;

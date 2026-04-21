@@ -60,6 +60,7 @@ modules:
     exports:
       - CriterionResult
       - EvalResult
+      - EvaluateOptions
       - evaluateMission
   - id: evaluator
     path: src/core/evaluator.ts
@@ -67,6 +68,7 @@ modules:
     depends_on: []
     exports:
       - CriterionResult
+      - EvaluateOptions
       - evaluateAllCriteria
       - evaluateCriterion
   - id: history
@@ -112,6 +114,7 @@ modules:
       - CommitCandidate
       - DecideOptions
       - DecideResult
+      - EvaluateOptions
       - ExtractedArchitecture
       - ExtractedEdge
       - ExtractedModule
@@ -243,6 +246,7 @@ modules:
     layer: commands
     depends_on:
       - eval
+      - evaluator
       - history
       - parser
     exports:
@@ -267,6 +271,7 @@ modules:
     depends_on: []
     exports:
       - ValidationResult
+      - normalizeHistoryData
       - validateHistory
       - validateMission
 edges:
@@ -335,6 +340,8 @@ edges:
   - from: status
     to: eval
   - from: status
+    to: evaluator
+  - from: status
     to: history
   - from: status
     to: parser
@@ -373,6 +380,7 @@ public_api:
     - CommitCandidate
     - DecideOptions
     - DecideResult
+    - EvaluateOptions
     - ExtractedArchitecture
     - ExtractedEdge
     - ExtractedModule

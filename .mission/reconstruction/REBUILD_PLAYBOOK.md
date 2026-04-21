@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-21 | Version: 1.19.3
+> Last updated: 2026-04-21 | Version: 1.20.0
 
 ## 전제 조건
 
@@ -48,8 +48,8 @@
 ## Phase 4: 스키마 → 검증 (TDD)
 
 17. `mission.schema.json` + `mission-history.schema.json` 작성 — ARCHITECTURE_CURRENT.yaml의 `validator` 모듈 exports 참조
-18. `tests/schema.test.ts` 먼저 작성(RED, 35 tests)
-19. `src/schema/validator.ts` 구현 — `validateMission()`, `validateHistory()`
+18. `tests/schema.test.ts` 먼저 작성(RED, 36 tests)
+19. `src/schema/validator.ts` 구현 — `validateMission()`, `validateHistory()` (+ sparse legacy history normalization)
 20. `npm test` GREEN 확인
 
 ## Phase 5: 핵심 파이프라인 (TDD)
@@ -57,8 +57,8 @@
 DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → adapters → index`.
 
 21. `parser.ts` — YAML parse + schema validate
-22. `evaluator.ts` — done_when 5-단계 평가 (llm-eval override → automated execSync → file-existence regex → test-pattern → fallback). `ARCHITECTURE_CURRENT.yaml` 의 `evaluation_rules` 참조
-23. `history.ts` — `mission-history.yaml` 로더 + `getCurrentPhase()` / `getLatestEntry()`
+22. `evaluator.ts` — done_when 7-단계 평가 (shared-mode local-only skip → llm-eval override → automated execSync → file-existence regex → safe inferred command clause → test-pattern → fallback). `ARCHITECTURE_CURRENT.yaml` 의 `evaluation_rules` 참조
+23. `history.ts` — `mission-history.yaml` 로더 + sparse legacy normalization + `getCurrentPhase()` / `getLatestEntry()`
 24. `reporter.ts` — markdown 렌더링 (`TRACE_MATRIX.yaml` 연동 포함)
 25. `init.ts` → `eval.ts` → `status.ts` → `report.ts` → `context.ts` → `decide.ts` 순서
 26. 각 단계는 TDD (테스트 먼저)
@@ -73,7 +73,7 @@ DEPENDENCY_GRAPH.yaml의 레이어 규칙: `schema → core → commands → ada
 
 ## Phase 7: 검증 (총 9+ 축)
 
-32. `npm test` — 현재 기준 307 tests 전수 통과 (24 test files)
+32. `npm test` — 현재 기준 316 tests 전수 통과 (24 test files)
 33. `npm run test:coverage` — stmts/branches/functions/lines ≥ 80/75/80/80 (현 baseline 93.95 / 83.59 / 95.52 / 93.95)
 34. `node scripts/validate-schema.js` — 스키마 검증 (3 fixtures)
 35. `node scripts/convert-platforms.js --verify` — 6개 플랫폼

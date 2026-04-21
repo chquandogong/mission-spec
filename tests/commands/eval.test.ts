@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
 import { stringify } from "yaml";
 import { evaluateMission, type EvalResult } from "../../src/commands/eval.js";
 
@@ -281,5 +282,48 @@ describe("evaluateMission", () => {
     const fallbackReason = result.criteria[1].reason.toLowerCase();
     expect(testPathReason).toContain("manual verification required");
     expect(fallbackReason).toContain("manual verification required");
+  });
+
+  it("treats missing gitignored local-only artifacts as shared-mode skips", () => {
+    execFileSync("git", ["init", "-q"], { cwd: tempDir });
+    writeFileSync(join(tempDir, ".gitignore"), "/.docs/\n");
+    writeMission(tempDir, {
+      title: "Shared Clone",
+      goal: "Remote clone should ignore local-only docs",
+      done_when: [
+        "Phase 0: .docs/final/review.md exists and was consumed by the reviewer",
+      ],
+    });
+
+    const result = evaluateMission(tempDir, { scope: "shared" });
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].skipped).toBe(true);
+    expect(result.criteria[0].reason).toContain("Shared-mode skip");
+    expect(result.criteria[0].reason).toContain(".docs/final/review.md");
+  });
+
+  it("runs safe inferred command clauses from backticked prose when they signal success", () => {
+    writeMission(tempDir, {
+      title: "Inferred Command",
+      goal: "Let adopters keep command prose in done_when",
+      done_when: ['Validation command `node -e "process.exit(0)"` succeeds'],
+    });
+
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].reason).toContain("Inferred command clause(s) succeeded");
+    expect(result.criteria[0].reason).toContain('node -e "process.exit(0)"');
+  });
+
+  it("fails inferred command clause when extracted safe command exits non-zero", () => {
+    writeMission(tempDir, {
+      title: "Inferred Command Failure",
+      goal: "Surface failing command prose",
+      done_when: ['Validation command `node -e "process.exit(1)"` succeeds'],
+    });
+
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toContain("Inferred command clause failed");
   });
 });

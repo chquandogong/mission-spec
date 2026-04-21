@@ -84,6 +84,10 @@ const result = evaluateMission(".");
 console.log(result.summary);
 ```
 
+For a fresh clone or shared-repo review, use `evaluateMission(".", { scope: "shared" })`
+or `npx mission-spec eval --shared`. Shared mode treats criteria that only reference
+missing gitignored local-only artifacts as skipped passes.
+
 ### Status Summary (`ms-status`)
 
 ```typescript
@@ -92,6 +96,9 @@ import { getMissionStatus } from "mission-spec";
 const status = getMissionStatus(".");
 console.log(status.markdown);
 ```
+
+`getMissionStatus(".", { scope: "shared" })` and `npx mission-spec status --shared`
+apply the same shared-clone behavior to status/drift reporting.
 
 ### Generate Report (`ms-report`)
 
@@ -315,6 +322,9 @@ git config core.hooksPath .githooks
 ```
 
 The hook runs `npx mission-spec validate`, which also works as a standalone command for CI or manual invocation.
+
+Legacy `mission-history.yaml` entries that omit empty `changes.*` / `done_when_delta.*`
+arrays are normalized before validation. Malformed types still fail.
 
 ## Backfilling related_commits (v1.18.0+)
 

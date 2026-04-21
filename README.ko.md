@@ -84,6 +84,10 @@ const result = evaluateMission(".");
 console.log(result.summary);
 ```
 
+fresh clone 또는 공유 저장소 리뷰에서는 `evaluateMission(".", { scope: "shared" })`
+또는 `npx mission-spec eval --shared`를 사용할 수 있습니다. shared mode는
+missing gitignored local-only artifact만 가리키는 criterion을 skip/pass 처리합니다.
+
 ### 상태 요약 (`ms-status`)
 
 ```typescript
@@ -92,6 +96,9 @@ import { getMissionStatus } from "mission-spec";
 const status = getMissionStatus(".");
 console.log(status.markdown);
 ```
+
+`getMissionStatus(".", { scope: "shared" })`와 `npx mission-spec status --shared`도
+같은 shared-clone 동작을 status/drift 보고에 적용합니다.
 
 ### 리포트 생성 (`ms-report`)
 
@@ -315,6 +322,10 @@ git config core.hooksPath .githooks
 ```
 
 Hook은 `npx mission-spec validate`를 호출하며, 같은 명령을 CI / 수동 검증에 독립적으로 사용할 수도 있습니다.
+
+비어 있는 `changes.*` / `done_when_delta.*` 배열을 생략한 legacy
+`mission-history.yaml` entry는 validation 전에 normalize합니다. 타입이 잘못된 값은
+계속 실패합니다.
 
 ## related_commits 백필 (v1.18.0+)
 

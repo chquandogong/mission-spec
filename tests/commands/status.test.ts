@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
 import { stringify } from "yaml";
 import {
   getMissionStatus,
@@ -104,6 +105,57 @@ describe("getMissionStatus", () => {
     expect(result.markdown).toContain("History unavailable");
   });
 
+  it("loads legacy mission-history.yaml entries that omit changes subfields", () => {
+    writeMission(tempDir, {
+      title: "Legacy History",
+      goal: "Status stays readable for adopters",
+      done_when: ["package.json 존재"],
+    });
+    writeFileSync(join(tempDir, "package.json"), "{}");
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "legacy",
+          mission_title: "Legacy History",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-01-01-001",
+            semantic_version: "1.0.0",
+            date: "2026-01-01",
+            author: "t",
+            change_type: "fix",
+            persistence: "permanent",
+            intent: "legacy entry",
+            changes: { modified: ["mission.yaml"] },
+            done_when_delta: { modified: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+        evolution_summary: {
+          phases: [
+            {
+              name: "bootstrap",
+              versions: ["1.0.0"],
+              date_range: "2026-01-01",
+              theme: "legacy",
+              description: "legacy adopter fixture",
+            },
+          ],
+        },
+      }),
+    );
+
+    const result = getMissionStatus(tempDir);
+    expect(result.historyWarning).toBeUndefined();
+    expect(result.phase).toBe("bootstrap");
+    expect(result.markdown).toContain("**Revisions:** 1");
+  });
+
   it("warns about scaffolded-but-empty .mission/decisions with remediation hint", () => {
     writeMission(tempDir, {
       title: "Scaffolded Empty",
@@ -181,6 +233,23 @@ describe("getMissionStatus", () => {
     });
     const result = getMissionStatus(tempDir);
     expect(result.doneWhenDrift).toEqual(["cargo tests pass"]);
+  });
+
+  it("omits shared-mode local-only criteria from done_when drift by marking them skipped", () => {
+    execFileSync("git", ["init", "-q"], { cwd: tempDir });
+    writeFileSync(join(tempDir, ".gitignore"), "/.docs/\n");
+    writeMission(tempDir, {
+      title: "Shared Drift",
+      goal: "Shared clone should not drift on local docs",
+      done_when: [
+        "Phase 0: .docs/final/review.md exists and was consumed by the reviewer",
+      ],
+    });
+
+    const result = getMissionStatus(tempDir, { scope: "shared" });
+    expect(result.doneWhenDrift ?? []).toEqual([]);
+    expect(result.markdown).not.toContain("## done_when drift");
+    expect(result.markdown).toContain("Phase 0: .docs/final/review.md exists");
   });
 
   it("renders drift=1 with inline colon layout (partial, 1/N form)", () => {

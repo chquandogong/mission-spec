@@ -6,6 +6,20 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.20.0] - 2026-04-21
+_qmonster adopter review에서 드러난 현실 제약을 Mission Spec 쪽에서 흡수한다. sparse legacy history ledger를 backward-compatible하게 읽고, shared clone에서는 gitignored local-only artifact를 요구하는 criteria를 건너뛰며, prose/backticked command success clauses를 안전 범위에서 자동 평가해 adopter가 self-dogfooding 규범을 그대로 따라야만 하는 구조를 완화한다._
+
+### Changed
+
+- src/schema/validator.ts + src/core/history.ts: sparse legacy history normalization (`normalizeHistoryData`) 추가
+- src/core/evaluator.ts + src/commands/eval.ts + src/commands/status.ts + src/index.ts: `EvaluateOptions` / shared-scope / safe inferred command clauses 지원
+- bin/mission-spec.js: `eval --shared` / `status --shared` CLI surface 추가
+- tests/schema.test.ts + tests/commands/{eval,status,validate}.test.ts + tests/bin/cli.test.ts: legacy history normalization, shared-mode skip, inferred command clause coverage 추가
+- .mission/traceability/TRACE_MATRIX.yaml + REBUILD_PLAYBOOK.md + CURRENT_STATE.md + VERIFICATION_LOG.yaml: 316-test baseline + v1.20.0 adopter-compat 상태로 동기화
+- .mission/interfaces/API_REGISTRY.yaml + .mission/architecture/ARCHITECTURE_CURRENT.yaml + docs/internal/{ARCHITECTURE,CLAUDE}.md: new signatures / evaluator behavior / shared-clone surface 반영
+- README.md + README.ko.md + README.zh.md: shared mode usage와 legacy history normalization 안내 추가
+- mission.yaml + mission-history.yaml + CHANGELOG.md + package.json + plugin.json + marketplace.json + package-lock.json: v1.20.0 release metadata 동기화
+
 ## [1.19.3] - 2026-04-21
 _정밀 검토에서 드러난 self-description drift를 정식 PATCH로 정리한다. `backfill-commits --apply` 실제 실패를 수정하고, registry/evidence 메타데이터 drift를 기계적으로 잡도록 강화하며, `architecture_doc_freshness`를 실제 완료 게이트로 승격해 저장소가 주장하는 mission complete 상태와 실제 평가 기준을 일치시킨다._
 

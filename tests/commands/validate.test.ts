@@ -133,4 +133,48 @@ describe("validateProject", () => {
     expect(r.historyErrors.join("\n")).toMatch(/parse error/);
     expect(r.allValid).toBe(false);
   });
+
+  it("accepts legacy mission-history.yaml entries missing changes subfields via normalization", () => {
+    writeFileSync(
+      join(tempDir, "mission.yaml"),
+      stringify({
+        mission: {
+          title: "t",
+          goal: "g",
+          done_when: ["done"],
+        },
+      }),
+    );
+    writeFileSync(
+      join(tempDir, "mission-history.yaml"),
+      stringify({
+        meta: {
+          mission_id: "t",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-01-01-001",
+            semantic_version: "1.0.0",
+            date: "2026-01-01",
+            author: "t",
+            change_type: "fix",
+            persistence: "permanent",
+            intent: "legacy adopter entry",
+            changes: { modified: ["mission.yaml"] },
+            done_when_delta: { modified: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+    const r = validateProject(tempDir);
+    expect(r.missionValid).toBe(true);
+    expect(r.historyPresent).toBe(true);
+    expect(r.historyValid).toBe(true);
+    expect(r.historyErrors).toEqual([]);
+    expect(r.allValid).toBe(true);
+  });
 });

@@ -35,7 +35,9 @@ const HELP = `Usage: mission-spec <command> [projectDir]
 Commands:
   context          [dir]  Print AI-agent project context (mission + history + architecture + API)
   status           [dir]  Print mission progress summary (done_when checklist + evolution)
+                          Add --shared to ignore gitignored local-only artifacts missing from clone.
   eval             [dir]  Evaluate done_when criteria against current state
+                          Add --shared to ignore gitignored local-only artifacts missing from clone.
   report           [dir]  Generate run report (PASS/FAIL + traceability)
   validate         [dir]  Schema-check mission.yaml (+ mission-history.yaml if present); fast, for pre-commit
   backfill-commits [dir]  Scan empty related_commits arrays; propose git SHAs by ±1-day date match.
@@ -77,6 +79,7 @@ if (first === "--help" || first === "-h") {
 }
 
 const projectDir = resolveProjectDir(argv.slice(1));
+const sharedMode = argv.includes("--shared");
 
 try {
   switch (first) {
@@ -86,12 +89,16 @@ try {
       break;
     }
     case "status": {
-      const r = getMissionStatus(projectDir);
+      const r = getMissionStatus(projectDir, {
+        scope: sharedMode ? "shared" : "workspace",
+      });
       process.stdout.write(r.markdown + "\n");
       break;
     }
     case "eval": {
-      const r = evaluateMission(projectDir);
+      const r = evaluateMission(projectDir, {
+        scope: sharedMode ? "shared" : "workspace",
+      });
       process.stdout.write(r.summary + "\n");
       process.exit(r.allPassed ? 0 : 1);
       break;

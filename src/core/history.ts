@@ -2,7 +2,10 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
-import { validateHistory } from "../schema/validator.js";
+import {
+  normalizeHistoryData,
+  validateHistory,
+} from "../schema/validator.js";
 
 export interface ModuleEntry {
   path: string;
@@ -82,7 +85,7 @@ export function loadHistory(projectDir: string): MissionHistory | null {
   if (!existsSync(historyPath)) return null;
 
   const content = readFileSync(historyPath, "utf-8");
-  const data = parse(content);
+  const data = normalizeHistoryData(parse(content));
   const result = validateHistory(data);
   if (!result.valid) {
     throw new Error(

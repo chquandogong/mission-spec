@@ -121,6 +121,27 @@ describe("mission-spec CLI", () => {
     expect(output).toMatch(/\d+\/\d+ criteria passed/);
   });
 
+  it("`eval --shared` skips missing gitignored local-only artifacts", () => {
+    writeFile(".gitignore", "/.docs/\n");
+    writeFile(
+      "mission.yaml",
+      stringify({
+        mission: {
+          title: "Shared CLI Fixture",
+          goal: "shared mode",
+          done_when: [
+            "Phase 0: .docs/final/review.md exists and was consumed by the reviewer",
+          ],
+          version: "1.0.0",
+        },
+      }),
+    );
+    execFileSync("git", ["init", "-q"], { cwd: tempDir });
+
+    const output = runCli(["eval", "--shared"]);
+    expect(output).toContain("1/1 criteria passed");
+  });
+
   it("exits non-zero on unknown subcommand", () => {
     const output = runCli(["not-a-command"], { expectFail: true });
     expect(output).toContain("not-a-command");
@@ -141,6 +162,38 @@ describe("mission-spec CLI", () => {
     const combined = runCli(["validate"], { expectFail: true });
     expect(combined).toContain("mission-spec: schema INVALID");
     expect(combined).toContain("mission.yaml:");
+  });
+
+  it("validate subcommand accepts legacy mission-history entries with omitted changes arrays", () => {
+    writeMission();
+    writeFile(
+      "mission-history.yaml",
+      stringify({
+        meta: {
+          mission_id: "t",
+          total_revisions: 1,
+          latest_version: "1.0.0",
+        },
+        timeline: [
+          {
+            change_id: "MSC-2026-01-01-001",
+            semantic_version: "1.0.0",
+            date: "2026-01-01",
+            author: "t",
+            change_type: "fix",
+            persistence: "permanent",
+            intent: "legacy entry",
+            changes: { modified: ["mission.yaml"] },
+            done_when_delta: { modified: [] },
+            impact_scope: {},
+            breaking: false,
+          },
+        ],
+      }),
+    );
+
+    const out = runCli(["validate"]);
+    expect(out).toContain("mission-spec: schema valid");
   });
 
   it("snapshot subcommand exits 0 and prints 'snapshot created' on a valid project", () => {

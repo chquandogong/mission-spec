@@ -1,10 +1,10 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-21 | Version: 1.19.3
+# Last updated: 2026-04-21 | Version: 1.20.0
 
 entries:
-  - version: "1.19.3"
+  - version: "1.20.0"
     date: "2026-04-21"
     verified_by: "Codex"
     environment:
@@ -13,7 +13,7 @@ entries:
       runtime: "ESM"
     results:
       npm_test:
-        passed: 307
+        passed: 316
         failed: 0
         files: 24
       npm_build: "success"
@@ -22,8 +22,8 @@ entries:
       validate_history_commits: "pass"
       arch_verify: "ARCHITECTURE_CURRENT.yaml and API_REGISTRY.yaml are in sync with src/."
       plugin_verify: "Plugin manifest and skills structure are valid."
-      metadata_check: ".mission/ Version headers in sync with package.json (1.19.3)"
-      registry_check: "modules 21, public API 25, skills 6, platforms 6, test files 24, tests 307 — mission.yaml lineage + VERIFICATION_LOG top-entry freshness included"
+      metadata_check: ".mission/ Version headers in sync with package.json (1.20.0)"
+      registry_check: "modules 21, public API 25, skills 6, platforms 6, test files 24, tests 316 — mission.yaml lineage + VERIFICATION_LOG top-entry freshness included"
       registry_check_verify_live: "livePassed 10/10 (matches CURRENT_STATE claim)"
       verify_reconstruction_references: "19 paths checked, cold-build + test succeeded"
       convert_platforms_verify: "all platform conversions verified successfully"
@@ -32,14 +32,16 @@ entries:
         criteria_total: 10
         status: "mission complete"
     notes: |
-      Formal tracked PATCH for the review follow-up reconciliation. Fixed CLI parsing so
-      `mission-spec backfill-commits --apply` no longer treats `--apply` as `projectDir`,
-      added integration coverage for that form, synced `mission.yaml`
-      `lineage.total_revisions` with `mission-history.yaml`, and extended
-      `registry:check` to detect future lineage / verification-ledger staleness.
-      `architecture_doc_freshness` is now part of `mission.yaml.done_when` rather than a
-      standalone-only eval, so self-dogfooding completion is 10/10 by contract, not only
-      by maintainer interpretation.
+      Formal tracked MINOR for adopter compatibility. `validateHistory()` and `loadHistory()`
+      now normalize sparse legacy `changes` / `done_when_delta` arrays before schema
+      validation or history loading, while preserving wrong-typed values as hard failures.
+      `evaluateMission()` / `getMissionStatus()` gained `shared` scope and CLI `--shared`
+      so fresh-clone reviews can skip criteria that only reference missing gitignored
+      local-only artifacts. The evaluator also executes a small allowlisted set of safe
+      inferred command clauses from prose/backticked success statements. Re-check on
+      qmonster improved from `validate` fail + `eval 0/86` to `validate` pass +
+      `eval --shared 14/86`, confirming the remaining gap is prose gate structure rather
+      than ledger/shared-clone compatibility.
 
   - version: "1.16.14"
     date: "2026-04-18"

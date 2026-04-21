@@ -84,6 +84,11 @@ const result = evaluateMission(".");
 console.log(result.summary);
 ```
 
+对于 fresh clone 或共享仓库审阅，可使用
+`evaluateMission(".", { scope: "shared" })` 或 `npx mission-spec eval --shared`。
+shared mode 会把那些只引用缺失且被 gitignore 的本地专用 artifact 的 criteria
+视为 skip/pass。
+
 ### 状态摘要（`ms-status`）
 
 ```typescript
@@ -92,6 +97,9 @@ import { getMissionStatus } from "mission-spec";
 const status = getMissionStatus(".");
 console.log(status.markdown);
 ```
+
+`getMissionStatus(".", { scope: "shared" })` 与 `npx mission-spec status --shared`
+也会把同样的 shared-clone 规则应用到状态/漂移报告。
 
 ### 生成报告（`ms-report`）
 
@@ -315,6 +323,9 @@ git config core.hooksPath .githooks
 ```
 
 Hook 调用 `npx mission-spec validate`，同一命令也可独立用于 CI / 手动校验。
+
+对于省略空 `changes.*` / `done_when_delta.*` 数组的 legacy
+`mission-history.yaml` 条目，验证前会先做 normalize；类型错误仍然会失败。
 
 ## 回填 related_commits（v1.18.0+）
 

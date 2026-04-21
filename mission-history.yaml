@@ -4,15 +4,76 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.19.3 — completion-gate reconciliation and registry drift hardening"
+  mission_title: "Mission Spec v1.20.0 — adopter compatibility and shared-clone evaluation"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 45
-  latest_version: "1.19.3"
+  total_revisions: 46
+  latest_version: "1.20.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-010"
+    semantic_version: "1.20.0"
+    change_sequence: 50
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Codex"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "qmonster adopter review에서 드러난 현실 제약을 Mission Spec 쪽에서 흡수한다. sparse legacy history ledger를 backward-compatible하게 읽고, shared clone에서는 gitignored local-only artifact를 요구하는 criteria를 건너뛰며, prose/backticked command success clauses를 안전 범위에서 자동 평가해 adopter가 self-dogfooding 규범을 그대로 따라야만 하는 구조를 완화한다."
+    decision: |
+      qmonster는 adopter이지 self-hosting maintainer 저장소가 아니다. 따라서 mission-spec이 adopter 현실을 더 잘 모델링해야 한다는 방향으로 수정했다.
+      1. `src/schema/validator.ts`에 `normalizeHistoryData()`를 추가해 legacy `mission-history.yaml` entry가 `changes.added/modified/removed` 또는 `done_when_delta.*`의 일부를 생략해도 빈 배열로 보정 후 검증한다. 단, 기존 값의 타입이 잘못된 경우는 그대로 남겨 실제 schema error는 계속 fail한다.
+      2. `src/core/history.ts`도 같은 normalization을 거쳐 sparse legacy ledger를 로드한다. 그 결과 adopter repo의 오래된 history 형식 때문에 status/context가 즉시 깨지는 문제를 줄인다.
+      3. `src/core/evaluator.ts`는 `EvaluateOptions { scope?: "workspace" | "shared" }`를 도입한다. `shared` scope에서는 criterion이 존재하지 않는 gitignored local-only artifact(예: `.docs/...`, `.mission/CURRENT_STATE.md`)만 가리킬 때 skip/pass 처리한다.
+      4. evaluator는 success hint가 붙은 safe command clause(`cargo build`, `cargo test`, `npm test`, backticked `node -e ...` 등)를 prose에서 추론해 실행할 수 있다. prose-heavy adopter의 `done_when`을 일부 기계 평가 가능하게 넓힌다.
+      5. `evaluateMission()` / `getMissionStatus()`는 optional options를 받고, CLI `eval` / `status`에 `--shared` 플래그를 추가한다. README 3종과 internal docs도 이 surface를 함께 문서화한다.
+      6. qmonster 재검토 결과: `mission-spec validate /tmp/qmonster-review`는 이제 통과하고, `mission-spec eval --shared /tmp/qmonster-review`는 0/86 → 14/86으로 개선된다. 남은 72개는 실제로 prose/manual gate가 많다는 뜻이므로 다음 문제는 schema/shared-clone compatibility가 아니라 gate structuring이다.
+      SemVer는 MDR-006 §MINOR. `EvaluateOptions` type export와 `eval/status --shared` surface는 additive consumer change이며 기존 호출과 호환된다.
+    triggered_by: "사용자 요청: qmonster adopter 관점에서 'qmonster에게 강요하지 말고, mission-spec이 준수해달라'. 이어서 mission-spec을 adopter-friendly하게 확장하는 실제 패치 수행."
+    issue_or_context: "qmonster 원격 검토에서 Rust 앱 코드는 healthy였지만 mission-spec 레이어는 adopter 현실과 어긋났다. legacy history ledger는 sparse `changes` blocks 때문에 validate가 fail했고, fresh clone에는 없는 gitignored local-only docs/CURRENT_STATE를 live contract가 그대로 요구했으며, prose-heavy done_when은 0/86 auto-eval이었다. 사용자는 이를 qmonster의 실패가 아니라 mission-spec의 adopter 모델 부족으로 재정의했고, 이번 MINOR는 그 첫 대응이다."
+    changes:
+      added: []
+      modified:
+        - "src/schema/validator.ts + src/core/history.ts: sparse legacy history normalization (`normalizeHistoryData`) 추가"
+        - "src/core/evaluator.ts + src/commands/eval.ts + src/commands/status.ts + src/index.ts: `EvaluateOptions` / shared-scope / safe inferred command clauses 지원"
+        - "bin/mission-spec.js: `eval --shared` / `status --shared` CLI surface 추가"
+        - "tests/schema.test.ts + tests/commands/{eval,status,validate}.test.ts + tests/bin/cli.test.ts: legacy history normalization, shared-mode skip, inferred command clause coverage 추가"
+        - ".mission/traceability/TRACE_MATRIX.yaml + REBUILD_PLAYBOOK.md + CURRENT_STATE.md + VERIFICATION_LOG.yaml: 316-test baseline + v1.20.0 adopter-compat 상태로 동기화"
+        - ".mission/interfaces/API_REGISTRY.yaml + .mission/architecture/ARCHITECTURE_CURRENT.yaml + docs/internal/{ARCHITECTURE,CLAUDE}.md: new signatures / evaluator behavior / shared-clone surface 반영"
+        - "README.md + README.ko.md + README.zh.md: shared mode usage와 legacy history normalization 안내 추가"
+        - "mission.yaml + mission-history.yaml + CHANGELOG.md + package.json + plugin.json + marketplace.json + package-lock.json: v1.20.0 release metadata 동기화"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — behavior is additive and backward-compatible. Workspace mode remains default, malformed history values still fail schema validation, and shared-mode skips only trigger for missing gitignored local-only artifacts. New safe inferred commands are tightly allowlisted and covered by regression tests. Verified on mission-spec itself (316/316 tests) and on qmonster fresh clone (`validate` pass, `eval --shared` 14/86). Semantic version: minor per MDR-006 §MINOR (new exported type + additive CLI surface)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-004-done-when-eval-linking",
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.20.0_mission.yaml"
+    follow_up:
+      - "다음 adopter-support 축은 prose-heavy done_when을 구조화하는 명시적 gate linkage (`done_when_refs` 또는 동등 surface)다. qmonster shared eval 14/86 이후 남은 72개는 이 문제에 속한다."
+      - "shared/local artifact split을 schema 수준으로 승격할지 여부는 실제 adopter 사례가 한두 개 더 쌓인 뒤 판단한다. 이번 릴리스는 heuristic/shared-scope 계층까지만 도입."
+      - "Rev.5 3벤더 재리뷰 baseline은 이제 v1.20.0 — adopter compatibility와 shared-clone evaluation이 포함된 상태로 진행."
+
   - change_id: "MSC-2026-04-21-009"
     semantic_version: "1.19.3"
     change_sequence: 49
