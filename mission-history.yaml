@@ -4,15 +4,75 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.19.0 — snapshot CLI"
+  mission_title: "Mission Spec v1.19.1 — MDR-008 Living Asset Registry retention policy"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 42
-  latest_version: "1.19.0"
+  total_revisions: 43
+  latest_version: "1.19.1"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-007"
+    semantic_version: "1.19.1"
+    change_sequence: 47
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "documentation"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "F-9 (Living Asset Registry 누적 크기 원칙) 미해결 거버넌스 축을 MDR-008으로 성문화. 기존 MDR-005(scope) / MDR-006(SemVer) / MDR-007(locale)에 이은 4번째 governance 축. qmonster B-3 IMP 시퀀스(v1.16.17~v1.19.0) 완료 후 남은 non-code follow-up 중 본 세션 내 완결 가능한 항목."
+    decision: |
+      `.mission/decisions/MDR-008-living-asset-registry-retention-and-compaction-policy.md` 신규 작성 (107 lines).
+      핵심 정책:
+        §INVARIANT — 재현성 불변식: 압축된 자산은 git history + 남은 registry 조합으로 재구성 가능해야 함.
+        §TIMELINE — 현재 phase entries 원문 유지, 이전 phase는 phase-boundary 시점에 `evolution_summary.phases[]` + `persistence: "summarized"` stub으로 압축 가능.
+        §SNAPSHOTS — phase-boundary snapshot 영구 보존, intra-phase snapshot은 phase 종료 시 선택적 prune.
+        §EVIDENCE — 현재 phase VERIFICATION_LOG 엔트리 유지, 이전 phase는 summary stanza로 압축.
+        §EVALS — 고아 override file 삭제 허용 (git 복구 가능).
+        §DECISIONS — MDR은 영구, 대체 시 "Superseded by MDR-NNN" 헤더.
+      Compaction은 phase-boundary에서 manual trigger (future IMP-9 `mission-spec compact` 후보).
+      Mission Spec 자체는 v1.19.0 시점 42 entries / 496 KB로 압축 임계 미도달 — 본 MDR은 v2.0 identity 전환 같은 향후 phase 경계에서 발동.
+      MDR-006 §PATCH 확정 — 신규 MDR 작성은 `.mission/decisions/` 디렉터리 content 추가이지 consumer surface 변경 아님 (v1.14.2 MDR-005 릴리스 패턴과 동일).
+    triggered_by: "사용자 요청: 'F-9 → MDR-008 작성' — 2026-04-21 qmonster IMP 시퀀스 완주 후 남은 code-external follow-up 정리. F-9은 CURRENT_STATE.md '다음 변경 후보'에 v1.16.x 시절부터 등재되어 있던 미해결 거버넌스 축."
+    issue_or_context: "Rev.4 Codex §7 'Low priority' 언급 (v1.16.0-series cross-session review): '누적 registry size는 아직 병목 아니지만 정책 부재 — 10년치 history 가진 adopter는 가이드 없음'. Mission Spec 자체 측정 시점(v1.19.0): mission-history.yaml 42 entries / 2480 lines, snapshots/ 42 files / 316 KB, .mission/ total 496 KB. 현재는 bloat 전이지만 qmonster 같은 장기 adopter가 같은 질문 발생 전에 정책 성문화 — retrofit보다 cheap. MDR-005/006/007 3-MDR cluster 이후 4번째 거버넌스 축이자 governance MDR 시리즈 일단락."
+    changes:
+      added:
+        - ".mission/decisions/MDR-008-living-asset-registry-retention-and-compaction-policy.md: 107 lines / 9 sections (Context / Decision § INVARIANT+TIMELINE+SNAPSHOTS+EVIDENCE+EVALS+DECISIONS / Rationale / Consequences / Alternatives Considered)"
+      modified:
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.19.0 → 1.19.1"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.19.1 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — 신규 MDR 1건 추가 (governance 문서), 코드/스키마/CLI/테스트 변경 없음. MDR-008은 가이드이지 validator가 아님 → adopter build 영향 없음. `mission-history.yaml`의 `persistence` enum에 'summarized' 값이 향후 사용될 수 있음을 명시 (schema에는 문자열 타입이므로 이미 허용 — schema 변경 아님). Semantic version: patch per MDR-006 §PATCH 6 (docs/MDR update, no consumer surface change — v1.14.2 MDR-005 릴리스와 동일 등급)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+        "MDR-008-living-asset-registry-retention-and-compaction-policy",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.19.1_mission.yaml"
+    follow_up:
+      - "IMP-9 후보: `mission-spec compact <phase>` CLI — §TIMELINE + §SNAPSHOTS 규칙을 phase-boundary에서 자동 실행, reconstruction-verifier가 fail하면 적용 거부. Mission Spec 자체가 phase-boundary에 도달하기 전에는 수요 없음 — 스케줄 out."
+      - "README.md / README.ko.md / README.zh.md에 'Living Asset Registry retention' 섹션 추가 — MDR-008 pointer. 후속 PATCH로 분리 (오늘 세션 우선순위 낮음)."
+      - "Rev.5 3벤더 재리뷰 baseline — v1.19.1이 MDR cluster 4개 완성 + IMP 시퀀스 완료된 최종 baseline."
+
   - change_id: "MSC-2026-04-21-006"
     semantic_version: "1.19.0"
     change_sequence: 46

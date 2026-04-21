@@ -6,6 +6,19 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.19.1] - 2026-04-21
+_F-9 (Living Asset Registry 누적 크기 원칙) 미해결 거버넌스 축을 MDR-008으로 성문화. 기존 MDR-005(scope) / MDR-006(SemVer) / MDR-007(locale)에 이은 4번째 governance 축. qmonster B-3 IMP 시퀀스(v1.16.17~v1.19.0) 완료 후 남은 non-code follow-up 중 본 세션 내 완결 가능한 항목._
+
+### Added
+
+- .mission/decisions/MDR-008-living-asset-registry-retention-and-compaction-policy.md: 107 lines / 9 sections (Context / Decision § INVARIANT+TIMELINE+SNAPSHOTS+EVIDENCE+EVALS+DECISIONS / Rationale / Consequences / Alternatives Considered)
+
+### Changed
+
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.19.0 → 1.19.1
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.19.1 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.19.0] - 2026-04-21
 _mission.yaml 버전별 snapshot 생성을 portable library API + CLI subcommand로 노출. 기존 `scripts/snapshot-mission.js` 로직을 `createSnapshot(projectDir)` public API로 병행 제공 (script 자체는 self-hook 안정성 보호 차원에서 변경 안 함). qmonster B-3 IMP 시퀀스의 6번째 axis이자 최종 항목._
 
