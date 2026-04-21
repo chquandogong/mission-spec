@@ -66,7 +66,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 순수 additive (신규 CLI subcommand은 기존 명령에 영향 없음, 신규 public API는 barrel export 추가만, 신규 template 파일은 기존 경로와 충돌 없음). `validateProject` 자체는 throw하지 않는 설계이므로 예외 경로 미정의. Hook은 POSIX sh + `set -e` + `npx` 조합이라 Alpine / Git Bash / WSL / macOS / Linux에서 동작. Windows native CMD는 out-of-scope (README 명시). Semantic version: MINOR per MDR-006 (신규 CLI subcommand + 신규 public API function export 두 조건 중 어느 하나만 충족해도 MINOR; 본 릴리스는 둘 다)."
-    related_commits: []
+    related_commits: ["82b64ad"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
