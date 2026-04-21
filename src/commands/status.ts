@@ -23,6 +23,7 @@ export interface StatusResult {
   totalRevisions?: number;
   historyWarning?: string;
   scaffoldingWarnings?: ScaffoldingWarning[];
+  doneWhenDrift?: string[];
   markdown: string;
 }
 
@@ -56,6 +57,21 @@ export function detectScaffoldedButEmpty(
     }
   }
   return warnings;
+}
+
+export function detectDoneWhenDrift(
+  criteria: Array<{ criterion: string; passed: boolean; reason: string }>,
+): string[] {
+  return criteria
+    .filter((c) =>
+      c.reason.toLowerCase().includes("manual verification required"),
+    )
+    .map((c) => c.criterion);
+}
+
+function formatDriftSample(entry: string): string {
+  const truncated = entry.length > 80 ? `${entry.slice(0, 77)}…` : entry;
+  return `"${truncated}"`;
 }
 
 export function getMissionStatus(projectDir: string): StatusResult {
@@ -133,6 +149,33 @@ export function getMissionStatus(projectDir: string): StatusResult {
     });
   }
 
+  const doneWhenDrift = detectDoneWhenDrift(evalResult.criteria);
+  if (doneWhenDrift.length > 0) {
+    md.push("", "## done_when drift", "");
+    const n = doneWhenDrift.length;
+    const total = evalResult.total;
+    if (n <= 3) {
+      md.push(`⚠ ${n}/${total} done_when entries cannot be auto-evaluated:`);
+      doneWhenDrift.forEach((entry) =>
+        md.push(`- ${formatDriftSample(entry)}`),
+      );
+    } else {
+      md.push(
+        `⚠ ${n}/${total} done_when entries cannot be auto-evaluated.`,
+        "",
+        "Sample:",
+      );
+      doneWhenDrift
+        .slice(0, 3)
+        .forEach((entry) => md.push(`- ${formatDriftSample(entry)}`));
+      md.push(`(+${n - 3} more — run \`ms-eval\` for full list)`);
+    }
+    md.push(
+      "",
+      "Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (`X 존재` / `X exists`).",
+    );
+  }
+
   return {
     title,
     goal: goal.trim(),
@@ -146,6 +189,7 @@ export function getMissionStatus(projectDir: string): StatusResult {
     totalRevisions,
     historyWarning,
     scaffoldingWarnings,
+    doneWhenDrift,
     markdown: md.join("\n"),
   };
 }

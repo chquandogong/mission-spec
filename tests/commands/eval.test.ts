@@ -265,4 +265,21 @@ describe("evaluateMission", () => {
     expect(result.criteria[0].passed).toBe(false);
     expect(result.criteria[0].reason).toBeTruthy();
   });
+
+  it("emits 'manual verification required' marker on both TEST_PATTERN and fallback paths (marker-contract invariant)", () => {
+    writeMission(tempDir, {
+      title: "Marker Contract",
+      goal: "Lock evaluator marker strings",
+      done_when: [
+        "cargo tests pass",
+        "this is a totally novel prose condition with no heuristic match",
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria).toHaveLength(2);
+    const testPathReason = result.criteria[0].reason.toLowerCase();
+    const fallbackReason = result.criteria[1].reason.toLowerCase();
+    expect(testPathReason).toContain("manual verification required");
+    expect(fallbackReason).toContain("manual verification required");
+  });
 });

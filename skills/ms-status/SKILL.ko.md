@@ -86,6 +86,44 @@ console.log(s.markdown);
 
 배경: qmonster 채택 감사(2026-04-21)에서 adopter가 Living Asset Registry 디렉터리를 scaffold만 하고 populate하지 않아 "기록 계약은 충실하나 검증 계약은 비활성" 패턴이 재발하는 것을 확인했습니다. 경고는 **디렉터리가 존재할 때만** 발생하며, 아예 없는 경우는 opt-out으로 간주해 경고하지 않습니다. 반환값에서는 같은 데이터를 `scaffoldingWarnings: Array<{ path, hint }>` 필드로 제공합니다.
 
+## done_when drift 섹션 (v1.16.18+)
+
+현재 evaluator가 auto-evaluate할 수 없는 `done_when` 엔트리(`TEST_PATTERN`에 걸리지만 대응 `evals[]`가 없는 경로 + 최종 fallback 경로, 둘 다 reason에 "manual verification required"를 포함)가 하나라도 있으면 `## done_when drift` 섹션이 추가되어 해당 엔트리를 나열합니다.
+
+**Layout — drift 1–3개 (inline colon):**
+
+```markdown
+## done_when drift
+
+⚠ 2/5 done_when entries cannot be auto-evaluated:
+
+- "design_refs documented"
+- "API is well-designed"
+
+Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (`X 존재` / `X exists`).
+```
+
+**Layout — drift > 3개 (Sample + more):**
+
+```markdown
+## done_when drift
+
+⚠ 50/50 done_when entries cannot be auto-evaluated.
+
+Sample:
+
+- "Phase 3B: advisory rules carry suggested_command where an actionable CLI snippet…"
+- "Phase 3B: Recommendation.is_strong flag set on context_pressure_warning…"
+- "Phase 3B: cargo build + cargo test (~155 lib + ~16 integration) + cargo clippy…"
+  (+47 more — run `ms-eval` for full list)
+
+Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (`X 존재` / `X exists`).
+```
+
+배경: 2026-04-21 qmonster 2차 감사에서 반복 확인된 패턴 — adopter가 `done_when`을 산문체("Phase 3B: advisory rules carry suggested_command...")로 작성하면 evaluator heuristic이 매칭하지 못해 `ms-eval`이 0/N을 보고하고, verification contract는 형식적으로만 존재하게 됩니다. `ms-status` 출력에서 즉시 surface하면 adopter는 `evals[]`를 추가하거나 파일 존재 패턴으로 재작성하는 두 선택을 바로 인지합니다.
+
+80자를 초과하는 Sample 엔트리는 가독성을 위해 77자 + `…`로 잘라 표시합니다. 원문 전체는 반환값 `doneWhenDrift: string[]` 필드로 제공됩니다.
+
 ## 주의
 
 - `mission.yaml`이 없으면 에러를 반환합니다.
@@ -95,3 +133,4 @@ console.log(s.markdown);
   Evolution 섹션에 `History unavailable: ...` 경고만 표시하고 상태 평가는 정상 수행합니다.
   반환값의 `historyWarning` 필드로도 전달됩니다.
 - scaffolded-but-empty 디렉터리가 하나도 없으면 Scaffolding 섹션은 생략됩니다.
+- done_when의 모든 엔트리가 auto-evaluate 가능하면(evals[] 매칭 / 파일 존재 / 기타 "manual verification required"가 아닌 reason) done_when drift 섹션은 생략됩니다.

@@ -4,15 +4,80 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.16.17 — ms-status scaffolded-but-empty warning"
+  mission_title: "Mission Spec v1.16.18 — ms-status done_when drift warning"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 37
-  latest_version: "1.16.17"
+  total_revisions: 38
+  latest_version: "1.16.18"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-21-002"
+    semantic_version: "1.16.18"
+    change_sequence: 42
+    date: "2026-04-21"
+    author: "Dr. QUAN"
+    contributors: ["Claude Opus 4.7"]
+    change_type: "feature"
+    motivation_type: "adopter-ux"
+    persistence: "permanent"
+    intent: "`ms-status`에 done_when drift 경고 추가. 2026-04-21 qmonster 2차 감사에서 ms-eval 0/50의 근본 원인 — done_when이 산문체로 작성되어 evaluator heuristic이 어느 경로에도 매칭 못 함 — 을 status 출력 단계에서 즉시 surface. v1.16.17 scaffolded-but-empty axis에 이어 `ms-status` health-check 서피스의 두 번째 axis."
+    decision: |
+      `StatusResult.doneWhenDrift?: string[]` 필드와 `## done_when drift` markdown 섹션 추가.
+      감지: `core/evaluator.ts`가 내는 reason이 "manual verification required"(case-insensitive substring)를 포함하는 criterion만 수집. 이는 `TEST_PATTERN`-without-evals 경로(3)와 fallback 경로(4)를 정확히 포괄하고 llm-eval/automated/file-existence 경로를 자동 제외.
+      Layout 2분기:
+        - drift 1–3: inline colon — `⚠ {n}/{total} ...:` + 엔트리 리스트 + 단일 Fix 힌트.
+        - drift > 3: Sample dot — `⚠ {n}/{total} ....` + blank + `Sample:` 헤더 + 첫 3개 + `(+{n-3} more — run \`ms-eval\` for full list)` + Fix 힌트.
+      Sample 엔트리는 80자 초과 시 77 + U+2026 ellipsis로 truncate (return field는 원문 유지).
+      marker-contract invariant 테스트를 `tests/commands/eval.test.ts`에 추가해 `core/evaluator.ts` reason 문자열이 미래에 reworded되면 drift 감지가 silent break 나기 전에 fast fail.
+      신규 helper `detectDoneWhenDrift` + `formatDriftSample`는 `commands/status.ts` 모듈-local export. `src/index.ts` 재노출 없음.
+    triggered_by: "사용자 요청: 'imp-3으로 진행해주세요' — 2026-04-21 qmonster 2차 감사 개선안 B-3(upstream IMP 시퀀스)의 1번 항목. 'mission-spec이 도구 레벨에서 drift를 자동 감지하도록 확장'이라는 feedback (memory: feedback_tool_vs_adopter.md) 실천. superpowers:brainstorming → writing-plans → executing-plans 워크플로우로 진행."
+    issue_or_context: "qmonster 로컬(v1.7.6, 15 revisions) 감사에서 ms-eval 0/50 (오늘 재측정 시 0/59 — criteria가 늘어남). 모든 criterion이 path 3 TEST_PATTERN 또는 path 4 fallback으로 떨어지며 둘 다 reason에 'manual verification required' 공통 marker. v1.16.17 scaffolding axis가 Living Asset Registry 스캐폴드만 있고 실체 없음 패턴을 잡는다면, 본 drift axis는 `done_when` 계약 자체의 quality 드리프트를 잡는다 (동일 adopter의 독립적인 두 번째 failure mode). Dogfood verified: qmonster에서 `⚠ 59/59 done_when entries cannot be auto-evaluated.` + 3 truncated samples + '(+56 more)' 섹션 노출."
+    changes:
+      added:
+        - "src/commands/status.ts: `detectDoneWhenDrift(criteria)` helper (module export), `formatDriftSample(entry)` helper (internal), `StatusResult.doneWhenDrift?: string[]` optional field, conditional `## done_when drift` markdown render (Scaffolding 다음에 위치)"
+        - "tests/commands/status.test.ts: 8 신규 테스트 — drift=0 no-section / TEST_PATTERN 포함 / llm-eval+automated 제외 / drift=1 inline-colon / drift=3 all-drift inline / drift=2 partial inline / drift=4 Sample + truncation + (+1 more) / drift=5 all-drift Sample + (+2 more) (기존 12 유지, 총 20)"
+        - "tests/commands/eval.test.ts: 1 신규 테스트 — marker-contract invariant (TEST_PATTERN + fallback path 양쪽 reason에 'manual verification required' 포함 lock). 기존 16 유지, 총 17."
+        - "skills/ms-status/SKILL.md + SKILL.ko.md + SKILL.zh.md: `## done_when drift Section (v1.16.18+)` 섹션 3개 언어 동시 추가; `## Notes`에 omission bullet 1개씩 추가 (MDR-007 trilingual policy)"
+        - "docs/superpowers/specs/2026-04-21-imp3-done-when-drift-design.md + docs/superpowers/plans/2026-04-21-imp3-done-when-drift.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)"
+      modified:
+        - ".mission/traceability/TRACE_MATRIX.yaml: status.test.ts cases 12 → 20 + 'done_when drift (v1.16.18)' category; eval.test.ts cases 16 → 17 + 'marker-contract invariant (v1.16.18)' category; header total 258 → 267; version header v1.16.17 → v1.16.18"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 258 → 267 tests"
+        - "mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.17 → 1.16.18"
+        - "mission-history.yaml: meta bump + 신규 timeline entry"
+        - ".mission/ Version 헤더 auto-synced to 1.16.18 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가"
+      removed: []
+    changed_sections: [title, version, lineage]
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — 순수 additive (`StatusResult.doneWhenDrift`는 optional, markdown 섹션은 drift > 0일 때만 렌더, exit code 영향 없음). 잠재 회귀는 `core/evaluator.ts`의 reason 문자열 reworded 시 drift 감지가 silent break — marker-contract invariant 테스트가 이를 fast fail로 전환. 길이 truncation은 presentation-only, return field는 원문 유지. Semantic version: patch per MDR-006 §PATCH (기존 `ms-status` 서피스 확장; 신규 top-level npm script / 신규 CLI subcommand / src/index.ts 신규 export 없음 — detectDoneWhenDrift / formatDriftSample은 commands/status.ts 모듈 수준에서만 노출)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-21_v1.16.18_mission.yaml"
+    follow_up:
+      - "IMP-4 meta staleness 감지 — `mission_id` / `mission_title` / `tracking_mode`가 mission.yaml / history 실체와 drift하는 경우 `ms-status` warning (qmonster 'planning-foundation' title regression 대응)"
+      - "IMP-5 schema-validation pre-commit hook 템플릿 — `ms-init` 생성물에 포함 (qmonster 40% invalid mission-history.yaml 대응)"
+      - "IMP-6 `ms-backfill-commits` helper — git log 날짜 ↔ revision date 매칭으로 related_commits 후보 제시 (qmonster 15/15 [] 대응)"
+      - "IMP-7 language-specific snapshot hook 템플릿 (Rust, Python, Go) — `npm run snapshot` 등가물이 없는 프로젝트 대응"
+      - "E-4 외부 adopter 1+ — qmonster(first-party dogfooding) 외 strict external 여전히 0"
+      - "Rev.5 3벤더 재리뷰 baseline — v1.16.18이 새 baseline (qmonster IMP 시퀀스 2번째 항목 반영)"
+
   - change_id: "MSC-2026-04-21-001"
     semantic_version: "1.16.17"
     change_sequence: 41

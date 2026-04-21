@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.16.18] - 2026-04-21
+_`ms-status`에 done_when drift 경고 추가. 2026-04-21 qmonster 2차 감사에서 ms-eval 0/50의 근본 원인 — done_when이 산문체로 작성되어 evaluator heuristic이 어느 경로에도 매칭 못 함 — 을 status 출력 단계에서 즉시 surface. v1.16.17 scaffolded-but-empty axis에 이어 `ms-status` health-check 서피스의 두 번째 axis._
+
+### Added
+
+- src/commands/status.ts: `detectDoneWhenDrift(criteria)` helper (module export), `formatDriftSample(entry)` helper (internal), `StatusResult.doneWhenDrift?: string[]` optional field, conditional `## done_when drift` markdown render (Scaffolding 다음에 위치)
+- tests/commands/status.test.ts: 8 신규 테스트 — drift=0 no-section / TEST_PATTERN 포함 / llm-eval+automated 제외 / drift=1 inline-colon / drift=3 all-drift inline / drift=2 partial inline / drift=4 Sample + truncation + (+1 more) / drift=5 all-drift Sample + (+2 more) (기존 12 유지, 총 20)
+- tests/commands/eval.test.ts: 1 신규 테스트 — marker-contract invariant (TEST_PATTERN + fallback path 양쪽 reason에 'manual verification required' 포함 lock). 기존 16 유지, 총 17.
+- skills/ms-status/SKILL.md + SKILL.ko.md + SKILL.zh.md: `## done_when drift Section (v1.16.18+)` 섹션 3개 언어 동시 추가; `## Notes`에 omission bullet 1개씩 추가 (MDR-007 trilingual policy)
+- docs/superpowers/specs/2026-04-21-imp3-done-when-drift-design.md + docs/superpowers/plans/2026-04-21-imp3-done-when-drift.md — brainstorming/writing-plans 산출물 (로컬 전용, docs/ gitignore)
+
+### Changed
+
+- .mission/traceability/TRACE_MATRIX.yaml: status.test.ts cases 12 → 20 + 'done_when drift (v1.16.18)' category; eval.test.ts cases 16 → 17 + 'marker-contract invariant (v1.16.18)' category; header total 258 → 267; version header v1.16.17 → v1.16.18
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: `npm test` 설명 258 → 267 tests
+- mission.yaml + package.json + plugin.json + marketplace.json + package-lock.json: version 1.16.17 → 1.16.18
+- mission-history.yaml: meta bump + 신규 timeline entry
+- .mission/ Version 헤더 auto-synced to 1.16.18 via metadata:sync; CURRENT_STATE.md Title line + 최근 구현 bullet 추가
+
 ## [1.16.17] - 2026-04-21
 _`ms-status`에 scaffolded-but-empty 디렉터리 경고 추가. qmonster 감사(2026-04-21, memory: project_qmonster_adoption.md §5 + recommendation 2)에서 확인된 anti-pattern — `.mission/decisions/`, `.claude/rules/` 등 scaffold 선언만 있고 비어 있는 폴더 — 를 adopter가 stale 상태로 방치하지 않도록 status 출력 단계에서 즉시 감지._
 

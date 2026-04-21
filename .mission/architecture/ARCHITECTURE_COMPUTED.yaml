@@ -220,6 +220,7 @@ modules:
     exports:
       - ScaffoldingWarning
       - StatusResult
+      - detectDoneWhenDrift
       - detectScaffoldedButEmpty
       - getMissionStatus
   - id: validator
