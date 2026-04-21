@@ -59,7 +59,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — 신규 MDR 1건 추가 (governance 문서), 코드/스키마/CLI/테스트 변경 없음. MDR-008은 가이드이지 validator가 아님 → adopter build 영향 없음. `mission-history.yaml`의 `persistence` enum에 'summarized' 값이 향후 사용될 수 있음을 명시 (schema에는 문자열 타입이므로 이미 허용 — schema 변경 아님). Semantic version: patch per MDR-006 §PATCH 6 (docs/MDR update, no consumer surface change — v1.14.2 MDR-005 릴리스와 동일 등급)."
-    related_commits: []
+    related_commits: ["0760310"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
