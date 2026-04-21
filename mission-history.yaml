@@ -62,7 +62,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — 순수 additive (`StatusResult.doneWhenDrift`는 optional, markdown 섹션은 drift > 0일 때만 렌더, exit code 영향 없음). 잠재 회귀는 `core/evaluator.ts`의 reason 문자열 reworded 시 drift 감지가 silent break — marker-contract invariant 테스트가 이를 fast fail로 전환. 길이 truncation은 presentation-only, return field는 원문 유지. Semantic version: patch per MDR-006 §PATCH (기존 `ms-status` 서피스 확장; 신규 top-level npm script / 신규 CLI subcommand / src/index.ts 신규 export 없음 — detectDoneWhenDrift / formatDriftSample은 commands/status.ts 모듈 수준에서만 노출)."
-    related_commits: []
+    related_commits: ["5cc02f7"]
     related_decisions:
       [
         "MDR-005-meta-tooling-expansion-within-task-contract-scope",
