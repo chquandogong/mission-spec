@@ -294,10 +294,13 @@ git config core.hooksPath .githooks
 
 快照脚本执行基于版本的去重——如果同一 `version` 的快照已存在则跳过。
 
-此外，`npm run validate:history-commits` 可将 `mission-history.yaml` 中的 `related_commits` 与实际 Git 历史进行交叉验证。Pre-commit 钩子同时执行两项操作：
+此外，`npm run validate:history-commits` 可将 `mission-history.yaml` 中的 `related_commits` 与实际 Git 历史进行交叉验证。当前仓库中已提交的 `.githooks/pre-commit` 会执行：
 
-- 生成并暂存新版本快照
-- 验证合约相关的暂存变更是否包含 `mission-history.yaml`
+- 生成并暂存快照
+- 重新生成并暂存 `CHANGELOG.md`
+- 同步并暂存 `.mission/` 元数据头部
+- 同步/校验 Architecture snapshot（当 `dist/core` 存在时）
+- 通过 `npm run validate:history-commits` 校验 `related_commits` 覆盖情况
 
 该验证还会捕获已提交但历史记录中缺失的相关 commit。为避免自引用问题，有两个例外：首次引入 `mission-history.yaml` 的 **bootstrap commit**，以及 **当前 HEAD** 在修改代码的同时也修改了 `mission-history.yaml` 的情况。后续有新 commit 推入后，之前的 code+history 同时提交也会重新纳入验证范围。
 
@@ -322,7 +325,7 @@ chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
 
-Hook 调用 `npx mission-spec validate`，同一命令也可独立用于 CI / 手动校验。
+随包分发的 `templates/pre-commit` hook 调用 `npx mission-spec validate`，同一命令也可独立用于 CI / 手动校验。本仓库自带的 `.githooks/pre-commit` 则在此基础上叠加了维护者自动化步骤。
 
 对于省略空 `changes.*` / `done_when_delta.*` 数组的 legacy
 `mission-history.yaml` 条目，验证前会先做 normalize；类型错误仍然会失败。
@@ -358,7 +361,7 @@ git commit -m "chore: backfill related_commits via ms-backfill-commits"
 npx mission-spec snapshot
 ```
 
-2-step pre-commit hook（结合 v1.17.0 validate 与 v1.19.0 snapshot）：
+adopter 最小 hook 示例（结合 v1.17.0 validate 与 v1.19.0 snapshot）：
 
 ```sh
 #!/bin/sh
@@ -404,7 +407,7 @@ npm run build
 - 提供中：Schema 验证、任务草案生成、基于规则的评估、状态/报告生成
 - 提供中：跨平台转换 — Cursor、Codex、OpenCode、Cline、Continue、Aider（v1.14.0+）
 - 提供中：Claude Code 技能文件 `ms-init`、`ms-eval`、`ms-status`、`ms-report`、`ms-context`、`ms-decide`
-- 提供中：CLI — `npx mission-spec <context|status|eval|report>`（v1.12.0+）
+- 提供中：CLI — `npx mission-spec <context|status|eval|report|validate|backfill-commits|snapshot>`（v1.12.0+，后续版本继续扩展）
 - 提供中：Living Asset Registry — `lineage` Schema、`mission-history.yaml` 变更台账、MDR、快照
 - 提供中：History API — `loadHistory()`、`getCurrentPhase()`、`getLatestEntry()`、`validateHistory()`
 - 提供中：LLM/主观评估覆盖（`llm-eval`、`llm-judge` + `.mission/evals/<name>.result.yaml`）

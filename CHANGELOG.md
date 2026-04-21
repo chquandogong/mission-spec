@@ -6,6 +6,16 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.20.0] - 2026-04-22
+_정적 검토에서 드러난 self-description drift를 정리한다. ms-context skill의 Public API 표기를 실제 구현과 맞추고, README/CONTRIBUTING/API registry/CLI 주석이 현재 CLI surface와 저장소 pre-commit 동작을 정확히 반영하도록 수정한다._
+
+### Changed
+
+- skills/ms-context/SKILL.md + SKILL.ko.md + SKILL.zh.md: Public API를 `generateContext(projectDir) => ContextResult`로 정정
+- README.md + README.ko.md + README.zh.md: 실제 CLI surface와 checked-in `.githooks/pre-commit` 동작 설명으로 정렬
+- CONTRIBUTING.md + .mission/interfaces/API_REGISTRY.yaml: hook contract를 실제 저장소 동작(changelog, metadata sync, arch sync/verify 포함)과 일치시킴
+- bin/mission-spec.js: 상단 지원 명령 주석을 현재 CLI help와 동일하게 정리
+
 ## [1.20.0] - 2026-04-21
 _qmonster adopter review에서 드러난 현실 제약을 Mission Spec 쪽에서 흡수한다. sparse legacy history ledger를 backward-compatible하게 읽고, shared clone에서는 gitignored local-only artifact를 요구하는 criteria를 건너뛰며, prose/backticked command success clauses를 안전 범위에서 자동 평가해 adopter가 self-dogfooding 규범을 그대로 따라야만 하는 구조를 완화한다._
 

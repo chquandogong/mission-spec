@@ -293,10 +293,13 @@ git config core.hooksPath .githooks
 
 스냅샷 스크립트는 버전 기반 dedup을 수행 — 같은 `version`의 스냅샷이 이미 있으면 생성하지 않습니다.
 
-또한 `npm run validate:history-commits`로 `mission-history.yaml`의 `related_commits`와 실제 Git 이력을 대조할 수 있습니다. 현재 pre-commit 훅은 다음 두 가지를 함께 수행합니다.
+또한 `npm run validate:history-commits`로 `mission-history.yaml`의 `related_commits`와 실제 Git 이력을 대조할 수 있습니다. 이 저장소의 체크인된 `.githooks/pre-commit`은 현재 다음 작업을 수행합니다.
 
-- 새 버전 snapshot 생성 및 스테이징
-- contract 관련 staged 변경이 있는데 `mission-history.yaml`이 빠졌는지 검사
+- snapshot 생성 및 스테이징
+- CHANGELOG 재생성 및 스테이징
+- `.mission/` 메타데이터 헤더 동기화 및 스테이징
+- Architecture snapshot 동기화/검증 (`dist/core`가 있을 때)
+- `npm run validate:history-commits` 기반 `related_commits` 커버리지 검사
 
 이 검증은 이미 커밋된 관련 commit이 history에 누락됐는지도 잡아냅니다. 단, self-reference 문제를 피하기 위해 `mission-history.yaml`을 **처음 도입한 bootstrap commit 1건**과, **현재 HEAD가 `mission-history.yaml`을 함께 수정한 경우**만 예외 처리합니다. 이후 다른 commit이 쌓이면, 그 이전 code+history 동시 commit도 다시 검사 대상이 됩니다.
 
@@ -321,7 +324,7 @@ chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
 
-Hook은 `npx mission-spec validate`를 호출하며, 같은 명령을 CI / 수동 검증에 독립적으로 사용할 수도 있습니다.
+배포되는 `templates/pre-commit` 훅은 `npx mission-spec validate`를 호출하며, 같은 명령을 CI / 수동 검증에 독립적으로 사용할 수도 있습니다. 이 저장소의 체크인된 `.githooks/pre-commit`은 그 위에 maintainer용 자동화를 추가로 올려둔 형태입니다.
 
 비어 있는 `changes.*` / `done_when_delta.*` 배열을 생략한 legacy
 `mission-history.yaml` entry는 validation 전에 normalize합니다. 타입이 잘못된 값은
@@ -358,7 +361,7 @@ git commit -m "chore: backfill related_commits via ms-backfill-commits"
 npx mission-spec snapshot
 ```
 
-2-step pre-commit hook (v1.17.0 validate + v1.19.0 snapshot 결합):
+adopter용 최소 hook 예시 (v1.17.0 validate + v1.19.0 snapshot 결합):
 
 ```sh
 #!/bin/sh
@@ -404,7 +407,7 @@ npm run build
 - 제공 중: schema validation, mission draft generation, rule-based evaluation, status/report generation
 - 제공 중: cross-platform conversion for Cursor, Codex, OpenCode, Cline, Continue, Aider (v1.14.0+)
 - 제공 중: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`, `ms-context`, `ms-decide`
-- 제공 중: CLI — `npx mission-spec <context|status|eval|report>` (v1.12.0+)
+- 제공 중: CLI — `npx mission-spec <context|status|eval|report|validate|backfill-commits|snapshot>` (v1.12.0+, 이후 릴리스에서 확장)
 - 제공 중: Living Asset Registry — `lineage` 스키마, `mission-history.yaml` 변경 원장, MDR, 스냅샷
 - 제공 중: history API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`, `validateHistory()`
 - 제공 중: LLM/주관 평가 오버라이드 (`llm-eval`, `llm-judge` + `.mission/evals/<name>.result.yaml`)

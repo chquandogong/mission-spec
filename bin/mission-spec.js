@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 // mission-spec CLI — dispatches to library functions. Supports:
-//   mission-spec context [projectDir]
-//   mission-spec status  [projectDir]
-//   mission-spec eval    [projectDir]
-//   mission-spec report  [projectDir]
+//   mission-spec context          [projectDir]
+//   mission-spec status           [projectDir] [--shared]
+//   mission-spec eval             [projectDir] [--shared]
+//   mission-spec report           [projectDir]
+//   mission-spec validate         [projectDir]
+//   mission-spec backfill-commits [projectDir] [--apply]
+//   mission-spec snapshot         [projectDir]
 //   mission-spec --version
 //   mission-spec --help
 

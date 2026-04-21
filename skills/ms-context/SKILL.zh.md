@@ -75,7 +75,7 @@ console.log(c.markdown);
 
 ## Public API
 
-- `evaluateMission(projectDir: string) => EvalResult`
+- `generateContext(projectDir: string) => ContextResult`
 ```
 
 ## 注意

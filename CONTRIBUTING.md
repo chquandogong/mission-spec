@@ -69,7 +69,10 @@ Commit messages should be conventional (`feat:`, `fix:`, `chore:`, `docs:`, `tes
 The pre-commit hook (`.githooks/pre-commit`) runs:
 
 1. `npm run snapshot` — auto-archive `mission.yaml` to `.mission/snapshots/<date>_v<version>_mission.yaml` (dedup by version)
-2. `npm run validate:history-commits` — verify that all IMPACTFUL commits have matching `related_commits` entries in history
+2. `npm run changelog` — regenerate `CHANGELOG.md`
+3. `npm run metadata:sync` — sync `.mission/` Version headers from repo metadata
+4. `npm run arch:sync` + `npm run arch:verify` — refresh and verify architecture registry when `dist/core` exists
+5. `npm run validate:history-commits` — verify that all IMPACTFUL commits have matching `related_commits` entries in history
 
 Two exceptions prevent self-reference cycles:
 

@@ -293,10 +293,13 @@ git config core.hooksPath .githooks
 
 The snapshot script performs version-based dedup — if a snapshot for the same `version` already exists, it is skipped.
 
-Additionally, `npm run validate:history-commits` cross-references `related_commits` in `mission-history.yaml` against actual Git history. The pre-commit hook performs both:
+Additionally, `npm run validate:history-commits` cross-references `related_commits` in `mission-history.yaml` against actual Git history. This repository's checked-in `.githooks/pre-commit` currently performs:
 
-- Generates and stages new version snapshots
-- Validates that contract-related staged changes include `mission-history.yaml`
+- Snapshot generation + staging
+- CHANGELOG regeneration + staging
+- `.mission/` metadata header sync + staging
+- Architecture snapshot sync/verify (when `dist/core` exists)
+- `related_commits` coverage validation via `npm run validate:history-commits`
 
 This validation also catches already-committed relevant commits missing from history. To avoid self-reference issues, two exceptions are made: the **bootstrap commit** that first introduced `mission-history.yaml`, and the **current HEAD commit** if it modifies `mission-history.yaml` alongside code. Once additional commits are pushed, the previous code+history commit becomes subject to validation again.
 
@@ -321,7 +324,7 @@ chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
 
-The hook runs `npx mission-spec validate`, which also works as a standalone command for CI or manual invocation.
+The shipped `templates/pre-commit` hook runs `npx mission-spec validate`, which also works as a standalone command for CI or manual invocation. This repository's own checked-in `.githooks/pre-commit` layers additional maintainer automation on top of that baseline.
 
 Legacy `mission-history.yaml` entries that omit empty `changes.*` / `done_when_delta.*`
 arrays are normalized before validation. Malformed types still fail.
@@ -357,7 +360,7 @@ Populate `.mission/snapshots/` with a per-version copy of `mission.yaml`. Idempo
 npx mission-spec snapshot
 ```
 
-2-step pre-commit hook (combines v1.17.0 validate + v1.19.0 snapshot):
+Minimal adopter hook example (combines v1.17.0 validate + v1.19.0 snapshot):
 
 ```sh
 #!/bin/sh
@@ -403,7 +406,7 @@ npm run build
 - Providing: schema validation, mission draft generation, rule-based evaluation, status/report generation
 - Providing: cross-platform conversion for Cursor, Codex, OpenCode, Cline, Continue, Aider (v1.14.0+)
 - Providing: Claude Code skill files `ms-init`, `ms-eval`, `ms-status`, `ms-report`, `ms-context`, `ms-decide`
-- Providing: CLI — `npx mission-spec <context|status|eval|report>` (v1.12.0+)
+- Providing: CLI — `npx mission-spec <context|status|eval|report|validate|backfill-commits|snapshot>` (v1.12.0+, expanded in later releases)
 - Providing: Living Asset Registry — `lineage` schema, `mission-history.yaml` change ledger, MDR, snapshots
 - Providing: History API — `loadHistory()`, `getCurrentPhase()`, `getLatestEntry()`, `validateHistory()`
 - Providing: LLM/subjective evaluation override (`llm-eval`, `llm-judge` + `.mission/evals/<name>.result.yaml`)

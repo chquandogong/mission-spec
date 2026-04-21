@@ -13,6 +13,56 @@ meta:
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-22-001"
+    semantic_version: "1.20.0"
+    change_sequence: 51
+    date: "2026-04-22"
+    author: "Dr. QUAN"
+    contributors: ["Codex"]
+    change_type: "documentation"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "정적 검토에서 드러난 self-description drift를 정리한다. ms-context skill의 Public API 표기를 실제 구현과 맞추고, README/CONTRIBUTING/API registry/CLI 주석이 현재 CLI surface와 저장소 pre-commit 동작을 정확히 반영하도록 수정한다."
+    decision: |
+      이번 변경은 구현 자체를 바꾸지 않고 self-description 층을 현재 저장소 상태와 일치시키는 correction이다.
+      1. `skills/ms-context/SKILL*.md`의 Public API 섹션을 `evaluateMission()`에서 실제 함수인 `generateContext()`로 수정한다.
+      2. README 3종은 패키지가 배포하는 `templates/pre-commit` baseline과 이 저장소가 체크인한 `.githooks/pre-commit`의 maintainer automation을 분리해서 설명한다.
+      3. README 3종과 `bin/mission-spec.js` 주석은 현재 정식 CLI surface(`validate`, `backfill-commits`, `snapshot` 포함)를 누락 없이 반영한다.
+      4. `CONTRIBUTING.md`와 `.mission/interfaces/API_REGISTRY.yaml`의 hook contract도 실제 `.githooks/pre-commit` 단계(changelog, metadata sync, arch sync/verify)를 기록한다.
+      SemVer 관점에서는 documentation/governance correction이며 새 버전은 올리지 않는다.
+    triggered_by: "사용자 요청: 프로젝트 이해 및 문서/코드 일관성 검토 후, 발견된 drift를 실제 파일에 반영."
+    issue_or_context: "테스트/registry/plugin/architecture 검증은 모두 통과했지만, self-description 중 일부는 검증 스크립트가 직접 커버하지 않아 drift가 남아 있었다. 특히 ms-context skill 문서의 API 표기, README의 축약된 CLI 설명, pre-commit hook의 실제 단계 설명이 구현과 어긋났다."
+    changes:
+      added: []
+      modified:
+        - "skills/ms-context/SKILL.md + SKILL.ko.md + SKILL.zh.md: Public API를 `generateContext(projectDir) => ContextResult`로 정정"
+        - "README.md + README.ko.md + README.zh.md: 실제 CLI surface와 checked-in `.githooks/pre-commit` 동작 설명으로 정렬"
+        - "CONTRIBUTING.md + .mission/interfaces/API_REGISTRY.yaml: hook contract를 실제 저장소 동작(changelog, metadata sync, arch sync/verify 포함)과 일치시킴"
+        - "bin/mission-spec.js: 상단 지원 명령 주석을 현재 CLI help와 동일하게 정리"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — behavior change 없이 문서와 registry 설명만 실제 구현에 맞춘 correction이다. `npm run plugin:verify`, `npm run arch:verify`, `npm run registry:check`, `npm test`로 self-description과 검증 체인이 계속 통과함을 확인했다."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-005-meta-tooling-expansion-within-task-contract-scope",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    follow_up:
+      - "introducing commit이 생성되면 `related_commits`에 실제 SHA를 backfill한다."
+
   - change_id: "MSC-2026-04-21-010"
     semantic_version: "1.20.0"
     change_sequence: 50
