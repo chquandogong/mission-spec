@@ -393,6 +393,20 @@ mission:
 
 绑定的 index 会直接运行对应校验器（`resolved_by: "ref"`）；未绑定的 index 回退到 v1.20.0 推理链。存在 refs 时 `ms-status` 会追加 `## refs coverage` 段落，并以 `resolved_by === "manual"` 作为 drift 判定标准；`validateProject` 强制三项不变式（index 范围、唯一性、`eval-ref` 孤立）。发布等级：MDR-006 §MINOR。
 
+## npm 包 vs 仓库（v1.21.5+）
+
+`mission-spec` npm 包仅包含运行时核心：`bin/`、`dist/`、`skills/`、`.claude-plugin/`、`templates/` 以及三个 locale 的 README。
+
+**不包含在 npm tarball 中**（故意的，为了减少安装体积）：
+
+- `.mission/` — Living Asset Registry（演进历史、MDR、快照、追溯性、重构 playbook、验证日志）
+- `mission-history.yaml` — 包含决策和相关 commit 的完整 revision timeline
+- Source TypeScript、tests、scripts
+
+若要查看 Mission Spec 自身的演进，请在**仓库中**读取 `.mission/` 和 `mission-history.yaml` (https://github.com/chquandogong/mission-spec)。仓库包含 50+ 快照(v1.0.0 → 当前)、8 个 MDR，以及完整的 architecture/API/traceability registry。
+
+**Two-track 信任模型**：npm tarball 带有 provenance 签名（sigstore，可通过 `npm view mission-spec@<version> --json` 验证），因此你可以信任构建产物。仓库是审计契约演进的地方。两条路径在设计上是分离的。
+
 ## 跨平台转换
 
 ```bash

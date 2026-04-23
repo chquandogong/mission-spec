@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.5] - 2026-04-23
+_Rev.6 3-vendor synthesis §7.4의 P1 6건 중 docs/config/MDR 성격의 3건(A/B/E)을 단일 §PATCH로 묶는다. Gemini Rev.6 Q4 지적(tarball disparity)에 대응해 `package.json`에 명시적 `files` whitelist 추가, 같은 Q4 관찰을 adopter가 README로 읽을 수 있게 trilingual 안내 섹션 추가, Claude/Gemini Rev.6에서 합의한 MDR-008 amendment(`§CURRENT_STATE` compaction rule + `§PHASE-BOUNDARY` signal 계층 + `v1.21.4 = phase boundary` 공식화)._
+
+### Added
+
+- .mission/snapshots/2026-04-23_v1.21.5_mission.yaml
+- package.json `files` field (whitelist)
+- README.md / README.ko.md / README.zh.md 신규 `## npm package vs repository (v1.21.5+)` 섹션 (trilingual, MDR-007 정합)
+- .mission/decisions/MDR-008 amendment block (§CURRENT_STATE / §PHASE-BOUNDARY / §V1.21.4 / §COMPACTION / §FUTURE)
+
+### Changed
+
+- mission.yaml: title + version 1.21.5 + lineage.total_revisions 52 → 53
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 52 → 53 + latest_version 1.21.4 → 1.21.5 + mission_title sync
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.4 → 1.21.5
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.5 entry 추가 (tarball slim 수치 포함)
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.5 bullet 추가 + version range v1.14.2 ~ v1.21.5
+
 ## [1.21.4] - 2026-04-23
 _F-1 tag push 실전 publish 과정에서 드러난 npm provenance validation 실패를 해결한다. `package.json`에 `repository`/`homepage`/`bugs` 필드를 추가해 sigstore provenance bundle이 요구하는 `repository.url` 매칭(GitHub Actions workflow source와 대조)을 가능하게 한다._
 

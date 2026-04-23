@@ -106,6 +106,47 @@ No compaction step may destroy information that cannot be recovered from (1) + (
 
 ---
 
+## Amendment — 2026-04-23 (v1.21.5)
+
+**Trigger**: Rev.5 Claude §5.4 + Rev.6 Claude §1 table `OPEN` line. The Living Asset Registry's **self-description surface** (specifically `.mission/CURRENT_STATE.md`'s "최근 구현" / "Recent implementation" section) has grown to 24+ bullets across the v1.14.2 → v1.21.4 window without a compaction rule. Rev.6 3-vendor synthesis (`docs/PROJECT_REVIEW_V1.21.4_2026-04-23.md` §7.4 P1-E) requested that this be covered here.
+
+**§CURRENT_STATE — `.mission/CURRENT_STATE.md` "최근 구현" section compaction**
+
+- **Rule**: when the "최근 구현" / "Recent implementation" bullet list exceeds **20 bullets**, the maintainer compacts older bullets by:
+  - grouping them under a phase header (`### <phase name> (vA.B.C ~ vX.Y.Z)`)
+  - replacing the individual bullets with a single summary paragraph for that phase (~3–5 lines)
+  - moving the raw bullets to `.mission/decisions/PHASE-RECORD-<phase>.md` only if the phase is not otherwise reconstructable from `mission-history.yaml`
+- **When**: at a **phase boundary**, not on a bullet-count trigger alone. Bullet count is a _signal_, not a threshold.
+- **Why not strict**: the 20-bullet threshold would fire mid-phase and create awkward summaries. Phase-boundary-gated compaction preserves narrative coherence.
+
+**§PHASE-BOUNDARY — what counts as a phase boundary signal**
+
+In order of increasing strength:
+
+1. **Release grade discontinuity** — the release jumps a major/minor axis (e.g., v1.20.0 MINOR after a long §PATCH streak). _Weak signal by itself._
+2. **Governance MDR addition** — a new MDR codifies a previously implicit axis (e.g., MDR-007 locale policy at v1.16.5). _Medium signal._
+3. **Consumer-surface milestone** — a new externally-visible artifact lands (e.g., `mission-spec validate` CLI at v1.17.0, `done_when_refs` at v1.21.0). _Medium signal._
+4. **Distribution-axis transition** — the tool gains or activates a distribution channel it previously could not use (e.g., **v1.21.4 — first-ever npm public publish via F-1 complete**). _Strong signal._
+5. **Explicit maintainer declaration in a Rev.N synthesis** — "phase X is closed, phase Y begins". _Authoritative — overrides signals 1–4._
+
+**§V1.21.4 — phase boundary recognition**
+
+By §PHASE-BOUNDARY signal strength 4 (distribution-axis transition: F-1 cold-build gate + tag push + npm publish full-chain green) and by Rev.6 3-vendor synthesis common framing ("Rev.6 is the first cycle after Mission Spec is publicly installable"), **v1.21.4 is recognized as a phase boundary**.
+
+Phase before v1.21.4: `governed portability` — v1.16.17 qmonster audit onward, emphasis on validator-of-validators, adopter-compat evaluator, 3-vendor adversarial review method.
+
+Phase opening at v1.21.5: `adopter-facing distribution` — emphasis shifts from "tool is correct" to "tool is verifiable/installable/supportable by external adopters". Rev.7 is the first review cycle under this new phase label.
+
+**§COMPACTION — deferred first invocation**
+
+The "최근 구현" section compaction is **not triggered immediately** by this amendment even though bullet count > 20. Rationale: the v1.21.5 bundle itself is part of the transition event; compacting while the transition is in progress would bury its own origin. The **first compaction opportunity** is at the Rev.7 synthesis or the v1.22.0 release — whichever lands first — at which point the maintainer applies §CURRENT_STATE to fold v1.14.2 → v1.21.x into a `governed portability` phase summary.
+
+**§FUTURE — IMP-9 relationship**
+
+`mission-spec compact` (IMP-9 candidate) is a potential tool automating the `§CURRENT_STATE` rule for adopters, but remains non-goal for the v1.21.x series. The amendment above is **policy only**, not code.
+
+---
+
 > MDR triggers (refer to `.mission/templates/MDR_TEMPLATE.md` for the full checklist):
 >
 > 1. `goal` direction changes

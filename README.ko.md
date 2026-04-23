@@ -393,6 +393,20 @@ mission:
 
 바인딩된 index는 해당 validator를 직접 실행(`resolved_by: "ref"`)하고, 바인딩 없는 index는 v1.20.0 inference chain으로 fallback 합니다. `ms-status`는 refs가 있을 때 `## refs coverage` 섹션을 추가하고 drift 판정을 `resolved_by === "manual"` 기준으로 재분류하며, `validateProject`는 3가지 invariant(index 범위, 중복, `eval-ref` orphan)를 강제합니다. 릴리스 등급: MDR-006 §MINOR.
 
+## npm 패키지 vs 저장소 (v1.21.5+)
+
+`mission-spec` npm 패키지는 런타임 필수 요소만 포함합니다: `bin/`, `dist/`, `skills/`, `.claude-plugin/`, `templates/`, 그리고 3개 로케일 README.
+
+**npm tarball에 포함되지 않는 것** (install 크기를 작게 유지하려는 의도):
+
+- `.mission/` — Living Asset Registry (진화 이력, MDR, 스냅샷, 추적성, 재구성 playbook, 검증 로그)
+- `mission-history.yaml` — 결정과 관련 commit이 포함된 전체 revision timeline
+- 소스 TypeScript, tests, scripts
+
+Mission Spec의 진화를 보려면 **저장소에서** `.mission/`과 `mission-history.yaml`을 읽으세요 (https://github.com/chquandogong/mission-spec). 저장소에는 50+ 스냅샷(v1.0.0 → 현재), 8개 MDR, 그리고 전체 architecture/API/traceability registry가 있습니다.
+
+**Two-track 신뢰 모델**: npm tarball은 provenance 서명(sigstore, `npm view mission-spec@<version> --json`으로 검증 가능)되어 있으므로 빌드를 신뢰할 수 있습니다. 저장소는 계약의 진화를 감사하는 장소입니다. 두 경로는 설계상 분리되어 있습니다.
+
 ## Cross-Platform 변환
 
 ```bash

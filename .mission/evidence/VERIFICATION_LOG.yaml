@@ -1,9 +1,91 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-22 | Version: 1.21.4
+# Last updated: 2026-04-22 | Version: 1.21.5
 
 entries:
+  - version: "1.21.5"
+    date: "2026-04-23"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      npm_build: "success"
+      npm_lint: "success"
+      validate_schema: "all schema validations passed"
+      validate_history_commits: "pass"
+      arch_verify: "ARCHITECTURE_CURRENT.yaml and API_REGISTRY.yaml are in sync with src/."
+      plugin_verify: "Plugin manifest and skills structure are valid."
+      metadata_check: ".mission/ Version headers in sync with package.json (1.21.5)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      registry_check_verify_live: "livePassed 10/10 (matches CURRENT_STATE claim)"
+      verify_reconstruction_references: "50 paths checked"
+      convert_platforms_verify: "all platform conversions verified successfully"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+      npm_pack_tarball:
+        before: "package 310.8 kB / unpacked 1.4 MB / 241 files"
+        after: "package 113.0 kB / unpacked 449.9 kB / ~120 files"
+        improvement: "-64% package / -68% unpacked"
+        excluded_after:
+          [
+            ".mission/",
+            ".github/",
+            ".githooks/",
+            ".claude/",
+            "src/",
+            "tests/",
+            "scripts/",
+            "docs/",
+            "tsconfig.json",
+            "vitest.config.ts",
+          ]
+        included_after:
+          [
+            "bin/",
+            "dist/",
+            "skills/",
+            ".claude-plugin/",
+            "templates/",
+            "README.md",
+            "README.ko.md",
+            "README.zh.md",
+            "LICENSE",
+            "CHANGELOG.md",
+          ]
+    notes: |
+      Rev.6 3-vendor synthesis §7.4 P1 6건 중 docs/config/MDR 성격 3건(A/B/E)을
+      single §PATCH로 landing:
+
+      (A) package.json `files` whitelist 도입. 실측 발견: v1.21.4 tarball이
+      `.claude/settings.local.json`(0B 빈 JSON이지만 의도치 않은 leak),
+      `.github/`, `.githooks/`, `.mission/` 전체 등을 포함한 상태였다. files
+      whitelist로 runtime essential만 publish. package size 310.8 → 113.0 kB
+      (-64%), unpacked 1.4 MB → 449.9 kB (-68%).
+
+      (B) README 3종 `## npm package vs repository (v1.21.5+)` 섹션 추가.
+      Gemini Rev.6 two-track trust model을 adopter-facing 문서로 고정
+      (MDR-007 trilingual).
+
+      (E) MDR-008 amendment: §CURRENT_STATE (20+ bullets 시 phase-boundary-gated
+      compaction) + §PHASE-BOUNDARY (5단계 signal 계층: release grade <
+      governance MDR < consumer-surface milestone < distribution-axis transition
+      < maintainer declaration) + §V1.21.4 (distribution-axis transition으로
+      phase boundary 인정, `governed portability` 닫고 `adopter-facing
+      distribution` 개시) + §COMPACTION (첫 적용은 Rev.7 또는 v1.22.0) +
+      §FUTURE (IMP-9 관계).
+
+      P1-C/D/F(Codex Rev.6 신규 + Claude self-review scope MDR)는 설계 필요로
+      v1.21.6+ 분리. 369/369 tests 불변, consumer runtime behavior 불변.
+
   - version: "1.21.4"
     date: "2026-04-23"
     verified_by: "Claude Opus 4.7"

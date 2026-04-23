@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.21.4",
+  "version": "1.21.5",
   "description": "Mission Spec — task contract layer for AI agent workflows",
   "type": "module",
   "main": "dist/index.js",
@@ -13,6 +13,18 @@
     "type": "git",
     "url": "git+https://github.com/chquandogong/mission-spec.git"
   },
+  "files": [
+    "bin/",
+    "dist/",
+    "skills/",
+    ".claude-plugin/",
+    "templates/",
+    "README.md",
+    "README.ko.md",
+    "README.zh.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "bin": {
     "mission-spec": "bin/mission-spec.js"
   },

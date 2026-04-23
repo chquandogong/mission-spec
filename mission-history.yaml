@@ -4,15 +4,86 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.4 — package.json repository for npm provenance (§PATCH)"
+  mission_title: "Mission Spec v1.21.5 — Rev.6 P1-A/B/E bundle (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 52
-  latest_version: "1.21.4"
+  total_revisions: 53
+  latest_version: "1.21.5"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-005"
+    semantic_version: "1.21.5"
+    change_sequence: 57
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude", "Codex", "Gemini"]
+    change_type: "fix"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "Rev.6 3-vendor synthesis §7.4의 P1 6건 중 docs/config/MDR 성격의 3건(A/B/E)을 단일 §PATCH로 묶는다. Gemini Rev.6 Q4 지적(tarball disparity)에 대응해 `package.json`에 명시적 `files` whitelist 추가, 같은 Q4 관찰을 adopter가 README로 읽을 수 있게 trilingual 안내 섹션 추가, Claude/Gemini Rev.6에서 합의한 MDR-008 amendment(`§CURRENT_STATE` compaction rule + `§PHASE-BOUNDARY` signal 계층 + `v1.21.4 = phase boundary` 공식화)."
+    decision: |
+      P1-A — `package.json.files` whitelist.
+      실측 발견: v1.21.4 tarball이 `.claude/settings.local.json`(로컬 IDE 설정 — 0B 빈 JSON이지만 leak), `.github/workflows/`, `.githooks/`, `.mission/` 전체 등 의도치 않은 파일을 포함한 상태였다(package size 310.8KB / unpacked 1.4MB). 명시적 `files` whitelist로 runtime essential(`bin/`, `dist/`, `skills/`, `.claude-plugin/`, `templates/`, README 3종, LICENSE, CHANGELOG)만 publish. 결과: package size → 113.0KB(-64%), unpacked → 449.9KB(-68%), 의도치 않은 leak 제거.
+
+      P1-B — README 3종에 `## npm package vs repository (v1.21.5+)` 섹션 추가.
+      Gemini Rev.6 독자 발견 "two-track trust model"을 adopter-facing 문서로 고정. npm tarball에서 제외된 것(`.mission/`, `mission-history.yaml`, source, tests)과 이유(install size + "진화 증거는 repo에서 읽는다"는 설계적 분리)를 명시. sigstore provenance 검증 경로(`npm view mission-spec@<version> --json`)도 함께 안내. MDR-007 trilingual 정책에 따라 EN/KO/ZH 3 locale 모두 반영.
+
+      P1-E — MDR-008 amendment (`§CURRENT_STATE` + `§PHASE-BOUNDARY` + `§V1.21.4` + `§COMPACTION` + `§FUTURE`).
+      Rev.5 Claude §5.4 지적이 Rev.5 → Rev.6까지 open 유지됐던 governance gap. MDR-008은 이제 명시적으로 (a) `.mission/CURRENT_STATE.md`의 "최근 구현" 섹션이 20+ bullets 초과 시 phase-boundary-gated compaction을 수행한다, (b) phase boundary signal을 5단계로 계층화(release grade discontinuity < governance MDR addition < consumer-surface milestone < **distribution-axis transition** < explicit maintainer declaration), (c) v1.21.4 = F-1 first-ever npm publish는 signal strength 4에 해당하므로 phase boundary로 인정, (d) `governed portability` phase를 닫고 `adopter-facing distribution` phase 개시를 Rev.7 진입점으로 선언, (e) 첫 compaction은 Rev.7 synthesis 또는 v1.22.0 release 중 먼저 오는 시점에 적용.
+
+      SemVer: MDR-006 §PATCH (docs + config + MDR amend, consumer surface 실질적 확대이나 기존 소비자 동작 파괴 없음 — tarball slim 제거된 파일은 runtime unrelated).
+    triggered_by: "Rev.6 3-vendor synthesis(`docs/PROJECT_REVIEW_V1.21.4_2026-04-23.md` §7.4) P1 6건 제안 중 maintainer가 옵션 B(single bundle A/B/E) 선택."
+    issue_or_context: |
+      Rev.6 closure 직후 v1.21.5는 P1 6건을 어떻게 묶느냐의 선택이었다.
+      옵션 A(single bundle 6건)는 Rev.5 P1 bundle(v1.21.2) 선례지만,
+      Codex가 Rev.6에서 신규 제안한 P1-C(fresh install smoke) / P1-D(warnings
+      enforcement) / P1-F(self-review scope MDR)는 설계 단계부터 brainstorming이
+      필요하다. 옵션 B는 docs/config/docs-MDR 3건은 지금, design-필요 3건은
+      v1.21.6+에서로 분리. P1-A는 Gemini 추측(`.mission/` 누락)의 실측 반례
+      (`.mission/` + `.claude/settings.local.json` + `.githooks/` 등 다수 포함)를
+      통해 더 큰 leak을 잡게 됐다.
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-23_v1.21.5_mission.yaml"
+        - "package.json `files` field (whitelist)"
+        - "README.md / README.ko.md / README.zh.md 신규 `## npm package vs repository (v1.21.5+)` 섹션 (trilingual, MDR-007 정합)"
+        - ".mission/decisions/MDR-008 amendment block (§CURRENT_STATE / §PHASE-BOUNDARY / §V1.21.4 / §COMPACTION / §FUTURE)"
+      modified:
+        - "mission.yaml: title + version 1.21.5 + lineage.total_revisions 52 → 53"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 52 → 53 + latest_version 1.21.4 → 1.21.5 + mission_title sync"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.4 → 1.21.5"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.5 entry 추가 (tarball slim 수치 포함)"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.5 bullet 추가 + version range v1.14.2 ~ v1.21.5"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — consumer-visible behavior 변화는 runtime unrelated. package.json `files` whitelist로 tarball에서 제외된 것들(`.mission/`, `.github/`, `.githooks/`, `src/`, `tests/`, `scripts/`, `docs/`)은 npm runtime에 쓰이지 않는 asset. 기존 v1.21.4 adopter가 node_modules 내부의 이런 파일을 직접 참조한 경우는 없을 것으로 판단(anti-pattern). README 3종 신규 섹션은 additive. MDR-008 amendment는 policy only, 코드 변경 0. local test suite 369/369 불변. Semantic version: patch per MDR-006 §PATCH (docs + config + MDR amend)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+        "MDR-008-living-asset-registry-retention-and-compaction-policy",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.5_mission.yaml"
+    follow_up:
+      - "Rev.6 §7.4 P1-C (npm install fresh smoke + provenance 예시) / P1-D (warnings enforcement / CI-visible failure budget) / P1-F (self-review scope MDR) 3건은 설계 brainstorming 필요. v1.21.6+ bundle로 분리."
+      - "MDR-008 amendment의 첫 §CURRENT_STATE compaction은 Rev.7 synthesis 또는 v1.22.0 중 먼저 도달하는 지점에서 적용."
+      - "v1.21.4에서 공식화된 phase boundary 이후 첫 사이클 = Rev.7. baseline 후보는 v1.21.5 HEAD 또는 v1.21.6+ HEAD (P1-C/D/F 처리 여부에 따라)."
+
   - change_id: "MSC-2026-04-23-004"
     semantic_version: "1.21.4"
     change_sequence: 56

@@ -392,6 +392,20 @@ mission:
 
 Bound indices run their validator directly (`resolved_by: "ref"`); unbound indices fall back to the v1.20.0 inference chain. `ms-status` surfaces a `## refs coverage` section when refs are present and reclassifies drift via `resolved_by === "manual"`, and `validateProject` enforces three invariants (index range, uniqueness, `eval-ref` orphan). Release grade: §MINOR per MDR-006.
 
+## npm package vs repository (v1.21.5+)
+
+The `mission-spec` npm package ships only runtime essentials: `bin/`, `dist/`, `skills/`, `.claude-plugin/`, `templates/`, and the three README locales.
+
+**Not in the npm tarball** (intentional, to keep install size small):
+
+- `.mission/` — Living Asset Registry (evolution history, MDRs, snapshots, traceability, reconstruction playbook, verification log)
+- `mission-history.yaml` — full revision timeline with decisions and related commits
+- Source TypeScript, tests, scripts
+
+To inspect the evolution of Mission Spec itself, read `.mission/` and `mission-history.yaml` **in the repository** (https://github.com/chquandogong/mission-spec). The repo holds 50+ snapshots (v1.0.0 → current), 8 MDRs, and full architecture/API/traceability registries.
+
+**Two-track trust model**: the npm tarball is provenance-signed (sigstore, verifiable with `npm view mission-spec@<version> --json`) so you can trust the build. The repository is where the contract's evolution is audited. The two are separated by design.
+
 ## Cross-Platform Conversion
 
 ```bash
