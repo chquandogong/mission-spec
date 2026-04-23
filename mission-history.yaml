@@ -4,15 +4,67 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.2 — Rev.5 3-vendor P1 bundle (§PATCH)"
+  mission_title: "Mission Spec v1.21.3 — GitHub Actions v4→v5 bump (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 50
-  latest_version: "1.21.2"
+  total_revisions: 51
+  latest_version: "1.21.3"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-003"
+    semantic_version: "1.21.3"
+    change_sequence: 55
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "F-1 cold-build gate 실전 dry-run 과정에서 표출된 Node.js 20 deprecation warning(2026-09-16 deadline)을 선제적으로 닫는다. `.github/workflows/`의 `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4` 총 7 pin을 `@v5`로 bump한다."
+    decision: |
+      1. `.github/workflows/release.yml`의 `actions/checkout@v4`, `actions/setup-node@v4`를 `@v5`로 업데이트.
+      2. `.github/workflows/test.yml`의 `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`를 `@v5`로 업데이트.
+      3. `.github/workflows/pre-commit-parity.yml`의 `actions/checkout@v4`, `actions/setup-node@v4`를 `@v5`로 업데이트.
+      4. 업데이트 후 `gh workflow run release.yml -f dry_run=true`로 전체 파이프라인(install / lint / build / test:coverage / cross-platform verify / plugin verify / arch verify / reconstruction cold-build / npm publish --dry-run)을 재검증한다.
+      SemVer: MDR-006 §PATCH 3 (CI workflow 편집). v1.16.1(cold-build gate step 추가)과 동일 등급. consumer surface 불변.
+    triggered_by: "F-1 cold-build gate 최초 실전 호출(run 24816675961, 50초 green) 직후 GitHub이 emit한 Node.js 20 deprecation warning."
+    issue_or_context: "GitHub Actions runner가 2026-06-02부터 Node.js 24 강제 전환, 2026-09-16부터 Node.js 20 제거 예정. `actions/checkout`, `actions/setup-node`, `actions/upload-artifact`의 v5는 Node 24 기반이며 이미 공개된 stable major. 2026-09-16 이전 bump가 필수이지만, F-1 실전 dry-run에서 warning이 실제 출력된 지금이 선제적 bump의 가장 낮은 비용 타이밍. 별도 functional change 없으며 pure YAML 버전 pin 수정."
+    changes:
+      added: [".mission/snapshots/2026-04-23_v1.21.3_mission.yaml"]
+      modified:
+        - ".github/workflows/release.yml: actions/checkout@v4 → v5, actions/setup-node@v4 → v5"
+        - ".github/workflows/test.yml: actions/checkout@v4 → v5, actions/setup-node@v4 → v5, actions/upload-artifact@v4 → v5"
+        - ".github/workflows/pre-commit-parity.yml: actions/checkout@v4 → v5, actions/setup-node@v4 → v5"
+        - "mission.yaml: title + version + lineage.total_revisions 1.21.3으로 bump"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 50 → 51 + latest_version 1.21.2 → 1.21.3 + mission_title sync"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.2 → 1.21.3"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.3 entry 추가 (F-1 실전 호출 기록 포함)"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.3 bullet 추가 + version range v1.14.2 ~ v1.21.3"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — 순수 CI YAML pin 업데이트. local test suite (369/369) 불변. 실전 검증은 post-commit `gh workflow run release.yml -f dry_run=true` 재실행으로 수행. Semantic version: patch per MDR-006 §PATCH 3 (CI workflow 편집) — v1.16.1 cold-build gate step 추가 선례와 동일 grade."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.3_mission.yaml"
+    follow_up:
+      - "다음 세션: Tag push로 실제 npm publish 결정 (여전히 사용자 explicit decision 영역, F-1 dry-run으로 cold-build 실전 green 확인 완료)."
+      - "Rev.6 baseline = v1.21.3 HEAD (Rev.5 P1 4건 + CI bump 포함)"
+
   - change_id: "MSC-2026-04-23-002"
     semantic_version: "1.21.2"
     change_sequence: 54
@@ -74,7 +126,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "low — all 4 fixes are additive or docs-only. Coerced warnings don't change validation verdicts. Allowlist expansion adds new phrase matches (prose that previously fell to manual now auto-pass; evaluator outputs preserve reason strings). Reconstruction verifier now more strict — may fail if REBUILD_PLAYBOOK references non-existent slash-less files; Mission Spec's own PLAYBOOK is expected to pass. Semantic version: patch per MDR-006 §PATCH (bugfix + validator extension + docs). Verified 350+19 = 369 tests + full validator chain."
-    related_commits: []
+    related_commits: ["252f922"]
     related_decisions: ["MDR-004", "MDR-006"]
     snapshot_after: ".mission/snapshots/2026-04-23_v1.21.2_mission.yaml"
     follow_up:
@@ -128,7 +180,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "very low — 2-block순서 swap은 symmetric하며 기존 테스트 349개 전부 그대로 통과. ref가 없는 criterion은 이전과 동일한 순서(shared-skip → evals → inference)로 평가되므로 refs 미사용 adopter는 영향 0. refs 사용자에게는 명시적 intent가 heuristic skip보다 우선한다는 자연스러운 semantics. Semantic version: patch per MDR-006 §PATCH (bugfix + docs update, consumer surface unchanged)."
-    related_commits: []
+    related_commits: ["d4c1b34"]
     related_decisions:
       [
         "MDR-004-done-when-eval-linking",

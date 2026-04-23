@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.3] - 2026-04-23
+_F-1 cold-build gate 실전 dry-run 과정에서 표출된 Node.js 20 deprecation warning(2026-09-16 deadline)을 선제적으로 닫는다. `.github/workflows/`의 `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4` 총 7 pin을 `@v5`로 bump한다._
+
+### Added
+
+- .mission/snapshots/2026-04-23_v1.21.3_mission.yaml
+
+### Changed
+
+- .github/workflows/release.yml: actions/checkout@v4 → v5, actions/setup-node@v4 → v5
+- .github/workflows/test.yml: actions/checkout@v4 → v5, actions/setup-node@v4 → v5, actions/upload-artifact@v4 → v5
+- .github/workflows/pre-commit-parity.yml: actions/checkout@v4 → v5, actions/setup-node@v4 → v5
+- mission.yaml: title + version + lineage.total_revisions 1.21.3으로 bump
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 50 → 51 + latest_version 1.21.2 → 1.21.3 + mission_title sync
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.2 → 1.21.3
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.3 entry 추가 (F-1 실전 호출 기록 포함)
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.3 bullet 추가 + version range v1.14.2 ~ v1.21.3
+
 ## [1.21.2] - 2026-04-23
 _Rev.5 3-vendor independent reviews (Claude §5.2 / Codex Q1~Q3 / Gemini Q5)에서 수렴된 P1 fix 4건을 단일 §PATCH 번들로 처리한다.
 (a) SAFE_COMMAND_CLAUSE_PATTERNS phrase-level allowlist를 backtick-prefix allowlist와 일치화하여 동일 커맨드가 backtick 여부에 따라 비대칭 auto-detect되던 Claude+Codex 동시 지적을 해소.

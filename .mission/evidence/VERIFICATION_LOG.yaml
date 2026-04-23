@@ -1,9 +1,65 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-22 | Version: 1.21.2
+# Last updated: 2026-04-22 | Version: 1.21.3
 
 entries:
+  - version: "1.21.3"
+    date: "2026-04-23"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      npm_build: "success"
+      npm_lint: "success"
+      validate_schema: "all schema validations passed"
+      validate_history_commits: "pass"
+      arch_verify: "ARCHITECTURE_CURRENT.yaml and API_REGISTRY.yaml are in sync with src/."
+      plugin_verify: "Plugin manifest and skills structure are valid."
+      metadata_check: ".mission/ Version headers in sync with package.json (1.21.3)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      registry_check_verify_live: "livePassed 10/10 (matches CURRENT_STATE claim)"
+      verify_reconstruction_references: "50 paths checked (v1.21.2 stricter verifier); cold-build not pre-commit gated"
+      convert_platforms_verify: "all platform conversions verified successfully"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+      release_workflow_dry_run:
+        github_run_id: "24816675961"
+        trigger: "workflow_dispatch + dry_run=true"
+        duration_seconds: 50
+        steps_green:
+          [
+            "Install",
+            "Lint",
+            "Build",
+            "Test with coverage",
+            "Cross-platform verify",
+            "Plugin verify",
+            "Architecture verify",
+            "Reconstruction cold-build gate",
+            "npm publish --dry-run",
+          ]
+        steps_skipped: ["Verify publish ref", "Publish to npm (real)"]
+        note: "F-1 cold-build gate first-ever real CI invocation. Green. Emitted Node.js 20 deprecation annotation which this release (v1.21.3) preemptively closes."
+    notes: |
+      §PATCH CI hygiene: GitHub Actions v4 → v5 pin bump across all 3 workflow
+      files (release, test, pre-commit-parity) driven by Node.js 20
+      deprecation warning emitted during the v1.21.2 dry-run. 7 action pins
+      updated: actions/checkout@v4→v5 (×3), actions/setup-node@v4→v5 (×3),
+      actions/upload-artifact@v4→v5 (×1). No functional change; local test
+      suite identical (369/369). Post-commit re-verification via
+      `gh workflow run release.yml -f dry_run=true` scheduled. Semantic
+      version: patch per MDR-006 §PATCH 3 (CI workflow edit) — same grade as
+      v1.16.1 cold-build gate step addition.
+
   - version: "1.21.2"
     date: "2026-04-23"
     verified_by: "Claude Opus 4.7"
