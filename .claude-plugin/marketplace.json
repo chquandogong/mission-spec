@@ -10,7 +10,7 @@
       "name": "mission-spec",
       "source": "./",
       "description": "Mission Spec core API + Claude Code skills (ms-init, ms-eval, ms-status, ms-report, ms-context, ms-decide) + CLI (npx mission-spec) + Living Asset Registry + Architecture Registry + Reconstruction verifier + Cross-platform adapters (Cursor, Codex, OpenCode, Cline, Continue, Aider)",
-      "version": "1.21.5"
+      "version": "1.21.6"
     }
   ]
 }

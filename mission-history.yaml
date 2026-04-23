@@ -4,15 +4,103 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.5 — Rev.6 P1-A/B/E bundle (§PATCH)"
+  mission_title: "Mission Spec v1.21.6 — self-dogfooding done_when_refs (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 53
-  latest_version: "1.21.5"
+  total_revisions: 54
+  latest_version: "1.21.6"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-006"
+    semantic_version: "1.21.6"
+    change_sequence: 58
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "self-dogfooding"
+    persistence: "permanent"
+    intent: '자기 자신의 mission.yaml done_when 10개를 v1.21.0 IMP-10 `done_when_refs`로 explicit하게 바인딩한다. audit 결과 10개 criteria 전부 `resolved_by: "inference"`로 평가되고 있었다 — Mission Spec은 ms-status drift 경고로 adopter에게 inference-only 계약을 경고하면서 자기 자신엔 동일 기능을 적용하지 않는 self-dogfooding 구멍이 있었다.'
+    decision: |
+      '최초 목표를 실제로 달성하고 있는가?' self-audit 결과 10/10 PASS가
+      전부 evaluator heuristic(파일명 + command 추론)에 의존하고 있었다.
+      v1.21.0(IMP-10)에서 도입한 `done_when_refs`는 adopter가 prose 기반
+      done_when을 concrete validator에 바인딩하기 위한 기능인데, 정작
+      Mission Spec 자신의 mission.yaml엔 적용 안 됨.
+
+      추가된 10 bindings (1:1 대응):
+        - 0-5: `file-exists` (SKILL.md 4개 + `.claude-plugin/plugin.json`
+          + `README.md`). criteria 문자열과 동일한 경로를 value에 명시.
+        - 6-9: `eval-ref` (`schema_validation_passes`,
+          `command_test`, `cross_platform_verifies`,
+          `architecture_doc_freshness`). 기존 `evals[]`의 name에 그대로 바인딩.
+
+      `ms-eval` 재실행 결과: 10/10 PASS, 전부 `resolved_by: "ref"`,
+      `inference: 0`, `manual: 0`. Scaffolding warning / done_when drift
+      warning 발동 없음 (v1.21.0 `validateProject` 3 invariant: index
+      range / duplicate / eval-ref orphan 모두 통과).
+
+      SemVer: MDR-006 §PATCH. mission.yaml 자체 편집, consumer surface 불변.
+      라이브러리 API / CLI / 스키마 / 런타임 동작 변화 없음. 369/369 tests
+      green.
+
+      Scope-out (본 §PATCH에선 의도적으로 하지 않음):
+        - done_when 문구 자체를 "기능 계약"으로 되돌리기 — 예:
+          `"skills/ms-init/SKILL.md 존재"` → `"ms-init invoked with
+          natural-language goal returns schema-valid draft"`. 이건
+          `evals[]`에 실기능 테스트를 추가해야 해서 별도 MINOR(§MINOR)
+          tier에 해당. 본 §PATCH는 '현재 문구에 대한 explicit ref'만 추가.
+        - 'README 5분 설치 가이드' / 'Dogfooding 완료' 등 최초 v1.0.0
+          done_when에 있었으나 약화 과정에서 사라진 항목의 복원. 별도
+          scope 검토 필요 (복원 자체가 MINOR 이상).
+    triggered_by: "사용자 요청 — '새 기능 추가보다 mission-spec이 최초 목표를 실제로 달성하는가를 감사해달라' + self-audit 결과 노출된 10/10 inference 구멍에 대해 권장 작업 1번 채택."
+    issue_or_context: |
+      v1.21.0(IMP-10)에서 `done_when_refs`를 도입할 때의 가장 큰 수혜자는
+      Mission Spec 자신이어야 했다. qmonster 감사(v1.16.17)에서 발견된
+      "기록 계약 충실, 검증 계약 비활성" 패턴이 Mission Spec 본체에도
+      존재했다. 도구는 만들었지만 자기 자신에겐 적용 안 된 상태로 4
+      revision(v1.21.0 → v1.21.5)이 지나갔다.
+
+      본 §PATCH는 기능 추가가 아니다. v1.21.0 기능을 v1.21.6 시점에 자기
+      자신에게 적용한 것이다. "Mission Spec을 adopter가 따를 때 보이는
+      가이드"와 "Mission Spec 본인의 mission.yaml" 사이의 비대칭을 해소.
+    changes:
+      added:
+        - "mission.yaml `done_when_refs:` block (10 entries, 1:1 done_when[] mapping)"
+        - ".mission/snapshots/2026-04-23_v1.21.6_mission.yaml"
+      modified:
+        - "mission.yaml: title + version 1.21.5 → 1.21.6 + lineage.total_revisions 53 → 54 + done_when_refs 10 entries"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 53 → 54 + latest_version 1.21.5 → 1.21.6 + mission_title sync"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.5 → 1.21.6"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.6 entry 추가 (10/10 ref resolution 확증)"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.6 bullet + version range v1.14.2 ~ v1.21.6"
+      removed: []
+    done_when_delta:
+      added: []
+      modified:
+        - "done_when[0..9] — 문구 자체는 불변. 동일한 criteria에 `done_when_refs` explicit binding이 1:1로 추가되어 resolved_by가 `inference` → `ref`로 전환됨."
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "minimal — self-description surface 변경만. consumer-visible runtime / CLI / API / 스키마 / 테스트 영향 없음. 기존 adopter의 mission.yaml은 영향받지 않음(자기 mission.yaml에만 국한). 369/369 tests 불변 (pre-commit parity가 post-edit ms-eval 10/10 PASS로 이미 확증). 유일한 의미 있는 변화는 self-eval의 `resolved_by` 필드 값(`inference` → `ref`) — 자기 자신 관점에서는 정직성 강화, 외부 관점에서는 관찰 불가."
+    related_commits: []
+    related_decisions: []
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.6_mission.yaml"
+    follow_up:
+      - "권장 작업 2번(done_when wording을 '파일 존재'에서 '기능 동작' 계약으로 복원 + 대응 `evals[]` 기능 테스트 추가) — §MINOR tier. brainstorming 필요."
+      - "권장 작업 3번(최초 목표 → 현재 목표 drift를 MDR로 기록) — policy 성격, MDR-009 후보."
+      - "권장 작업 4번(README 설치 가이드에서 `npm install mission-spec`을 primary로 승격) — §PATCH, trilingual."
+      - "권장 작업 5번(approvals gates stale 정리) — mission.yaml 추가 편집, §PATCH."
+
   - change_id: "MSC-2026-04-23-005"
     semantic_version: "1.21.5"
     change_sequence: 57
@@ -71,7 +159,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — consumer-visible behavior 변화는 runtime unrelated. package.json `files` whitelist로 tarball에서 제외된 것들(`.mission/`, `.github/`, `.githooks/`, `src/`, `tests/`, `scripts/`, `docs/`)은 npm runtime에 쓰이지 않는 asset. 기존 v1.21.4 adopter가 node_modules 내부의 이런 파일을 직접 참조한 경우는 없을 것으로 판단(anti-pattern). README 3종 신규 섹션은 additive. MDR-008 amendment는 policy only, 코드 변경 0. local test suite 369/369 불변. Semantic version: patch per MDR-006 §PATCH (docs + config + MDR amend)."
-    related_commits: []
+    related_commits: ["30320a7"]
     related_decisions:
       [
         "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
@@ -135,7 +223,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — package.json에 3 optional field 추가. package.json의 기존 동작(npm install / exports / bin)에 영향 없음. local test suite 369/369 불변. 실전 검증은 post-commit `gh workflow run release.yml --ref v1.21.4 -f dry_run=false` (또는 v1.21.4 tag push)로 수행 — provenance validation E422가 해소되고 publish가 npm registry까지 도달해야 green."
-    related_commits: []
+    related_commits: ["461d157"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-23_v1.21.4_mission.yaml"

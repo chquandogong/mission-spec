@@ -6,6 +6,23 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.6] - 2026-04-23
+_자기 자신의 mission.yaml done_when 10개를 v1.21.0 IMP-10 `done_when_refs`로 explicit하게 바인딩한다. audit 결과 10개 criteria 전부 `resolved_by: "inference"`로 평가되고 있었다 — Mission Spec은 ms-status drift 경고로 adopter에게 inference-only 계약을 경고하면서 자기 자신엔 동일 기능을 적용하지 않는 self-dogfooding 구멍이 있었다._
+
+### Added
+
+- mission.yaml `done_when_refs:` block (10 entries, 1:1 done_when[] mapping)
+- .mission/snapshots/2026-04-23_v1.21.6_mission.yaml
+
+### Changed
+
+- mission.yaml: title + version 1.21.5 → 1.21.6 + lineage.total_revisions 53 → 54 + done_when_refs 10 entries
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 53 → 54 + latest_version 1.21.5 → 1.21.6 + mission_title sync
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.5 → 1.21.6
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.6 entry 추가 (10/10 ref resolution 확증)
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.6 bullet + version range v1.14.2 ~ v1.21.6
+
 ## [1.21.5] - 2026-04-23
 _Rev.6 3-vendor synthesis §7.4의 P1 6건 중 docs/config/MDR 성격의 3건(A/B/E)을 단일 §PATCH로 묶는다. Gemini Rev.6 Q4 지적(tarball disparity)에 대응해 `package.json`에 명시적 `files` whitelist 추가, 같은 Q4 관찰을 adopter가 README로 읽을 수 있게 trilingual 안내 섹션 추가, Claude/Gemini Rev.6에서 합의한 MDR-008 amendment(`§CURRENT_STATE` compaction rule + `§PHASE-BOUNDARY` signal 계층 + `v1.21.4 = phase boundary` 공식화)._
 
