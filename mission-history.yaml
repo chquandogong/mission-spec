@@ -57,7 +57,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — 순수 CI YAML pin 업데이트. local test suite (369/369) 불변. 실전 검증은 post-commit `gh workflow run release.yml -f dry_run=true` 재실행으로 수행. Semantic version: patch per MDR-006 §PATCH 3 (CI workflow 편집) — v1.16.1 cold-build gate step 추가 선례와 동일 grade."
-    related_commits: []
+    related_commits: ["3b505a7"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-23_v1.21.3_mission.yaml"
