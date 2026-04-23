@@ -451,6 +451,151 @@ describe("validateHistory", () => {
     expect(result.errors).toEqual([]);
   });
 
+  it("emits a warning when changes block is null (Rev.5 Q2 — Codex)", () => {
+    // Rev.5 Q2 (Codex): normalizeHistoryData silently coerced null/array/string
+    // into an empty delta. §PATCH keeps the coercion (backward compat) but
+    // surfaces a non-fatal warning so adopters see the malformed shape.
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: null,
+          done_when_delta: {},
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true); // verdict unchanged (warning-only)
+    expect(result.warnings).toBeDefined();
+    expect(result.warnings?.length ?? 0).toBeGreaterThan(0);
+    expect(result.warnings?.join(" ")).toMatch(/timeline\[0\]\.changes/);
+    expect(result.warnings?.join(" ")).toMatch(/null/);
+  });
+
+  it("emits a warning when done_when_delta is an array (non-object)", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: {},
+          done_when_delta: ["oops"],
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings?.join(" ")).toMatch(
+      /timeline\[0\]\.done_when_delta/,
+    );
+  });
+
+  it("emits a warning when changes block is a string", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: "nope",
+          done_when_delta: {},
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings?.join(" ")).toMatch(/string/i);
+  });
+
+  it("emits a warning when a subfield (added) is null within an otherwise-valid changes block", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: { added: null, modified: [], removed: [] },
+          done_when_delta: {},
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings?.join(" ")).toMatch(/timeline\[0\]\.changes\.added/);
+  });
+
+  it("produces an empty warnings array (or omits it) when history is well-formed", () => {
+    const result = validateHistory({
+      meta: {
+        mission_id: "m",
+        total_revisions: 1,
+        latest_version: "1.0.0",
+      },
+      timeline: [
+        {
+          change_id: "c1",
+          semantic_version: "1.0.0",
+          date: "2026-04-01",
+          author: "t",
+          change_type: "initial",
+          persistence: "permanent",
+          intent: "x",
+          changes: { added: [], modified: [], removed: [] },
+          done_when_delta: { added: [], modified: [], removed: [] },
+          impact_scope: {},
+          breaking: false,
+        },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings === undefined || result.warnings.length === 0).toBe(
+      true,
+    );
+  });
+
   it("rejects history when changes arrays have wrong types", () => {
     const result = validateHistory({
       meta: {

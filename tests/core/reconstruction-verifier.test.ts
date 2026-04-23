@@ -117,4 +117,63 @@ describe("verifyReconstructionReferences", () => {
     const result = verifyReconstructionReferences(tempDir);
     expect(result.checkedPaths.filter((p) => p === "src/x.ts").length).toBe(1);
   });
+
+  // Rev.5 Q5 (Gemini): slash-less filenames and glob patterns previously
+  // bypassed the heuristic, silently hiding drift. v1.21.2 §PATCH resolves
+  // slash-less code/doc filenames against the repo tree, and expands glob
+  // patterns to check for at least one match.
+
+  it("accepts slash-less filename that exists at the src/ level (Rev.5 Q5)", () => {
+    writeFile("src/parser.ts", "");
+    writeFile("README.md", "");
+    writePlaybook(
+      "Entry point is `parser.ts` under src/, documented in `README.md`.",
+    );
+    const result = verifyReconstructionReferences(tempDir);
+    expect(result.valid).toBe(true);
+    expect(result.checkedPaths).toContain("parser.ts");
+    expect(result.checkedPaths).toContain("README.md");
+    expect(result.missing).not.toContain("parser.ts");
+  });
+
+  it("fails slash-less filename that does not exist anywhere in the repo", () => {
+    writeFile("src/real.ts", "");
+    writePlaybook("Check `ghost.ts` — the missing entry point.");
+    const result = verifyReconstructionReferences(tempDir);
+    expect(result.valid).toBe(false);
+    expect(result.missing).toContain("ghost.ts");
+  });
+
+  it("accepts glob pattern that resolves to at least one match", () => {
+    writeFile("src/commands/a.ts", "");
+    writeFile("src/commands/b.ts", "");
+    writePlaybook("All commands live in `src/commands/*.ts`.");
+    const result = verifyReconstructionReferences(tempDir);
+    expect(result.valid).toBe(true);
+    expect(result.checkedPaths).toContain("src/commands/*.ts");
+    expect(result.missing).not.toContain("src/commands/*.ts");
+  });
+
+  it("fails glob pattern with zero matches", () => {
+    writeFile("src/commands/a.ts", "");
+    writePlaybook("Phantom families live in `nonexistent/*.xyz`.");
+    const result = verifyReconstructionReferences(tempDir);
+    expect(result.valid).toBe(false);
+    expect(result.missing).toContain("nonexistent/*.xyz");
+  });
+
+  it("still treats command-like tokens (npm install, foo()) as non-paths", () => {
+    writeFile("src/a.ts", "");
+    writePlaybook(
+      [
+        "Run `npm install`.",
+        "Call `parseMissionFile()`.",
+        "Edit `src/a.ts`.",
+      ].join("\n"),
+    );
+    const result = verifyReconstructionReferences(tempDir);
+    expect(result.valid).toBe(true);
+    expect(result.checkedPaths).not.toContain("npm install");
+    expect(result.checkedPaths).not.toContain("parseMissionFile()");
+  });
 });

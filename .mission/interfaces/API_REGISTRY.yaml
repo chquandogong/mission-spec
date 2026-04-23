@@ -1,6 +1,6 @@
 # Mission Spec — API / Interface Registry
 # 외부와 맺고 있는 모든 계약(public exports, skill surface, file format contracts)을 한 곳에 기록합니다.
-# Last updated: 2026-04-22 | Version: 1.21.1
+# Last updated: 2026-04-22 | Version: 1.21.2
 
 # ── 1. Public Library API (src/index.ts → package.json exports) ──
 
@@ -124,6 +124,10 @@ public_api:
       shape: "{ criterion: string; status: 'PASS' | 'FAIL' | 'SKIP'; reason?: string; evaluatedBy?: string; evaluatedAt?: string; resolved_by: ResolvedBy; ref_kind?: RefKind }"
       source: "src/core/evaluator.ts"
       purpose: "done_when criterion evaluation outcome — v1.21.0에서 resolved_by/ref_kind 추가"
+    - name: "ValidationResult"
+      shape: "{ valid: boolean; errors: string[]; warnings?: string[] }"
+      source: "src/schema/validator.ts"
+      purpose: "validateMission / validateHistory 반환 — v1.21.2 (Rev.5 Q2 — Codex)에서 optional warnings 필드 추가 (null/array/string delta block coercion notice; verdict 불변, strict fail은 v1.22.0 §MINOR로 이월)"
 
 # ── 2. Skill Surface (Claude Code Plugin) ──
 

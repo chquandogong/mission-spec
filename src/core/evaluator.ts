@@ -44,12 +44,28 @@ const SAFE_COMMAND_CLAUSE_PATTERNS: Array<{ regex: RegExp; render: string }> = [
   { regex: /\bcargo\s+test\b/i, render: "cargo test" },
   { regex: /\bcargo\s+build\b/i, render: "cargo build" },
   { regex: /\bcargo\s+check\b/i, render: "cargo check" },
+  { regex: /\bcargo\s+fmt\s+--check\b/i, render: "cargo fmt --check" },
   { regex: /\bnpm\s+test\b/i, render: "npm test" },
   { regex: /\bnpm\s+run\s+lint\b/i, render: "npm run lint" },
   { regex: /\bnpm\s+run\s+build\b/i, render: "npm run build" },
+  // Rev.5 Q1 (Codex) + §5.2 (Claude): phrase-level allowlist expanded to
+  // match the backtick-prefix allowlist below (pnpm / yarn / bun / pytest /
+  // go test). Previously the same command was auto-detected only when
+  // backticked, so equivalent prose fell through to manual.
+  { regex: /\bpnpm\s+test\b/i, render: "pnpm test" },
+  { regex: /\bpnpm\s+run\s+lint\b/i, render: "pnpm run lint" },
+  { regex: /\bpnpm\s+run\s+build\b/i, render: "pnpm run build" },
+  { regex: /\byarn\s+test\b/i, render: "yarn test" },
+  { regex: /\byarn\s+lint\b/i, render: "yarn lint" },
+  { regex: /\byarn\s+build\b/i, render: "yarn build" },
+  { regex: /\bbun\s+test\b/i, render: "bun test" },
+  { regex: /\bbun\s+run\s+lint\b/i, render: "bun run lint" },
+  { regex: /\bbun\s+run\s+build\b/i, render: "bun run build" },
+  { regex: /\bpytest\b/i, render: "pytest" },
+  { regex: /\bgo\s+test\b/i, render: "go test" },
 ];
 const SAFE_COMMAND_SUCCESS_HINT =
-  /succeeds?|passes?|is clean|all clean|green|통과|성공|clean/i;
+  /succeeds?|passes?|is clean|all clean|green|통과|성공|clean|\bexit 0\b|without warnings|validated|passes CI/i;
 const BACKTICK_COMMAND_RE = /`([^`]+)`/g;
 const PATH_TOKEN_RE =
   /(?:\.[\w-]+\/|[\w-]+\/|)(?:[\w.-]+\/)*[\w.-]+\.(?:md|ya?ml|json|toml|rs|ts|js|sh|txt|conf|sql|sqlite|db|lock)/gi;

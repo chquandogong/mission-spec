@@ -6,6 +6,40 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.2] - 2026-04-23
+_Rev.5 3-vendor independent reviews (Claude §5.2 / Codex Q1~Q3 / Gemini Q5)에서 수렴된 P1 fix 4건을 단일 §PATCH 번들로 처리한다.
+(a) SAFE_COMMAND_CLAUSE_PATTERNS phrase-level allowlist를 backtick-prefix allowlist와 일치화하여 동일 커맨드가 backtick 여부에 따라 비대칭 auto-detect되던 Claude+Codex 동시 지적을 해소.
+(b) normalizeHistoryData가 null/array/string block을 empty delta로 silent coerce하던 Codex 지적에 대해, 검증 verdict은 그대로 두고 ValidationResult.warnings 필드로 notice만 노출 (warning-only; strict fail은 v1.22.0 §MINOR로 이월).
+(c) reconstruction-verifier.looksLikeRepoPath가 slash-less filename과 glob pattern을 silently 무시하던 Gemini 지적을 해소 — slash-less는 repo 스캔으로, glob은 간이 glob walker로 해결.
+(d) templates/pre-commit 설치 주석의 `$_` (POSIX sh 엄격 모드에서 미정의) 제거, 명시적 경로 반복으로 교체 (Codex Q3).
+_
+
+### Added
+
+- .mission/snapshots/2026-04-23_v1.21.2_mission.yaml
+- tests/core/history.test.ts: loadHistory warnings emission 테스트 (3 tests)
+
+### Changed
+
+- src/core/evaluator.ts: SAFE_COMMAND_CLAUSE_PATTERNS 12 entry 확장 (pnpm/yarn/bun/pytest/go test/cargo fmt --check) + SAFE_COMMAND_SUCCESS_HINT에 exit 0/without warnings/validated/passes CI 추가
+- src/schema/validator.ts: ValidationResult에 optional warnings 필드, normalizeHistoryData/normalizeDeltaBlock에 warnings accumulator param, validateHistory가 warnings 수집 및 반환
+- src/core/history.ts: loadHistory가 warnings를 console.warn([mission-history] prefix)으로 emit
+- src/core/reconstruction-verifier.ts: looksLikeRepoPath → classifyToken 리팩터 + slashlessFileExists + globHasMatch/globWalk/segmentToRegex 간이 glob 추가
+- templates/pre-commit: Install 주석의 $_ 제거, 명시적 .git/hooks/pre-commit 경로 사용
+- tests/commands/eval.test.ts: Rev.5 Q1 parity 6 tests (+36 → 42)
+- tests/schema.test.ts: Rev.5 Q2 warnings 5 tests (+42 → 47)
+- tests/core/reconstruction-verifier.test.ts: Rev.5 Q5 slash-less + glob 5 tests (+7 → 12)
+- mission.yaml: title + version + lineage.total_revisions 1.21.2로 bump
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 49 → 50 + latest_version 1.21.1 → 1.21.2 + mission_title sync
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.1 → 1.21.2
+- .mission/ Version 헤더 + CURRENT_STATE.md Title: metadata:sync 자동 반영
+- CHANGELOG.md: v1.21.2 entry 추가 (auto)
+- .mission/traceability/TRACE_MATRIX.yaml: 350 → 369 tests (eval +6, schema +5, reconstruction +5, history +3)
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: 350 → 369 tests
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.2 entry 추가
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.2 bullet 추가 + version range v1.14.2~v1.21.2
+- .mission/interfaces/API_REGISTRY.yaml: ValidationResult 타입에 optional warnings 필드 반영
+
 ## [1.21.1] - 2026-04-23
 _IMP-10 v1.21.0에서 도입한 `done_when_refs` ref dispatch가 `evaluateCriterion` 내에서 shared-scope skip 이후에 실행되어, 실 git repo + `scope: "shared"` + gitignored path 조건이 동시 성립하면 refs가 shared-skip에 선점되는 latent ordering 버그를 수정한다. Rev.5 Claude 단독 리뷰 §5.1 지적._
 

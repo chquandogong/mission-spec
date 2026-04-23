@@ -331,6 +331,89 @@ describe("evaluateMission", () => {
     );
   });
 
+  it("infers plain-prose pnpm test (Rev.5 Q1 allowlist parity)", () => {
+    // Rev.5 Q1: phrase-level allowlist must match backtick-prefix allowlist.
+    // Reason must reflect that inference was attempted (passed or failed on
+    // this machine — pnpm may not be installed — but the evaluator must have
+    // emitted an "Inferred command clause" marker instead of falling through
+    // to the manual marker).
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["pnpm test passes"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].reason).toMatch(
+      /Inferred command clause(?:\(s\) succeeded| failed)/,
+    );
+    expect(result.criteria[0].reason).toContain("pnpm test");
+  });
+
+  it("infers plain-prose yarn build with 'succeeds' hint", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["yarn build succeeds"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].reason).toMatch(
+      /Inferred command clause(?:\(s\) succeeded| failed)/,
+    );
+    expect(result.criteria[0].reason).toContain("yarn build");
+  });
+
+  it("infers plain-prose pytest with 'passes' hint", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["pytest passes"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].reason).toMatch(
+      /Inferred command clause(?:\(s\) succeeded| failed)/,
+    );
+    expect(result.criteria[0].reason).toContain("pytest");
+  });
+
+  it("infers plain-prose 'cargo fmt --check is clean'", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["cargo fmt --check is clean"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].reason).toMatch(
+      /Inferred command clause(?:\(s\) succeeded| failed)/,
+    );
+    expect(result.criteria[0].reason).toContain("cargo fmt --check");
+  });
+
+  it("infers plain-prose bun test with 'exit 0' hint (success hint expansion)", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["bun test must exit 0"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].reason).toMatch(
+      /Inferred command clause(?:\(s\) succeeded| failed)/,
+    );
+    expect(result.criteria[0].reason).toContain("bun test");
+  });
+
+  it("infers plain-prose go test with 'validated' hint", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["go test validated across packages"],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].reason).toMatch(
+      /Inferred command clause(?:\(s\) succeeded| failed)/,
+    );
+    expect(result.criteria[0].reason).toContain("go test");
+  });
+
   it("sets resolved_by=inference on file-existence passes", () => {
     writeMission(tempDir, {
       title: "T",

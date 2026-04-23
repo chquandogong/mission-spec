@@ -4,15 +4,83 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.1 — IMP-10 ref ordering fix (MDR-006 §PATCH)"
+  mission_title: "Mission Spec v1.21.2 — Rev.5 3-vendor P1 bundle (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 49
-  latest_version: "1.21.1"
+  total_revisions: 50
+  latest_version: "1.21.2"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-002"
+    semantic_version: "1.21.2"
+    change_sequence: 54
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude", "Codex", "Gemini"]
+    change_type: "fix"
+    motivation_type: "correctness"
+    persistence: "permanent"
+    intent: |
+      Rev.5 3-vendor independent reviews (Claude §5.2 / Codex Q1~Q3 / Gemini Q5)에서 수렴된 P1 fix 4건을 단일 §PATCH 번들로 처리한다.
+      (a) SAFE_COMMAND_CLAUSE_PATTERNS phrase-level allowlist를 backtick-prefix allowlist와 일치화하여 동일 커맨드가 backtick 여부에 따라 비대칭 auto-detect되던 Claude+Codex 동시 지적을 해소.
+      (b) normalizeHistoryData가 null/array/string block을 empty delta로 silent coerce하던 Codex 지적에 대해, 검증 verdict은 그대로 두고 ValidationResult.warnings 필드로 notice만 노출 (warning-only; strict fail은 v1.22.0 §MINOR로 이월).
+      (c) reconstruction-verifier.looksLikeRepoPath가 slash-less filename과 glob pattern을 silently 무시하던 Gemini 지적을 해소 — slash-less는 repo 스캔으로, glob은 간이 glob walker로 해결.
+      (d) templates/pre-commit 설치 주석의 `$_` (POSIX sh 엄격 모드에서 미정의) 제거, 명시적 경로 반복으로 교체 (Codex Q3).
+    decision: |
+      Rev.5 3-vendor P1 수렴 — 단일 §PATCH 번들 처리 (MDR-006 §PATCH 경계 내, consumer surface 불변).
+      1. Fix 1 (Claude §5.2 + Codex Q1): `src/core/evaluator.ts`의 SAFE_COMMAND_CLAUSE_PATTERNS에 `pnpm test/run lint/run build`, `yarn test/lint/build`, `bun test/run lint/run build`, `pytest`, `go test`, `cargo fmt --check` 12 phrase-level entry 추가. SAFE_COMMAND_SUCCESS_HINT에 `exit 0`, `without warnings`, `validated`, `passes CI` alternation 추가. +6 tests (tests/commands/eval.test.ts).
+      2. Fix 2 (Codex Q2): `src/schema/validator.ts`의 ValidationResult에 optional `warnings?: string[]` 필드 추가. normalizeHistoryData / normalizeDeltaBlock에 optional warnings accumulator 파라미터 도입 — null/array/string block coercion 및 added/modified/removed subfield null coercion 시 `timeline[i].changes: replaced non-object (null) with empty delta ...` 형태의 human-readable notice를 push. `validateHistory()`가 warnings를 수집해서 result에 붙임. `src/core/history.ts`의 loadHistory는 warnings.length > 0일 때 `console.warn("[mission-history] ...")` 로 출력. +5 tests (schema.test.ts) + 3 tests (tests/core/history.test.ts 신규). **Important**: coercion은 계속 성공 + 엔트리는 valid로 통과. strict fail path는 v1.21.2 scope 아님 — v1.22.0 §MINOR follow-up.
+      3. Fix 3 (Gemini Q5): `src/core/reconstruction-verifier.ts`의 `looksLikeRepoPath`를 `classifyToken`으로 리팩터. slash-less token이 known 확장자(md/yaml/json/toml/rs/ts/tsx/js/jsx/mjs/cjs/sh/py/go/rb/lock/txt/conf)를 가지면 `{kind: "slashless"}`로 분류, `slashlessFileExists` + bounded directory scan (src/scripts/tests/bin/templates + 루트; node_modules/.git/dist/.mission/coverage 제외)으로 존재 확인. glob 메타문자(`*?[`) 포함 시 `{kind: "glob"}`으로 분류, minimatch-free 간이 glob walker (`globHasMatch` + `segmentToRegex`)로 경로 세그먼트 별 walk. 둘 다 match 없으면 failing list에 편입. +5 tests (reconstruction-verifier.test.ts).
+      4. Fix 4 (Codex Q3): `templates/pre-commit` 설치 주석의 `chmod +x $_`를 `chmod +x .git/hooks/pre-commit`로 교체. READMEs 3종은 이미 명시적 경로를 사용하고 있어 변경 없음 (역사적 mission-history.yaml 내 `$_` 언급은 기록물이라 touch 안 함).
+      Semantic version: patch per MDR-006 §PATCH (bugfix + validator 범위 확장 + warnings 추가 notice + 문서 교정, consumer surface 불변 — ValidationResult.warnings는 optional, normalizeHistoryData의 추가 param도 optional, 기존 콜러 0 변경).
+    triggered_by: "Rev.5 3-vendor independent reviews (Claude / Codex / Gemini) P1 수렴 — 단일 §PATCH 번들로 처리하여 Rev.6 baseline을 마련."
+    issue_or_context: "Rev.5 cycle은 Rev.4에서 확립된 3-vendor adversarial review 프로토콜을 v1.21.0/v1.21.1에 적용한 두 번째 사이클. Claude 단독 리뷰 §5.1이 먼저 v1.21.1로 lands, §5.2는 allowlist 비대칭성을 지적. Codex는 Q1 (allowlist), Q2 (silent coercion), Q3 (`$_` 비호환)을 독립 발견. Gemini는 Q5로 reconstruction-verifier의 glob/slash-less blind spot을 발견. 세 벤더가 독립적으로 수렴한 Fix 1(Claude+Codex), 단독이지만 명백 규범인 Fix 2/3/4를 한 커밋에 묶어 일관된 Rev.5 closure를 만든다."
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-23_v1.21.2_mission.yaml"
+        - "tests/core/history.test.ts: loadHistory warnings emission 테스트 (3 tests)"
+      modified:
+        - "src/core/evaluator.ts: SAFE_COMMAND_CLAUSE_PATTERNS 12 entry 확장 (pnpm/yarn/bun/pytest/go test/cargo fmt --check) + SAFE_COMMAND_SUCCESS_HINT에 exit 0/without warnings/validated/passes CI 추가"
+        - "src/schema/validator.ts: ValidationResult에 optional warnings 필드, normalizeHistoryData/normalizeDeltaBlock에 warnings accumulator param, validateHistory가 warnings 수집 및 반환"
+        - "src/core/history.ts: loadHistory가 warnings를 console.warn([mission-history] prefix)으로 emit"
+        - "src/core/reconstruction-verifier.ts: looksLikeRepoPath → classifyToken 리팩터 + slashlessFileExists + globHasMatch/globWalk/segmentToRegex 간이 glob 추가"
+        - "templates/pre-commit: Install 주석의 $_ 제거, 명시적 .git/hooks/pre-commit 경로 사용"
+        - "tests/commands/eval.test.ts: Rev.5 Q1 parity 6 tests (+36 → 42)"
+        - "tests/schema.test.ts: Rev.5 Q2 warnings 5 tests (+42 → 47)"
+        - "tests/core/reconstruction-verifier.test.ts: Rev.5 Q5 slash-less + glob 5 tests (+7 → 12)"
+        - "mission.yaml: title + version + lineage.total_revisions 1.21.2로 bump"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 49 → 50 + latest_version 1.21.1 → 1.21.2 + mission_title sync"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.1 → 1.21.2"
+        - ".mission/ Version 헤더 + CURRENT_STATE.md Title: metadata:sync 자동 반영"
+        - "CHANGELOG.md: v1.21.2 entry 추가 (auto)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: 350 → 369 tests (eval +6, schema +5, reconstruction +5, history +3)"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: 350 → 369 tests"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.2 entry 추가"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.2 bullet 추가 + version range v1.14.2~v1.21.2"
+        - ".mission/interfaces/API_REGISTRY.yaml: ValidationResult 타입에 optional warnings 필드 반영"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: true
+      skills: false
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "low — all 4 fixes are additive or docs-only. Coerced warnings don't change validation verdicts. Allowlist expansion adds new phrase matches (prose that previously fell to manual now auto-pass; evaluator outputs preserve reason strings). Reconstruction verifier now more strict — may fail if REBUILD_PLAYBOOK references non-existent slash-less files; Mission Spec's own PLAYBOOK is expected to pass. Semantic version: patch per MDR-006 §PATCH (bugfix + validator extension + docs). Verified 350+19 = 369 tests + full validator chain."
+    related_commits: []
+    related_decisions: ["MDR-004", "MDR-006"]
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.2_mission.yaml"
+    follow_up:
+      - "v1.22.0 §MINOR 후보: normalizeHistoryData strict fail 전환 (현재는 warning-only)."
+      - "Rev.6 baseline = v1.21.2 HEAD."
+
   - change_id: "MSC-2026-04-23-001"
     semantic_version: "1.21.1"
     change_sequence: 53

@@ -9,7 +9,13 @@
 // available at the CLI (npm ci + build + test in a temp dir) for extra
 // confidence, but it is opt-in because it takes tens of seconds.
 
-import { existsSync, readFileSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  type Dirent,
+} from "node:fs";
 import { join, isAbsolute } from "node:path";
 
 export interface ReconstructionResult {
@@ -21,6 +27,28 @@ export interface ReconstructionResult {
 export interface ReconstructionOptions {
   playbookPath?: string; // default ".mission/reconstruction/REBUILD_PLAYBOOK.md"
 }
+
+// Directories to scan recursively when resolving slash-less filenames
+// against the repo. Kept conservative: the scan is limited to well-known
+// source / doc / asset trees so a slash-less prose word that happens to
+// collide with an unrelated file deep inside node_modules or dist is not
+// treated as "found". The project root itself is scanned non-recursively
+// (top-level files only) in slashlessFileExists. Adopters can rely on
+// these conventional locations, or use the full repo-relative path in
+// the playbook for anything outside them.
+const SLASHLESS_SCAN_ROOTS = [
+  "src",
+  "scripts",
+  "tests",
+  "bin",
+  "templates",
+  "skills",
+  ".mission",
+  ".claude-plugin",
+  ".githooks",
+];
+const KNOWN_EXTENSIONS =
+  /\.(md|ya?ml|json|toml|rs|ts|tsx|js|jsx|mjs|cjs|sh|py|go|rb|lock|txt|conf)$/i;
 
 // Matches `foo` inline spans, but excludes content inside ```fenced blocks```.
 function extractInlineBackticks(markdown: string): string[] {
@@ -43,22 +71,144 @@ function extractInlineBackticks(markdown: string): string[] {
   return out;
 }
 
-// A conservative heuristic: a token is treated as a repo path only if it
-// contains a slash (so bare filenames like "parser.ts" in prose are ignored),
-// is not absolute, contains no whitespace / code syntax / URL scheme, and
-// contains no glob metacharacters (skills/ms-*/SKILL.md is glob, not a path).
-// False negatives (missed path mentions) are acceptable; false positives
+type Classification =
+  | { kind: "path"; value: string }
+  | { kind: "slashless"; value: string }
+  | { kind: "glob"; value: string }
+  | { kind: "skip" };
+
+// A conservative heuristic. v1.21.2 §PATCH (Rev.5 Q5 — Gemini):
+//   - slash-less filenames with a known extension are now resolved against
+//     the repo tree instead of being silently ignored.
+//   - glob patterns (*, ?, []) are expanded against the repo tree instead
+//     of being silently ignored.
+//
+// False negatives (missed path mentions) remain acceptable; false positives
 // (flagging prose as drift) make the verifier noisy and get disabled.
-function looksLikeRepoPath(token: string): boolean {
+function classifyToken(token: string): Classification {
   const t = token.trim();
-  if (!t) return false;
-  if (!t.includes("/")) return false; // bare filenames are prose
-  if (isAbsolute(t)) return false; // environmental, not repo
-  if (/\s/.test(t)) return false; // command-like
-  if (/[()=<>;,]/.test(t)) return false; // code/identifier syntax
-  if (t.includes("://")) return false; // URL
-  if (/[*?\[\]]/.test(t)) return false; // glob pattern, not a concrete path
-  return true;
+  if (!t) return { kind: "skip" };
+  if (isAbsolute(t)) return { kind: "skip" }; // environmental, not repo
+  if (/\s/.test(t)) return { kind: "skip" }; // command-like
+  if (/[()=<>;,]/.test(t)) return { kind: "skip" }; // code/identifier syntax
+  if (t.includes("://")) return { kind: "skip" }; // URL
+  if (/[*?[\]]/.test(t)) return { kind: "glob", value: t }; // glob pattern
+  if (!t.includes("/")) {
+    // Slash-less: only claim this as a repo reference if it has a known
+    // code/doc extension AND a non-dot leading character. Dot-prefixed
+    // slash-less tokens (`.ts`, `.aider.conf.yml`, `.cursorrules`) are
+    // either bare extensions or adopter config patterns documented by
+    // name — treat them as prose, not paths. Bare prose words like
+    // "Rev.5" or "config" also stay out of the candidate set.
+    if (t.startsWith(".")) return { kind: "skip" };
+    if (KNOWN_EXTENSIONS.test(t)) return { kind: "slashless", value: t };
+    return { kind: "skip" };
+  }
+  return { kind: "path", value: t };
+}
+
+function slashlessFileExists(projectDir: string, filename: string): boolean {
+  // 1) top-level file (non-recursive) — matches adopter root conventions
+  //    for e.g. README.md, AGENTS.md, opencode.toml.
+  if (existsSync(join(projectDir, filename))) return true;
+  // 2) recursive scan within the conservative code/test/doc subtrees.
+  for (const root of SLASHLESS_SCAN_ROOTS) {
+    const rootAbs = join(projectDir, root);
+    if (!existsSync(rootAbs)) continue;
+    if (scanDirForFilename(rootAbs, filename)) return true;
+  }
+  return false;
+}
+
+// Shallow-recursive scan for an exact filename match. Bail early once a
+// match is found. Keeps the scan bounded — we don't descend into node_modules
+// or .git, and we don't walk the entire tree every time; each slash-less
+// lookup is individually memoized via `presentCache` in the caller.
+function scanDirForFilename(root: string, filename: string): boolean {
+  const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "coverage"]);
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(root, { withFileTypes: true }) as Dirent[];
+  } catch {
+    return false;
+  }
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name === filename) return true;
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (SKIP_DIRS.has(entry.name)) continue;
+    if (entry.name.startsWith(".")) continue;
+    if (scanDirForFilename(join(root, entry.name), filename)) return true;
+  }
+  return false;
+}
+
+// Minimal glob support — enough to expand patterns like
+// `src/commands/*.ts` or `skills/ms-*/SKILL.md`. We split on slashes and
+// walk directories, treating '*' as "anything but slash", '?' as "single
+// char but slash", and character classes `[abc]` literally. This avoids a
+// dependency on fast-glob / minimatch for one internal verifier.
+function globHasMatch(projectDir: string, pattern: string): boolean {
+  const segments = pattern.split("/").filter((s) => s.length > 0);
+  if (segments.length === 0) return false;
+  return globWalk(projectDir, segments, 0);
+}
+
+function globWalk(baseAbs: string, segments: string[], i: number): boolean {
+  if (i >= segments.length) return existsSync(baseAbs);
+  const seg = segments[i];
+  const isLast = i === segments.length - 1;
+  const regex = segmentToRegex(seg);
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(baseAbs, { withFileTypes: true }) as Dirent[];
+  } catch {
+    return false;
+  }
+  for (const entry of entries) {
+    if (!regex.test(entry.name)) continue;
+    const nextAbs = join(baseAbs, entry.name);
+    if (isLast) {
+      try {
+        statSync(nextAbs);
+        return true;
+      } catch {
+        // ignore and keep walking
+      }
+    } else if (entry.isDirectory()) {
+      if (globWalk(nextAbs, segments, i + 1)) return true;
+    }
+  }
+  return false;
+}
+
+function segmentToRegex(seg: string): RegExp {
+  let out = "^";
+  let i = 0;
+  while (i < seg.length) {
+    const ch = seg[i];
+    if (ch === "*") {
+      out += "[^/]*";
+    } else if (ch === "?") {
+      out += "[^/]";
+    } else if (ch === "[") {
+      const close = seg.indexOf("]", i);
+      if (close < 0) {
+        out += "\\[";
+      } else {
+        out += seg.slice(i, close + 1);
+        i = close;
+      }
+    } else if (/[.+^${}()|\\]/.test(ch)) {
+      out += "\\" + ch;
+    } else {
+      out += ch;
+    }
+    i += 1;
+  }
+  out += "$";
+  return new RegExp(out);
 }
 
 export function verifyReconstructionReferences(
@@ -75,20 +225,32 @@ export function verifyReconstructionReferences(
   const content = readFileSync(playbookPath, "utf-8");
   const tokens = extractInlineBackticks(content);
 
-  const candidates = new Set<string>();
+  const candidates = new Map<string, Classification>();
   for (const token of tokens) {
-    if (looksLikeRepoPath(token)) {
-      candidates.add(token.replace(/^\.?\//, ""));
+    const classification = classifyToken(token);
+    if (classification.kind === "skip") continue;
+    const normalized =
+      classification.kind === "path"
+        ? classification.value.replace(/^\.?\//, "")
+        : classification.value;
+    if (!candidates.has(normalized)) {
+      candidates.set(normalized, { ...classification, value: normalized });
     }
   }
 
   const missing: string[] = [];
   const checkedPaths: string[] = [];
-  for (const candidate of candidates) {
+  for (const [candidate, classification] of candidates) {
     checkedPaths.push(candidate);
-    if (!existsSync(join(projectDir, candidate))) {
-      missing.push(candidate);
+    let present = false;
+    if (classification.kind === "path") {
+      present = existsSync(join(projectDir, candidate));
+    } else if (classification.kind === "slashless") {
+      present = slashlessFileExists(projectDir, candidate);
+    } else if (classification.kind === "glob") {
+      present = globHasMatch(projectDir, candidate);
     }
+    if (!present) missing.push(candidate);
   }
 
   return {

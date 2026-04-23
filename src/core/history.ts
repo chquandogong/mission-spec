@@ -2,10 +2,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
-import {
-  normalizeHistoryData,
-  validateHistory,
-} from "../schema/validator.js";
+import { normalizeHistoryData, validateHistory } from "../schema/validator.js";
 
 export interface ModuleEntry {
   path: string;
@@ -85,14 +82,23 @@ export function loadHistory(projectDir: string): MissionHistory | null {
   if (!existsSync(historyPath)) return null;
 
   const content = readFileSync(historyPath, "utf-8");
-  const data = normalizeHistoryData(parse(content));
-  const result = validateHistory(data);
+  const parsed = parse(content);
+  const result = validateHistory(parsed);
   if (!result.valid) {
     throw new Error(
       `mission-history.yaml schema errors:\n${result.errors.join("\n")}`,
     );
   }
-  return data as MissionHistory;
+  // v1.21.2 (Rev.5 Q2 — Codex): surface non-fatal coercion notices so
+  // adopters see when their ledger contains null/array/string delta blocks
+  // that the legacy silent-coercion layer fixed up. Strict fail is deferred
+  // to v1.22.0 §MINOR.
+  if (result.warnings && result.warnings.length > 0) {
+    for (const w of result.warnings) {
+      console.warn(`[mission-history] ${w}`);
+    }
+  }
+  return normalizeHistoryData(parsed) as MissionHistory;
 }
 
 export function getLatestEntry(history: MissionHistory): HistoryEntry | null {
