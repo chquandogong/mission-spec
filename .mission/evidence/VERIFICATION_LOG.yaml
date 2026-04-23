@@ -1,9 +1,50 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-22 | Version: 1.21.3
+# Last updated: 2026-04-22 | Version: 1.21.4
 
 entries:
+  - version: "1.21.4"
+    date: "2026-04-23"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      npm_build: "success"
+      npm_lint: "success"
+      validate_schema: "all schema validations passed"
+      validate_history_commits: "pass"
+      arch_verify: "ARCHITECTURE_CURRENT.yaml and API_REGISTRY.yaml are in sync with src/."
+      plugin_verify: "Plugin manifest and skills structure are valid."
+      metadata_check: ".mission/ Version headers in sync with package.json (1.21.4)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      registry_check_verify_live: "livePassed 10/10 (matches CURRENT_STATE claim)"
+      verify_reconstruction_references: "50 paths checked"
+      convert_platforms_verify: "all platform conversions verified successfully"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+    notes: |
+      §PATCH fix for F-1 publish path. v1.21.3 tag push 시 release.yml publish
+      step이 두 번 fail 했다:
+      1) run 24817184471 (first tag push): `npm error code ENEEDAUTH` (NPM_TOKEN
+         secret 미설정). 사용자가 secret 추가 후 재시도.
+      2) run 24818027084 (workflow_dispatch on v1.21.3 tag, dry_run=false):
+         `npm error code E422 — Error verifying sigstore provenance bundle:
+         Failed to validate repository information: package.json:
+         'repository.url' is '', expected to match
+         'https://github.com/chquandogong/mission-spec' from provenance`.
+      이 v1.21.4는 (2)를 해결: package.json에 `repository` + `homepage` +
+      `bugs` 필드 추가. Pre-publish gate는 이미 3회(dry-run 2 + real 1) green
+      으로 증명됐으므로 남은 unknown은 provenance validation 결과뿐.
+
   - version: "1.21.3"
     date: "2026-04-23"
     verified_by: "Claude Opus 4.7"

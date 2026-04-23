@@ -4,15 +4,75 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.3 — GitHub Actions v4→v5 bump (§PATCH)"
+  mission_title: "Mission Spec v1.21.4 — package.json repository for npm provenance (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 51
-  latest_version: "1.21.3"
+  total_revisions: 52
+  latest_version: "1.21.4"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-004"
+    semantic_version: "1.21.4"
+    change_sequence: 56
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "correctness"
+    persistence: "permanent"
+    intent: "F-1 tag push 실전 publish 과정에서 드러난 npm provenance validation 실패를 해결한다. `package.json`에 `repository`/`homepage`/`bugs` 필드를 추가해 sigstore provenance bundle이 요구하는 `repository.url` 매칭(GitHub Actions workflow source와 대조)을 가능하게 한다."
+    decision: |
+      F-1 실전 검증 연쇄의 세 번째 fix. 이전 실패/해결 history:
+      1. v1.21.3 tag push (#24817184471) → `npm error code ENEEDAUTH` (NPM_TOKEN secret 미설정).
+      2. NPM_TOKEN secret 등록 후 tag ref workflow_dispatch (#24818027084) → `npm error code E422` "Error verifying sigstore provenance bundle: Failed to validate repository information: package.json: 'repository.url' is '', expected to match 'https://github.com/chquandogong/mission-spec' from provenance".
+      3. 본 v1.21.4는 package.json의 repository 필드 부재를 해결한다. npm은 sigstore provenance를 검증할 때 package.json의 repository.url을 GitHub Actions source와 대조하는데, 현재 mission-spec의 package.json에는 repository 필드 자체가 없어 validator가 "" 값으로 읽음.
+
+      추가된 3 필드:
+      ```json
+      "homepage": "https://github.com/chquandogong/mission-spec#readme",
+      "bugs": { "url": "https://github.com/chquandogong/mission-spec/issues" },
+      "repository": { "type": "git", "url": "git+https://github.com/chquandogong/mission-spec.git" }
+      ```
+
+      SemVer: MDR-006 §PATCH (npm metadata correction, consumer surface 실질적으로 확장이나 package 설치 동작 불변). v1.16.1(cold-build gate step 추가)와 유사 grade.
+    triggered_by: "v1.21.3 tag publish 시 npm E422 provenance validation 실패 (run 24818027084)."
+    issue_or_context: "mission-spec은 v1.9.0부터 npm publish 경로를 갖춰왔지만 실제 publish는 F-1 deferral로 0회였음. 이번 사이클(Rev.5 closure + v1.21.3 tag + NPM_TOKEN 등록)에서 최초 실전 attempt가 발생했고, 그 순간 npm provenance 요구사항이 표출됐다. provenance는 2023년 이후 npm의 trust model 표준이 됐고 package.json의 repository 필드를 GitHub Actions의 GITHUB_REPOSITORY env와 대조한다. mission-spec은 이 요구사항을 인지 못하고 설계됐다. 본 fix는 그 gap을 닫는다."
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-23_v1.21.4_mission.yaml"
+        - "package.json: `repository` / `homepage` / `bugs` 필드 (npm provenance 요구사항)"
+      modified:
+        - "mission.yaml: title + version + lineage.total_revisions 1.21.4로 bump"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 51 → 52 + latest_version 1.21.3 → 1.21.4 + mission_title sync"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.3 → 1.21.4"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.4 entry 추가"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.4 bullet 추가 + version range v1.14.2 ~ v1.21.4"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — package.json에 3 optional field 추가. package.json의 기존 동작(npm install / exports / bin)에 영향 없음. local test suite 369/369 불변. 실전 검증은 post-commit `gh workflow run release.yml --ref v1.21.4 -f dry_run=false` (또는 v1.21.4 tag push)로 수행 — provenance validation E422가 해소되고 publish가 npm registry까지 도달해야 green."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.4_mission.yaml"
+    follow_up:
+      - "v1.21.4 tag + publish 경로가 green이면 F-1 complete — 모든 pre-publish gate 통과 + 실제 npm registry 도달 확인."
+      - "다음 문제 발생 시 별도 §PATCH (v1.21.5+) 또는 Rev.6로 승계."
+      - "Rev.6 baseline = v1.21.4 HEAD (또는 성공 시 v1.21.4 published tag)"
+
   - change_id: "MSC-2026-04-23-003"
     semantic_version: "1.21.3"
     change_sequence: 55

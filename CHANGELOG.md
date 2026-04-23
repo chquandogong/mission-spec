@@ -6,6 +6,23 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.4] - 2026-04-23
+_F-1 tag push 실전 publish 과정에서 드러난 npm provenance validation 실패를 해결한다. `package.json`에 `repository`/`homepage`/`bugs` 필드를 추가해 sigstore provenance bundle이 요구하는 `repository.url` 매칭(GitHub Actions workflow source와 대조)을 가능하게 한다._
+
+### Added
+
+- .mission/snapshots/2026-04-23_v1.21.4_mission.yaml
+- package.json: `repository` / `homepage` / `bugs` 필드 (npm provenance 요구사항)
+
+### Changed
+
+- mission.yaml: title + version + lineage.total_revisions 1.21.4로 bump
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 51 → 52 + latest_version 1.21.3 → 1.21.4 + mission_title sync
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.3 → 1.21.4
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.4 entry 추가
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.4 bullet 추가 + version range v1.14.2 ~ v1.21.4
+
 ## [1.21.3] - 2026-04-23
 _F-1 cold-build gate 실전 dry-run 과정에서 표출된 Node.js 20 deprecation warning(2026-09-16 deadline)을 선제적으로 닫는다. `.github/workflows/`의 `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4` 총 7 pin을 `@v5`로 bump한다._
 
