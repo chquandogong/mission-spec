@@ -566,4 +566,24 @@ describe("done_when_refs — partial coverage and overrides", () => {
     expect(result.criteria[0].passed).toBe(true);
     expect(result.criteria[0].resolved_by).toBe("ref");
   });
+
+  it("ref wins over shared-scope skip in a real git repo with gitignored path (v1.21.1 §PATCH regression)", () => {
+    // Regression for IMP-10 §PATCH: before the fix, shared-scope skip fired
+    // BEFORE the ref dispatch, so a ref explicitly authored for a gitignored
+    // path would silently be pre-empted and return resolved_by:"inference"
+    // with skipped:true. After the fix, refs win (trust-by-explicit-authoring).
+    execFileSync("git", ["init", "-q"], { cwd: tempDir });
+    writeFileSync(join(tempDir, ".gitignore"), "/.local/\n");
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["Phase 0: .local/verdict.md exists and is complete"],
+      done_when_refs: [{ index: 0, kind: "command", value: "true" }],
+    });
+    const result = evaluateMission(tempDir, { scope: "shared" });
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("ref");
+    expect(result.criteria[0].ref_kind).toBe("command");
+    expect(result.criteria[0].skipped).toBeUndefined();
+  });
 });

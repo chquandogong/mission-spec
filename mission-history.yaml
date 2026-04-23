@@ -4,15 +4,73 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.0 — explicit gate linkage (done_when_refs)"
+  mission_title: "Mission Spec v1.21.1 — IMP-10 ref ordering fix (MDR-006 §PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 48
-  latest_version: "1.21.0"
+  total_revisions: 49
+  latest_version: "1.21.1"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-001"
+    semantic_version: "1.21.1"
+    change_sequence: 53
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "correctness"
+    persistence: "permanent"
+    intent: 'IMP-10 v1.21.0에서 도입한 `done_when_refs` ref dispatch가 `evaluateCriterion` 내에서 shared-scope skip 이후에 실행되어, 실 git repo + `scope: "shared"` + gitignored path 조건이 동시 성립하면 refs가 shared-skip에 선점되는 latent ordering 버그를 수정한다. Rev.5 Claude 단독 리뷰 §5.1 지적.'
+    decision: |
+      v1.21.0 MSC-2026-04-22-002 follow_up의 최상단 항목이자 Rev.5 Claude 단독 리뷰 §5.1/§6 우선순위 1번. 순서 원칙은 "refs = trust-by-explicit-authoring이 shared-scope heuristic보다 우선".
+      1. `src/core/evaluator.ts`의 `evaluateCriterion`에서 shared-scope skip 블록과 ref dispatch 블록을 swap. 새 순서: **ref → shared-scope skip → evals match → inference chain**.
+      2. `tests/commands/eval.test.ts`에 regression test 추가 — 실 git repo(`git init`) + `.gitignore`에 local path + `done_when_refs`에 command=true + `scope: "shared"` 조합에서 ref가 이겨 `resolved_by: "ref"` + `skipped: undefined`임을 검증.
+      3. 기존 349 tests 전부 유지 + 신규 1 test = 350/350.
+      Semantic version: patch per MDR-006 §PATCH (기존 기능의 버그 수정, consumer surface 불변 — done_when_refs schema / evaluator API / CLI 모두 identical).
+    triggered_by: "Rev.5 Claude 단독 리뷰(`docs/claude-code/PROJECT_REVIEW_V1.21.0_2026-04-23.md`) §5.1 latent ordering issue 지적 → 즉시 §PATCH로 처리."
+    issue_or_context: "IMP-10 Task 7 구현자가 이 문제를 처음 플래그했으나 Task 7은 verification-only였고 실 git repo fixture가 없어 silent pass로 통과했다. Rev.5 리뷰에서 동일 이슈를 재발견 + §PATCH 우선 권고. 실 adopter 저장소에서 `mission-spec eval --shared` 호출 시 refs로 감싼 criterion이 gitignored path를 prose로 언급하면 ref가 실행 안 되고 skip 처리돼 silent wrong-pass를 유발할 수 있던 버그."
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-23_v1.21.1_mission.yaml"
+      modified:
+        - "src/core/evaluator.ts: evaluateCriterion 내 ref dispatch 블록과 shared-scope skip 블록 순서 swap (ref 우선)"
+        - "tests/commands/eval.test.ts: 'ref wins over shared-scope skip in a real git repo with gitignored path' regression test 추가 (+1, 349 → 350)"
+        - "mission.yaml: title + version + lineage.total_revisions를 1.21.1로 bump"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 48 → 49 + latest_version 1.21.0 → 1.21.1 + mission_title sync"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.0 → 1.21.1"
+        - ".mission/ Version 헤더 + CURRENT_STATE.md Title: metadata:sync 자동 반영"
+        - "CHANGELOG.md: v1.21.1 entry 추가 (auto)"
+        - ".mission/traceability/TRACE_MATRIX.yaml: 349 → 350 tests (eval.test.ts +1)"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md: 349 → 350 tests"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.1 entry 추가"
+        - "CURRENT_STATE.md 최근 구현 섹션에 v1.21.1 bullet 추가 + version range v1.14.2~v1.21.1"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "very low — 2-block순서 swap은 symmetric하며 기존 테스트 349개 전부 그대로 통과. ref가 없는 criterion은 이전과 동일한 순서(shared-skip → evals → inference)로 평가되므로 refs 미사용 adopter는 영향 0. refs 사용자에게는 명시적 intent가 heuristic skip보다 우선한다는 자연스러운 semantics. Semantic version: patch per MDR-006 §PATCH (bugfix + docs update, consumer surface unchanged)."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-004-done-when-eval-linking",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.1_mission.yaml"
+    follow_up:
+      - "Rev.5 Codex / Gemini single-vendor 리뷰 착수 (kickoff §4.2 / §4.3)."
+      - "추가 §PATCH 후보: CLI help 그룹화 + MDR-008 CURRENT_STATE 섹션 compaction rule + 신뢰 모델 이원화 README 명시 (Rev.5 Claude 리뷰 §6 tables)."
+
   - change_id: "MSC-2026-04-22-002"
     semantic_version: "1.21.0"
     change_sequence: 52

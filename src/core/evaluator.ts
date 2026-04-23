@@ -377,6 +377,12 @@ export function evaluateCriterion(
   options: EvaluateOptions = {},
   ref?: DoneWhenRef,
 ): CriterionResult {
+  // Explicit ref — trust-by-explicit-authoring wins over shared-scope heuristics.
+  // Order: ref > shared-scope skip > evals/inference chain (IMP-10 §PATCH, v1.21.1).
+  if (ref) {
+    return runRef(ref, criterion, projectDir, evals);
+  }
+
   if (options.scope === "shared") {
     const missingLocalOnly = detectMissingLocalOnlyPaths(criterion, projectDir);
     if (missingLocalOnly.length > 0) {
@@ -388,11 +394,6 @@ export function evaluateCriterion(
         resolved_by: "inference",
       };
     }
-  }
-
-  // Explicit ref — short-circuit above inference chain.
-  if (ref) {
-    return runRef(ref, criterion, projectDir, evals);
   }
 
   // 0. Check if evals array has an explicit automated command or LLM evaluation

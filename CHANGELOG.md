@@ -6,6 +6,27 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.1] - 2026-04-23
+_IMP-10 v1.21.0에서 도입한 `done_when_refs` ref dispatch가 `evaluateCriterion` 내에서 shared-scope skip 이후에 실행되어, 실 git repo + `scope: "shared"` + gitignored path 조건이 동시 성립하면 refs가 shared-skip에 선점되는 latent ordering 버그를 수정한다. Rev.5 Claude 단독 리뷰 §5.1 지적._
+
+### Added
+
+- .mission/snapshots/2026-04-23_v1.21.1_mission.yaml
+
+### Changed
+
+- src/core/evaluator.ts: evaluateCriterion 내 ref dispatch 블록과 shared-scope skip 블록 순서 swap (ref 우선)
+- tests/commands/eval.test.ts: 'ref wins over shared-scope skip in a real git repo with gitignored path' regression test 추가 (+1, 349 → 350)
+- mission.yaml: title + version + lineage.total_revisions를 1.21.1로 bump
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 48 → 49 + latest_version 1.21.0 → 1.21.1 + mission_title sync
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.0 → 1.21.1
+- .mission/ Version 헤더 + CURRENT_STATE.md Title: metadata:sync 자동 반영
+- CHANGELOG.md: v1.21.1 entry 추가 (auto)
+- .mission/traceability/TRACE_MATRIX.yaml: 349 → 350 tests (eval.test.ts +1)
+- .mission/reconstruction/REBUILD_PLAYBOOK.md: 349 → 350 tests
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.1 entry 추가
+- CURRENT_STATE.md 최근 구현 섹션에 v1.21.1 bullet 추가 + version range v1.14.2~v1.21.1
+
 ## [1.21.0] - 2026-04-22
 _qmonster adopter review에서 드러난 prose-heavy done_when의 구조화 부재(shared eval 14/86 중 나머지 72개가 manual)를 해결하기 위해 mission.yaml에 optional `done_when_refs` sibling field를 도입한다. 각 ref는 done_when[index]에 대한 explicit validator 바인딩(command / file-exists / file-contains / eval-ref 4 kind)을 제공한다. refs가 있는 index는 그 결과가 truth이고, refs가 없는 index는 v1.20.0 inference fallback을 유지한다._
 
