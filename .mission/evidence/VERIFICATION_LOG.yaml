@@ -1,9 +1,41 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-23 | Version: 1.21.6
+# Last updated: 2026-04-23 | Version: 1.21.7
 
 entries:
+  - version: "1.21.7"
+    date: "2026-04-23"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+        resolved_by:
+          ref: 10
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 9
+          file-exists: 1
+    notes: |
+      권장 작업 2번 구현. done_when[0..4] 문구를 '파일 존재' → '기능 동작' 계약으로
+      복원하고 5 신규 evals (각각 skill별 test file 서브셋 실행)에 바인딩. v1.21.6
+      대비 ref_kind 분포가 eval-ref 4 → 9로 증가 (기능 검증 축 +5). v1.0.0 원본
+      8개 done_when 중 6개가 functional contract로 커버됨. 남은 2개(5분 설치 가이드
+      / 자체 dogfooding)는 권장 작업 3/4로 이월.
+
   - version: "1.21.6"
     date: "2026-04-23"
     verified_by: "Claude Opus 4.7"

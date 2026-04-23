@@ -4,15 +4,104 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.6 — self-dogfooding done_when_refs (§PATCH)"
+  mission_title: "Mission Spec v1.21.7 — done_when 기능 계약 복원 (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 54
-  latest_version: "1.21.6"
+  total_revisions: 55
+  latest_version: "1.21.7"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-23-007"
+    semantic_version: "1.21.7"
+    change_sequence: 59
+    date: "2026-04-23"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "self-dogfooding"
+    persistence: "permanent"
+    intent: "v1.21.6 self-dogfooding 후속. done_when[0..4]의 약화된 '파일 존재' 문구를 '기능 동작' 계약으로 복원하고, 각 인덱스를 해당 skill의 test file을 실행하는 신규 eval에 바인딩한다. 권장 작업 2번 구현. done_when 문구가 실질적 기능 주장을 담도록 계약의 의미적 수준을 올린다."
+    decision: |
+      v1.21.6까지 done_when[0..5]는 'skills/ms-*/SKILL.md 존재' / 'plugin.json
+      존재' / 'README.md 존재' 형태의 아티팩트 존재 계약이었다. ms-eval은 10/10
+      PASS였으나 '기능 동작'은 command_test eval이 npm test를 돌려야만 확증되는
+      간접 증명이었다.
+
+      본 §PATCH는 index 0-4를 직접적 기능 계약으로 올린다:
+        - done_when 문구 5건 재작성 (ms-init/eval/status/report API 각 1건 +
+          plugin manifest validator 통과 1건)
+        - done_when_refs[0..4]를 file-exists → eval-ref로 전환, 값을 신규
+          evals[] 이름에 바인딩
+        - evals[]에 5 신규 entry: 각각 `npm test -- tests/commands/<skill>.test.ts`
+          (또는 plugin-validator test file) 실행
+
+      index 5(README)는 기능 계약 없이 유지 — 권장 작업 4(설치 가이드 npm
+      primary 승격)에서 README 구조 자체가 재설계될 예정이라 churn 회피. index
+      6-9는 이미 기능 계약(자동/LLM eval)이라 불변.
+
+      재평가 결과: 10/10 PASS, resolved_by: ref 10 (eval-ref 9 + file-exists 1).
+      v1.21.6 대비 eval-ref 4 → 9 증가 (기능 검증 축 +5). 369/369 tests 불변,
+      schema valid, registry green.
+
+      SemVer: MDR-006 §PATCH. mission.yaml 자체 편집, consumer surface 불변. 새
+      source/CLI/schema 추가 0. 5 신규 evals는 Mission Spec 본인 self-verification
+      용이며 adopter에게 노출되는 feature 아님.
+    triggered_by: "사용자 요청 — 2026-04-23 self-audit 권장 작업 2번 채택. v1.21.6 (권장 1번)에 이어 내부 계약 정합성 회복 2번째 §PATCH."
+    issue_or_context: |
+      2026-04-23 self-audit에서 발견된 drift: v1.0.0 done_when은 '/ms:init 명령으로
+      자연어에서 mission.yaml 초안 자동 생성' 같은 '기능 동작' 계약이었으나,
+      v1.21.6까지 'skills/ms-init/SKILL.md 존재' 같은 '파일 존재' 계약으로 약화됨.
+      ms-eval 10/10 PASS가 기능 동작의 정직한 증거가 아니라 아티팩트 존재의
+      증명에 가까웠다. v1.21.6은 이 계약을 done_when_refs로 explicit하게 바인딩
+      (inference → ref)했지만 계약 문구 자체는 그대로 '존재'였다.
+
+      본 §PATCH는 계약 의미 수준을 올린다. 문구가 '기능 주장'을 담고, 이를 실제
+      test file로 증명. v1.0.0 8개 done_when 중 6개가 functional contract로
+      커버됨 (0-3 ms-init/eval/status/report + 4 plugin-validator + 기존 유지된
+      cross_platform_verifies). 2개는 이월 (5분 설치 가이드 + 자체 dogfooding).
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-23_v1.21.7_mission.yaml"
+        - "mission.yaml evals[]: ms_init_functional / ms_eval_functional / ms_status_functional / ms_report_functional / plugin_manifest_valid (5 신규 automated evals, 각각 npm test -- <test file> 서브셋 실행)"
+      modified:
+        - "mission.yaml done_when[0..4]: 문구를 '파일 존재' → '기능 동작' 계약으로 재작성 (5 entries)"
+        - "mission.yaml done_when_refs[0..4]: file-exists → eval-ref로 kind 전환, value를 신규 evals[] 이름으로 바인딩 (5 entries)"
+        - "mission.yaml: title + version 1.21.6 → 1.21.7 + lineage.total_revisions 54 → 55"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 54 → 55 + latest_version 1.21.6 → 1.21.7 + mission_title sync + v1.21.6 related_commits 백필(2c06941)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.6 → 1.21.7"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.7 entry 추가 (ref_kind 분포 변화 기록)"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.7 bullet 추가 + version range v1.14.2 ~ v1.21.7"
+      removed: []
+    done_when_delta:
+      added: []
+      modified:
+        - "done_when[0]: 'skills/ms-init/SKILL.md 존재' → 'ms-init API가 자연어 goal에서 schema-valid mission.yaml draft를 반환'"
+        - "done_when[1]: 'skills/ms-eval/SKILL.md 존재' → 'ms-eval API가 done_when 기준별 pass/fail을 계산'"
+        - "done_when[2]: 'skills/ms-status/SKILL.md 존재' → 'ms-status API가 진행 요약과 drift 경고를 markdown으로 반환'"
+        - "done_when[3]: 'skills/ms-report/SKILL.md 존재' → 'ms-report API가 평가 결과 markdown 리포트를 생성'"
+        - "done_when[4]: '.claude-plugin/plugin.json 존재' → 'plugin manifest가 plugin-validator 전체 체크 통과'"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "minimal — self-description surface 변경만. consumer-visible runtime / CLI / API / 스키마 / 테스트 영향 없음. 5 신규 evals의 command는 모두 기존 test file 실행 (파일 자체 불변, 서브셋 호출). ms-eval latency은 각 eval당 ~3-5초 증가 (npm 서브셋 호출 오버헤드) — diagnostic 용도라 허용. 369/369 tests 불변, schema valid, registry green. v1.21.6과 동일 grade."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-23_v1.21.7_mission.yaml"
+    follow_up:
+      - "권장 작업 3번(goal drift MDR, MDR-009 후보) — v1.0.0 8개 → v1.21.7 10개 done_when 매핑과 2개 이월 항목(5분 가이드 / self-dogfooding)을 공식 기록"
+      - "권장 작업 4번(README 설치 가이드 npm install primary 승격 + 기능 계약 eval 추가) — 이 때 index 5(README)를 functional contract로 복원"
+      - "권장 작업 5번(approvals[] gates stale 정리) — 'release: v1.0.0 릴리스 전 최종 승인' 같은 닫힌 gate 처리"
+
   - change_id: "MSC-2026-04-23-006"
     semantic_version: "1.21.6"
     change_sequence: 58
@@ -92,7 +181,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "minimal — self-description surface 변경만. consumer-visible runtime / CLI / API / 스키마 / 테스트 영향 없음. 기존 adopter의 mission.yaml은 영향받지 않음(자기 mission.yaml에만 국한). 369/369 tests 불변 (pre-commit parity가 post-edit ms-eval 10/10 PASS로 이미 확증). 유일한 의미 있는 변화는 self-eval의 `resolved_by` 필드 값(`inference` → `ref`) — 자기 자신 관점에서는 정직성 강화, 외부 관점에서는 관찰 불가."
-    related_commits: []
+    related_commits: ["2c06941"]
     related_decisions: []
     snapshot_after: ".mission/snapshots/2026-04-23_v1.21.6_mission.yaml"
     follow_up:

@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.7] - 2026-04-23
+_v1.21.6 self-dogfooding 후속. done_when[0..4]의 약화된 '파일 존재' 문구를 '기능 동작' 계약으로 복원하고, 각 인덱스를 해당 skill의 test file을 실행하는 신규 eval에 바인딩한다. 권장 작업 2번 구현. done_when 문구가 실질적 기능 주장을 담도록 계약의 의미적 수준을 올린다._
+
+### Added
+
+- .mission/snapshots/2026-04-23_v1.21.7_mission.yaml
+- mission.yaml evals[]: ms_init_functional / ms_eval_functional / ms_status_functional / ms_report_functional / plugin_manifest_valid (5 신규 automated evals, 각각 npm test -- <test file> 서브셋 실행)
+
+### Changed
+
+- mission.yaml done_when[0..4]: 문구를 '파일 존재' → '기능 동작' 계약으로 재작성 (5 entries)
+- mission.yaml done_when_refs[0..4]: file-exists → eval-ref로 kind 전환, value를 신규 evals[] 이름으로 바인딩 (5 entries)
+- mission.yaml: title + version 1.21.6 → 1.21.7 + lineage.total_revisions 54 → 55
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 54 → 55 + latest_version 1.21.6 → 1.21.7 + mission_title sync + v1.21.6 related_commits 백필(2c06941)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.6 → 1.21.7
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.7 entry 추가 (ref_kind 분포 변화 기록)
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.7 bullet 추가 + version range v1.14.2 ~ v1.21.7
+
 ## [1.21.6] - 2026-04-23
 _자기 자신의 mission.yaml done_when 10개를 v1.21.0 IMP-10 `done_when_refs`로 explicit하게 바인딩한다. audit 결과 10개 criteria 전부 `resolved_by: "inference"`로 평가되고 있었다 — Mission Spec은 ms-status drift 경고로 adopter에게 inference-only 계약을 경고하면서 자기 자신엔 동일 기능을 적용하지 않는 self-dogfooding 구멍이 있었다._
 
