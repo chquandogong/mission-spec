@@ -6,6 +6,24 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.11] - 2026-04-24
+_권장 작업 5번 구현. mission.yaml의 `approvals[]` 블록 4 gates(schema_design / first_command / cross_platform / release)가 전부 pre-v1.0.0 릴리스 시점 맥락으로 현재 활성 가치 없는 stale 상태임을 정리. 블록 전체 제거 + 주석으로 이유 명시. 역사 기록은 v1.0.0 snapshot(immutable)에 보존._
+
+### Changed
+
+- mission.yaml: approvals[] 블록(4 entries) 제거 + 주석 기록 (원본은 v1.0.0 snapshot 참조 안내)
+- mission.yaml: title + version 1.21.10 → 1.21.11 + lineage.total_revisions 58 → 59
+- mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.10 related_commits 백필(fac1451)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.10 → 1.21.11
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.11 entry 추가
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.11 bullet 추가 + version range v1.14.2 ~ v1.21.11
+- .mission/snapshots/2026-04-24_v1.21.11_mission.yaml 신규
+
+### Removed
+
+- mission.yaml approvals[] 4 entries (schema_design / first_command / cross_platform / release)
+
 ## [1.21.10] - 2026-04-24
 _권장 작업 4번 구현. README 3종(EN/KO/ZH)의 설치 가이드를 npm install primary로 재구성하고, done_when[5] '`README.md 존재`'를 'README가 npm install primary 설치 가이드 + 4 skill API 사용 예시 제공' functional contract로 복원한다. MDR-009 §V에서 v1.21.10 owner로 명시된 항목의 closure._
 

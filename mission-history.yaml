@@ -4,15 +4,102 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.10 — README install guide npm primary + done_when[5] 복원 (§PATCH)"
+  mission_title: "Mission Spec v1.21.11 — approvals[] stale gates 제거 (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 58
-  latest_version: "1.21.10"
+  total_revisions: 59
+  latest_version: "1.21.11"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-004"
+    semantic_version: "1.21.11"
+    change_sequence: 63
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "self-description"
+    persistence: "permanent"
+    intent: "권장 작업 5번 구현. mission.yaml의 `approvals[]` 블록 4 gates(schema_design / first_command / cross_platform / release)가 전부 pre-v1.0.0 릴리스 시점 맥락으로 현재 활성 가치 없는 stale 상태임을 정리. 블록 전체 제거 + 주석으로 이유 명시. 역사 기록은 v1.0.0 snapshot(immutable)에 보존."
+    decision: |
+      v1.21.8까지 mission.yaml에 남아 있던 4 approvals[] entries:
+        - schema_design: 'mission.yaml JSON Schema 확정 전 인간 리뷰'
+          → v1.0.0 릴리스 전 passed, 현재 schema는 draft-07 고정 (통과 후 closed)
+        - first_command: 'ms-init 첫 작동 확인 후 나머지 진행'
+          → v1.0.0 릴리스 전 passed, ms-init는 v1.21.10 시점까지 58 revisions 누적
+        - cross_platform: 'Codex가 cross-platform 호환성 adversarial review'
+          → v1.0.0 릴리스 전 초판 review passed. 현재 Rev.N 3-vendor 루프는
+            mission-spec schema의 `approvals[]` semantic('mission 완료 전 승인
+            필요한 gate')에 맞지 않는 외부 워크플로 (approver가 "codex" 단일
+            지정이지만 실제는 Claude/Codex/Gemini 3-vendor)
+        - release: 'v1.0.0 릴리스 전 최종 승인'
+          → 명시적으로 v1.0.0-specific, 2026-04-02 이후 closed
+
+      전부 archive 대상. mission-spec schema `approvals[]`는 optional이라
+      블록 전체 제거가 schema-valid. 원본 approvals[]는 v1.0.0 snapshot
+      (`.mission/snapshots/2026-04-02_v1.0.0_mission.yaml`)에 immutable하게
+      보존되므로 역사적 증거는 유실 없음.
+
+      제거 대신 주석으로 "왜 비어있는가"를 명시해 미래 reviewer / adopter가
+      '여기 뭐가 있었나?'에 답할 수 있게 함. 빈 배열 `approvals: []`로
+      남기는 것보다 블록 자체 제거가 더 명확.
+
+      SemVer: MDR-006 §PATCH (mission.yaml 자체 편집, consumer surface 불변).
+    triggered_by: "사용자 요청 — 2026-04-23 self-audit 권장 작업 5번 채택. 세션 내 v1.21.6~v1.21.10에 이은 6번째이자 마지막 §PATCH."
+    issue_or_context: |
+      mission.yaml의 self-description surface 정합성 마지막 남은 drift.
+      approvals[] 블록이 pre-v1.0.0 시점 gate들을 'Active' 상태인 것처럼
+      유지해 adopter가 읽었을 때 '현재 운영되는 승인 프로세스'로 오인할
+      여지가 있었다. 특히 approver: "codex"는 현재 Rev.N 3-vendor 루프와
+      어긋남 (2026-04-23 self-audit §6 지적).
+
+      해결 옵션 비교:
+        (A) 전체 제거 — 채택. 가장 정직, 역사는 snapshot에 보존
+        (B) 3-vendor adversarial review 반영 재작성 — 기각: adversarial
+            review는 external workflow이며 mission-spec schema의 "mission
+            완료 전 필수 gate" semantic과 맞지 않음
+        (C) 빈 배열 유지 (`approvals: []`) — 기각: '왜 비어있는가'가
+            안 보여 blockless (A)보다 명확도 낮음
+    changes:
+      added: []
+      modified:
+        - "mission.yaml: approvals[] 블록(4 entries) 제거 + 주석 기록 (원본은 v1.0.0 snapshot 참조 안내)"
+        - "mission.yaml: title + version 1.21.10 → 1.21.11 + lineage.total_revisions 58 → 59"
+        - "mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.10 related_commits 백필(fac1451)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.10 → 1.21.11"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.11 entry 추가"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.11 bullet 추가 + version range v1.14.2 ~ v1.21.11"
+        - ".mission/snapshots/2026-04-24_v1.21.11_mission.yaml 신규"
+      removed:
+        - "mission.yaml approvals[] 4 entries (schema_design / first_command / cross_platform / release)"
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "minimal — mission.yaml self-description 정리만. approvals는 optional schema field이므로 제거가 schema-valid. local test suite 369/369 불변, runtime 불변, consumer surface 불변. adopter의 mission.yaml에는 영향 없음(자기 mission.yaml에만 국한). 원본 approvals[]는 v1.0.0 snapshot에 보존되므로 역사적 증거 유실 없음."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.11_mission.yaml"
+    follow_up:
+      - "이번 세션의 권장 작업 1~5 전부 closed. 다음 우선순위는 E-4 외부 adopter 유치 (MDR-009 §V v1.22.x dogfooding 복원 작업과 결합 가능)."
+      - "v1.0.0 #8 자체 dogfooding 복원 (MDR-009 §V v1.22.x owner) — `dogfood_test` manual eval을 automated로 승격 or 별도 done_when entry 추가 검토."
+      - "Rev.7 3-vendor synthesis 준비 — baseline 후보: v1.21.11 HEAD."
+
   - change_id: "MSC-2026-04-24-003"
     semantic_version: "1.21.10"
     change_sequence: 62
@@ -105,7 +192,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "minimal — README 3 locale 재배치는 additive (기존 Method 1-3 모두 보존, Method 4로 하나 추가). 기존 adopter가 Marketplace 경로를 따르던 흐름 유지. 신규 scripts/verify-readme.js는 internal validator, consumer-visible 아님. mission.yaml done_when[5] 재기술은 자기 자신 mission.yaml에만 영향 (adopter mission.yaml 무관). ms-eval 10/10 PASS 유지 (eval-ref 10 달성), 369/369 tests 불변."
-    related_commits: []
+    related_commits: ["fac1451"]
     related_decisions:
       [
         "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",

@@ -1,9 +1,49 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-24 | Version: 1.21.10
+# Last updated: 2026-04-24 | Version: 1.21.11
 
 entries:
+  - version: "1.21.11"
+    date: "2026-04-24"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+        resolved_by:
+          ref: 10
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 10
+          file-exists: 0
+    notes: |
+      권장 작업 5번 구현, 세션 내 마지막 §PATCH. approvals[] 블록
+      4 entries(schema_design / first_command / cross_platform / release)
+      제거. 전부 pre-v1.0.0 시점 gate로 2026-04-02 이후 closed 상태.
+      특히 approver: "codex"는 현재 3-vendor adversarial review와 어긋나
+      stale 표지. schema optional field이므로 블록 전체 제거가 schema-valid.
+      원본은 v1.0.0 snapshot에 immutable 보존.
+
+      세션 내 권장 작업 1~5 + release workflow fix 총 6건 §PATCH 완료 상태:
+      v1.21.6 self-dogfooding done_when_refs → v1.21.7 done_when 기능 계약
+      복원 → v1.21.8 workflow depth=1 fix → v1.21.9 MDR-009 → v1.21.10
+      README npm primary + done_when[5] 복원 → v1.21.11 approvals 제거.
+      ref_kind eval-ref 10 유지, 369/369 tests 불변. mission.yaml
+      self-description surface 정합성 세션 종결.
+
   - version: "1.21.10"
     date: "2026-04-24"
     verified_by: "Claude Opus 4.7"
