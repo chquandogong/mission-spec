@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.21.13",
+  "version": "1.21.14",
   "description": "Mission Spec — task contract layer for AI agent workflows. Provides library API, Claude Code skill bundle, Living Asset Registry, LLM/subjective evaluation override, and Architecture Registry.",
   "author": {
     "name": "Dr. QUAN",

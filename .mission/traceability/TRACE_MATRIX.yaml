@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-22 | Version: 1.21.13
+# Last updated: 2026-04-22 | Version: 1.21.14
 
 # ── done_when 기준 추적 ──
 
@@ -69,7 +69,7 @@ requirements:
       - "src/schema/mission.schema.json"
       - "src/schema/mission-history.schema.json"
     tests:
-      - "tests/schema.test.ts (42 tests)"
+      - "tests/schema.test.ts (47 tests)"
       - "tests/commands/eval.test.ts: runs automated eval"
 
   - criterion: "command_test"
@@ -151,7 +151,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.21.2 기준, 25 files / 369 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.21.13 기준, 25 files / 369 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"

@@ -1,7 +1,7 @@
 # Mission Spec — Reconstruction Playbook
 
 > 이 문서는 소스코드 없이 Mission Spec 자산만으로 프로젝트를 처음부터 재구현할 때 참고하는 가이드입니다.
-> Last updated: 2026-04-22 | Version: 1.21.13
+> Last updated: 2026-04-22 | Version: 1.21.14
 
 ## 전제 조건
 
@@ -48,7 +48,7 @@
 ## Phase 4: 스키마 → 검증 (TDD)
 
 17. `mission.schema.json` + `mission-history.schema.json` 작성 — ARCHITECTURE_CURRENT.yaml의 `validator` 모듈 exports 참조
-18. `tests/schema.test.ts` 먼저 작성(RED, 42 tests — v1.21.1 기준, `done_when_refs` schema 포함)
+18. `tests/schema.test.ts` 먼저 작성(RED, 47 tests — v1.21.13 기준, `done_when_refs` schema + `normalizeHistoryData` warnings 포함)
 19. `src/schema/validator.ts` 구현 — `validateMission()`, `validateHistory()` (+ sparse legacy history normalization)
 20. `npm test` GREEN 확인
 

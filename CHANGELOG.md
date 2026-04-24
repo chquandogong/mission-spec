@@ -6,6 +6,25 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.14] - 2026-04-24
+_사용자 요청 '깃을 확인하여, 문서를 검토하고, 일관성을 정리해줘' 수행 중 발견된 Living Asset Registry 내부 test count drift 수정. REBUILD_PLAYBOOK line 51과 TRACE_MATRIX line 72가 `tests/schema.test.ts`의 count를 '42 tests (v1.21.1 기준)'으로 claiming하지만 실제 현재는 47 tests (v1.21.2 Rev.5 Q2에서 normalizeHistoryData warnings layer 5 test 추가됨)._
+
+### Added
+
+- .mission/snapshots/2026-04-24_v1.21.14_mission.yaml
+
+### Changed
+
+- .mission/reconstruction/REBUILD_PLAYBOOK.md line 51: schema.test.ts count 42 → 47, '기준' v1.21.1 → v1.21.13, description 'normalizeHistoryData warnings 포함' 추가
+- .mission/traceability/TRACE_MATRIX.yaml line 72: `tests/schema.test.ts (42 tests)` → `(47 tests)`
+- .mission/traceability/TRACE_MATRIX.yaml line 154: `v1.21.2 기준, 25 files / 369 tests` → `v1.21.13 기준, 25 files / 369 tests`
+- mission.yaml: title + version 1.21.13 → 1.21.14 + lineage.total_revisions 61 → 62
+- mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.13 related_commits 백필(8ad1b13)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.13 → 1.21.14
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.14 entry
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.14 bullet + version range v1.14.2 ~ v1.21.14
+
 ## [1.21.13] - 2026-04-24
 _MDR-009 §V에서 owner로 명시된 2건(v1.0.0 #7 → v1.21.10, v1.0.0 #8 → v1.22.x)이 각각 v1.21.10과 v1.21.12에서 closure됐음을 MDR-009 amendment로 정식 기록. §V 원본 표는 미수정(audit trail 보존), 말미에 closure block 추가._
 

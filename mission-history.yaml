@@ -4,15 +4,100 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.13 — MDR-009 §V closure amendment (§PATCH)"
+  mission_title: "Mission Spec v1.21.14 — consistency audit test-count drift fix (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 61
-  latest_version: "1.21.13"
+  total_revisions: 62
+  latest_version: "1.21.14"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-007"
+    semantic_version: "1.21.14"
+    change_sequence: 66
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "correctness"
+    persistence: "permanent"
+    intent: "사용자 요청 '깃을 확인하여, 문서를 검토하고, 일관성을 정리해줘' 수행 중 발견된 Living Asset Registry 내부 test count drift 수정. REBUILD_PLAYBOOK line 51과 TRACE_MATRIX line 72가 `tests/schema.test.ts`의 count를 '42 tests (v1.21.1 기준)'으로 claiming하지만 실제 현재는 47 tests (v1.21.2 Rev.5 Q2에서 normalizeHistoryData warnings layer 5 test 추가됨)."
+    decision: |
+      consistency 감사에서 발견된 드리프트 2건 수정:
+
+      (1) `.mission/reconstruction/REBUILD_PLAYBOOK.md` line 51:
+          - Before: "`tests/schema.test.ts` 먼저 작성(RED, 42 tests — v1.21.1 기준, `done_when_refs` schema 포함)"
+          - After:  "`tests/schema.test.ts` 먼저 작성(RED, 47 tests — v1.21.13 기준, `done_when_refs` schema + `normalizeHistoryData` warnings 포함)"
+
+      (2) `.mission/traceability/TRACE_MATRIX.yaml` line 72 + 154:
+          - Before: `tests/schema.test.ts (42 tests)`
+          - After:  `tests/schema.test.ts (47 tests)`
+          - Before: `# ── 테스트 파일 → 모듈 매핑 (v1.21.2 기준, 25 files / 369 tests) ──`
+          - After:  `# ── 테스트 파일 → 모듈 매핑 (v1.21.13 기준, 25 files / 369 tests) ──`
+
+      드리프트 원인: v1.21.2 §PATCH에서 `normalizeHistoryData` null/array/string
+      coercion warnings(Rev.5 Q2 — Codex)에 대한 5 schema 테스트를 추가하면서
+      `tests/schema.test.ts`가 42 → 47 tests로 성장했지만, REBUILD_PLAYBOOK /
+      TRACE_MATRIX의 count 주장이 v1.21.2 시점에 동기화되지 않았다. 이후 12
+      release 동안 silent drift 유지.
+
+      registry:check는 현재 `total tests` 수치(369)와 `test file count`(25)만
+      검증하고 개별 test file 내부 count는 비교하지 않아 silent drift를 잡지
+      못했다. 이번 발견은 사용자 요청 consistency audit에서 시각적으로 42 vs
+      47 mismatch를 확인해 잡음.
+
+      Follow-up: registry:check에 개별 test file count drift 감지 확장을
+      v1.22.x 또는 IMP-NN 후보로 추가 검토. 본 §PATCH는 수치 수정만.
+
+      SemVer: MDR-006 §PATCH (.mission/ docs-only content fix, consumer
+      surface 불변). 369/369 tests 불변, schema valid.
+    triggered_by: "사용자 요청 '깃을 확인하여, 문서를 검토하고, 일관성을 정리해줘' 감사 수행 중 발견."
+    issue_or_context: |
+      Living Asset Registry 내부 수치 주장이 registry:check가 커버하지 않는
+      granularity에서 drift 유지된 상태. 본 수정은 단순 숫자 갱신이지만,
+      registry:check의 잠재 blind spot(per-file test count 검증 부재)을
+      노출했다는 점에서 가치 있다 — v1.22.x 후보로 follow-up 기록.
+
+      (docs/PROJECT_REVIEW_V1.21.13_2026-04-24.md §3의 "snapshots: 60 files"
+      → "61 files" 드리프트도 함께 발견했지만 docs/는 gitignored local
+      artifact이므로 본 §PATCH changes에는 포함 안 함. 로컬 수정으로 처리.)
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-24_v1.21.14_mission.yaml"
+      modified:
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md line 51: schema.test.ts count 42 → 47, '기준' v1.21.1 → v1.21.13, description 'normalizeHistoryData warnings 포함' 추가"
+        - ".mission/traceability/TRACE_MATRIX.yaml line 72: `tests/schema.test.ts (42 tests)` → `(47 tests)`"
+        - ".mission/traceability/TRACE_MATRIX.yaml line 154: `v1.21.2 기준, 25 files / 369 tests` → `v1.21.13 기준, 25 files / 369 tests`"
+        - "mission.yaml: title + version 1.21.13 → 1.21.14 + lineage.total_revisions 61 → 62"
+        - "mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.13 related_commits 백필(8ad1b13)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.13 → 1.21.14"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.14 entry"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.14 bullet + version range v1.14.2 ~ v1.21.14"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — Living Asset Registry 문서 내부 숫자 주장 2건 수정만. consumer surface / runtime / CLI / API / schema / test 코드 영향 없음. 369/369 tests 불변, ms-eval 11/11 PASS eval-ref 11 유지. registry:check / arch:verify / plugin:verify 전부 green 유지."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.14_mission.yaml"
+    follow_up:
+      - "registry:check 확장 후보 — 개별 test file count를 live source와 대조하는 기능. v1.22.x IMP-NN 또는 §MINOR 검토. 현재는 total(25 files / 369 tests)만 검증되어 per-file drift가 silent 통과."
+      - "Rev.7 3-vendor synthesis baseline을 v1.21.14로 전환 고려 (consistency audit 반영). 단, baseline 변경이 Rev.7 독립성에 영향을 주는지 재평가."
+      - "v1.21.6 npm gap: follow-up 유지."
+
   - change_id: "MSC-2026-04-24-006"
     semantic_version: "1.21.13"
     change_sequence: 65
@@ -84,7 +169,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — 순수 MDR amendment 추가, 원본 MDR-009 §I-§V 미수정. consumer surface / runtime / CLI / API / 스키마 / 테스트 영향 없음. v1.21.5 MDR-008 amendment와 동일 패턴. 369/369 tests 불변, ms-eval 11/11 PASS eval-ref 11 유지."
-    related_commits: []
+    related_commits: ["8ad1b13"]
     related_decisions:
       [
         "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",

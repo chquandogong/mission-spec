@@ -1,9 +1,46 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-24 | Version: 1.21.13
+# Last updated: 2026-04-24 | Version: 1.21.14
 
 entries:
+  - version: "1.21.14"
+    date: "2026-04-24"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      evaluate_mission:
+        criteria_passed: 11
+        criteria_total: 11
+        status: "mission complete"
+        resolved_by:
+          ref: 11
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 11
+          file-exists: 0
+    notes: |
+      사용자 요청 consistency audit 수행 중 발견된 Living Asset Registry 내부
+      test count drift 수정. `tests/schema.test.ts` count 주장이 REBUILD_PLAYBOOK
+      line 51과 TRACE_MATRIX line 72/154에서 42 (v1.21.1/v1.21.2 기준) 표기
+      유지 → 47 (v1.21.13 기준)로 동기화. v1.21.2 §PATCH에서 normalizeHistoryData
+      warnings 5 schema test 추가 이후 12 release 동안 silent drift.
+
+      registry:check blind spot 확인: total tests(369) / file count(25)만
+      검증, per-file count 비교 부재. v1.22.x IMP-NN 후보로 follow-up 기록.
+
+      consumer surface 완전 불변, 369/369 tests 불변, 11/11 ms-eval PASS 유지.
+
   - version: "1.21.13"
     date: "2026-04-24"
     verified_by: "Claude Opus 4.7"
