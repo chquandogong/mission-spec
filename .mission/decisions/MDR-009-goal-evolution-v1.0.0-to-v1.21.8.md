@@ -123,6 +123,36 @@ The goal wording "cross-platform plugin" from v1.0.0 is superseded by "portable 
 
 ---
 
+## Amendment — 2026-04-24 (v1.21.13): §V closure recording
+
+**Trigger**: Both §V deferred items closed within the same session as MDR-009 creation. §V ownership table now has concrete completion evidence and should not claim "deferred" indefinitely.
+
+### §V status update
+
+| v1.0.0 #                | Original §V owner | Actual closure                                     | Evidence                                                                                                                                      |
+| ----------------------- | ----------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 7 (5-min install guide) | v1.21.10 §PATCH   | **v1.21.10** (commit `fac1451`)                    | `scripts/verify-readme.js` + `evals[].readme_install_guide_valid` + `done_when[5]` rewording + README 3종 Method 1 npm install primary 재배치 |
+| 8 (self-dogfooding)     | v1.22.x or later  | **v1.21.12** (commit `69736e6`, ahead of schedule) | `scripts/verify-dogfooding.js` + `evals[].dogfooding_active` + `done_when[10]` (신규 11번째 entry)                                            |
+
+Both items are now **closed**. v1.0.0 원본 8 done_when 전수 (8/8) functional contract로 커버된 상태 — §III 표의 "deferred" 라벨 2건이 "covered"로 전환됐다.
+
+### §V v1.22.x acceleration rationale
+
+§V는 v1.0.0 #8 owner를 v1.22.x로 표기했으나 v1.21.12 세션 컨텍스트에서 앞당겨 실행됐다. 근거:
+
+- **Session coherence** — v1.21.6~v1.21.11 6개 §PATCH가 self-dogfooding / 기능 계약 / governance / README 재배치를 한 줄에 닫았다. #8만 별도 MINOR/다른 세션으로 떼어낼 이유 부재
+- **Overlap concern 재평가** — MDR-009 §V 초안은 `dogfood_test` manual eval이 `command_test` + `schema_validation_passes`와 overlap한다고 기록. 실제 설계 과정에서 `dogfooding_active` 자동 eval을 **Living Asset Registry 실사용 evidence** 축(timeline entries + related_commits 커버리지 + MDR 존재 + snapshot 존재) 기준으로 구성해 overlap 해소. 세 eval은 각자 다른 proposition을 증명:
+  - `command_test` — unit test 통과 (소스 수준 correctness)
+  - `schema_validation_passes` — mission.yaml 파싱 가능 (스키마 수준 correctness)
+  - `dogfooding_active` — Living Asset Registry가 scaffolded 너머 실사용 evidence (운영 수준 활용도)
+- **Maximal-clean ref_kind 상태** — v1.21.10 시점 ref_kind eval-ref:10 + file-exists:0 달성. v1.21.12에서 entry 하나 추가(10→11)하되 동일 분포(eval-ref:11) 유지 가능. 세션 외로 미루면 "v1.0.0 전수 커버 + 순수 eval-ref" 상태를 다음 release 후까지 지연 — 의미적 milestone 상실
+
+### Precedent for future MDR §V acceleration
+
+§V 이월 항목을 원래 owner 버전 도달 전에 앞당겨 실행하는 것은 허용되며, 그 경우 **본 amendment 패턴**(원 §V 미수정, 아래에 closure block 추가)을 따른다. §V 원본 표를 rewrite하는 것은 금지 — 이월 의사결정 자체가 audit trail의 일부이므로.
+
+---
+
 > MDR triggers (refer to `.mission/templates/MDR_TEMPLATE.md` for the full checklist):
 >
 > 1. `goal` direction changes

@@ -6,6 +6,24 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.13] - 2026-04-24
+_MDR-009 §V에서 owner로 명시된 2건(v1.0.0 #7 → v1.21.10, v1.0.0 #8 → v1.22.x)이 각각 v1.21.10과 v1.21.12에서 closure됐음을 MDR-009 amendment로 정식 기록. §V 원본 표는 미수정(audit trail 보존), 말미에 closure block 추가._
+
+### Added
+
+- .mission/snapshots/2026-04-24_v1.21.13_mission.yaml
+- .mission/decisions/MDR-009 'Amendment — 2026-04-24 (v1.21.13): §V closure recording' block (§V status update 표 + v1.22.x acceleration rationale + future §V acceleration precedent)
+
+### Changed
+
+- .mission/decisions/MDR-009-goal-evolution-v1.0.0-to-v1.21.8.md: amendment 블록 추가만, 원본 §I-§V 미수정
+- mission.yaml: title + version 1.21.12 → 1.21.13 + lineage.total_revisions 60 → 61
+- mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.12 related_commits 백필(69736e6)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.12 → 1.21.13
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.13 entry 추가
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.13 bullet + version range v1.14.2 ~ v1.21.13
+
 ## [1.21.12] - 2026-04-24
 _MDR-009 §V에서 v1.22.x owner로 이월됐던 v1.0.0 #8 (자체 mission.yaml로 dogfooding 완료) 복원을 v1.21.12로 앞당겨 closure. 신규 자동화 eval `dogfooding_active`로 Living Asset Registry 실사용 evidence를 검증하고, done_when[10]에 바인딩해 '자기 자신의 도구를 실제 사용 중임'을 기능 계약 수준으로 증명한다._
 

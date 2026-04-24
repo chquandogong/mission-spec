@@ -4,15 +4,98 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.12 — dogfooding done_when 복원 (v1.0.0 #8 closure, §PATCH)"
+  mission_title: "Mission Spec v1.21.13 — MDR-009 §V closure amendment (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 60
-  latest_version: "1.21.12"
+  total_revisions: 61
+  latest_version: "1.21.13"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-006"
+    semantic_version: "1.21.13"
+    change_sequence: 65
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "MDR-009 §V에서 owner로 명시된 2건(v1.0.0 #7 → v1.21.10, v1.0.0 #8 → v1.22.x)이 각각 v1.21.10과 v1.21.12에서 closure됐음을 MDR-009 amendment로 정식 기록. §V 원본 표는 미수정(audit trail 보존), 말미에 closure block 추가."
+    decision: |
+      MDR-009 §V의 두 이월 항목이 실제로는 다음과 같이 closure됐다:
+        - v1.0.0 #7 (5-minute install guide): §V 표기 owner v1.21.10 §PATCH
+          → **v1.21.10** (commit fac1451)에서 closure — 공칭 일치
+        - v1.0.0 #8 (self-dogfooding): §V 표기 owner v1.22.x or later
+          → **v1.21.12** (commit 69736e6)에서 ahead-of-schedule closure
+
+      MDR-009 §V 표는 "deferred" 라벨을 유지하고 있어 현재 adopter / reviewer가
+      읽었을 때 "아직 이월 중"으로 오인할 수 있다. 하지만 §III 표 rewrite는
+      금지되어야 한다 — 이월 의사결정 자체가 audit trail의 일부이기 때문.
+
+      **채택 방식**: §V와 별도로 말미에 "Amendment — 2026-04-24 (v1.21.13):
+      §V closure recording" 블록 추가. MDR-008 amendment(v1.21.5) 선례 동일.
+      amendment는:
+        (a) §V 표의 현재 상태(closed) 갱신 (별도 closure 표)
+        (b) #8이 v1.22.x → v1.21.12로 앞당겨진 근거 3건 기록 (session
+            coherence / overlap 재평가 / maximal-clean ref_kind 유지)
+        (c) Future §V acceleration precedent 문서화 ("앞당김은 허용,
+            §V 원본 rewrite는 금지")
+
+      SemVer: MDR-006 §PATCH (MDR amendment, docs only). v1.21.5에서 MDR-008
+      amendment와 동일 grade.
+    triggered_by: "사용자 요청 — 세션 내 남은 follow-up 중 MDR-009 §V 표 업데이트 실행 (v1.21.6 npm gap은 NPM_TOKEN 부재로 스킵)."
+    issue_or_context: |
+      MDR-009가 v1.21.9에서 작성됐을 당시 §V는 두 이월 항목에 "v1.21.10"과
+      "v1.22.x or later" owner를 명시. 이후:
+        - v1.21.10에서 #7 closure (§V 예측과 공칭 일치)
+        - v1.21.12에서 #8 ahead-of-schedule closure (§V 예측보다 앞당김)
+
+      세션 종료 전에 §V amendment를 추가하지 않으면 다음 읽는 사람에게 "이
+      MDR은 미완의 상태로 남아있다"로 읽힘. 실제 작업은 완료됐지만 문서는
+      stale — MDR governance 시스템의 본질적 drift.
+
+      v1.21.5 MDR-008 amendment가 이 패턴의 선례: 원본 MDR은 그대로 두고
+      말미에 amendment block을 추가. §INVARIANT(재현성 보존)도 유지됨.
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-24_v1.21.13_mission.yaml"
+        - ".mission/decisions/MDR-009 'Amendment — 2026-04-24 (v1.21.13): §V closure recording' block (§V status update 표 + v1.22.x acceleration rationale + future §V acceleration precedent)"
+      modified:
+        - ".mission/decisions/MDR-009-goal-evolution-v1.0.0-to-v1.21.8.md: amendment 블록 추가만, 원본 §I-§V 미수정"
+        - "mission.yaml: title + version 1.21.12 → 1.21.13 + lineage.total_revisions 60 → 61"
+        - "mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.12 related_commits 백필(69736e6)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.12 → 1.21.13"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.13 entry 추가"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.13 bullet + version range v1.14.2 ~ v1.21.13"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — 순수 MDR amendment 추가, 원본 MDR-009 §I-§V 미수정. consumer surface / runtime / CLI / API / 스키마 / 테스트 영향 없음. v1.21.5 MDR-008 amendment와 동일 패턴. 369/369 tests 불변, ms-eval 11/11 PASS eval-ref 11 유지."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.13_mission.yaml"
+    follow_up:
+      - "v1.21.6 npm gap: 세션 내 실행 불가 (NPM_TOKEN 필요), follow-up 유지."
+      - "Rev.7 3-vendor synthesis 준비 — v1.21.13 HEAD가 baseline 후보. docs/PROJECT_REVIEW_V1.21.13_2026-04-24.md 작성은 별도 작업."
+      - "MDR-009가 향후 §V acceleration precedent 확립 — 이후 MDR들에서 이월 owner가 앞당겨지면 본 amendment 패턴 따름."
+
   - change_id: "MSC-2026-04-24-005"
     semantic_version: "1.21.12"
     change_sequence: 64
@@ -112,7 +195,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "minimal — mission.yaml self-description 확장만. done_when 10→11 entries는 자기 자신의 완료 기준 강화, adopter의 mission.yaml엔 영향 없음. 새 scripts/verify-dogfooding.js는 internal validator, consumer-visible 아님. ms-eval 11/11 PASS 유지 (resolved_by ref 11, ref_kind eval-ref 11 — 가장 깨끗한 상태). 369/369 tests 불변, schema valid, registry green."
-    related_commits: []
+    related_commits: ["69736e6"]
     related_decisions:
       [
         "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",
