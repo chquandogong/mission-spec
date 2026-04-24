@@ -6,6 +6,27 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.12] - 2026-04-24
+_MDR-009 §V에서 v1.22.x owner로 이월됐던 v1.0.0 #8 (자체 mission.yaml로 dogfooding 완료) 복원을 v1.21.12로 앞당겨 closure. 신규 자동화 eval `dogfooding_active`로 Living Asset Registry 실사용 evidence를 검증하고, done_when[10]에 바인딩해 '자기 자신의 도구를 실제 사용 중임'을 기능 계약 수준으로 증명한다._
+
+### Added
+
+- scripts/verify-dogfooding.js (신규 validator, 5 thresholds: done_when/timeline/related_commits coverage/MDR/snapshot)
+- mission.yaml evals[]: dogfooding_active entry 추가 (`node scripts/verify-dogfooding.js`)
+- mission.yaml done_when[10]: '자체 Living Asset Registry dogfooding' 신규 항목
+- mission.yaml done_when_refs[10]: eval-ref → dogfooding_active
+- .mission/snapshots/2026-04-24_v1.21.12_mission.yaml
+
+### Changed
+
+- mission.yaml: title + version 1.21.11 → 1.21.12 + lineage.total_revisions 59 → 60 + done_when 10→11 entries
+- mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.11 related_commits 백필(394cf5f)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.11 → 1.21.12
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/CURRENT_STATE.md 완료 조건 섹션: v1.21.5 이후 wording drift 해소, 11 entries로 업데이트
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.12 bullet + version range v1.14.2 ~ v1.21.12
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.12 entry (11/11 PASS, v1.0.0 8/8 커버 달성)
+
 ## [1.21.11] - 2026-04-24
 _권장 작업 5번 구현. mission.yaml의 `approvals[]` 블록 4 gates(schema_design / first_command / cross_platform / release)가 전부 pre-v1.0.0 릴리스 시점 맥락으로 현재 활성 가치 없는 stale 상태임을 정리. 블록 전체 제거 + 주석으로 이유 명시. 역사 기록은 v1.0.0 snapshot(immutable)에 보존._
 

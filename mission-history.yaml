@@ -4,15 +4,126 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.11 — approvals[] stale gates 제거 (§PATCH)"
+  mission_title: "Mission Spec v1.21.12 — dogfooding done_when 복원 (v1.0.0 #8 closure, §PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 59
-  latest_version: "1.21.11"
+  total_revisions: 60
+  latest_version: "1.21.12"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-005"
+    semantic_version: "1.21.12"
+    change_sequence: 64
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "self-dogfooding"
+    persistence: "permanent"
+    intent: "MDR-009 §V에서 v1.22.x owner로 이월됐던 v1.0.0 #8 (자체 mission.yaml로 dogfooding 완료) 복원을 v1.21.12로 앞당겨 closure. 신규 자동화 eval `dogfooding_active`로 Living Asset Registry 실사용 evidence를 검증하고, done_when[10]에 바인딩해 '자기 자신의 도구를 실제 사용 중임'을 기능 계약 수준으로 증명한다."
+    decision: |
+      MDR-009 §V에서 v1.0.0 #8 복원 owner를 v1.22.x로 표기했지만, v1.21.12
+      세션에서 바로 처리 가능하다고 판단해 앞당김. 근거:
+
+      (a) 이번 세션의 v1.21.7→v1.21.10 기능 계약 복원 기조와 한 줄 — 2개로
+          분리할 강한 이유 없음
+      (b) 자동화 기준을 maximal-honest로 설계하면 overlap 우려 해소됨:
+          - command_test는 '모든 unit test 통과' 증명
+          - schema_validation_passes는 'mission.yaml 파싱 가능' 증명
+          - dogfooding_active는 'Living Asset Registry가 scaffolded 너머 실사용
+            evidence 유지' 증명 — 별개 축
+      (c) MDR-009 §V에 "restoration requires promoting `dogfood_test` to
+          automated or binding to new done_when entry"라 명시됨. (A2) 채택:
+          새 자동 eval 추가 (manual `dogfood_test`는 narrative 목적으로 유지).
+
+      신규 `scripts/verify-dogfooding.js` — 5 thresholds (non-scaffolded bar):
+        1. mission.yaml done_when ≥ 1 entry
+        2. mission-history.yaml timeline ≥ 1 entry
+        3. related_commits 커버리지 ≥ 50% (persistence != "summarized" 기준)
+        4. .mission/decisions/ MDR ≥ 1 파일
+        5. .mission/snapshots/ snapshot ≥ 1 파일
+
+      실측: 10 done_when (v1.21.12는 11), 59 timeline entries, 98.3%
+      related_commits 커버리지 (최신 entry만 자기 commit 미포함, 다른 모든
+      entry 백필됨), 9 MDRs, 59 snapshots. 전부 임계 초과.
+
+      **ms-eval 결과**: 11/11 PASS, `ref: 11`, `ref_kind eval-ref: 11`.
+      resolved_by non-ref 0건, file-exists 0건, manual 0건, inference 0건.
+      v1.0.0 원본 8 done_when 중 **8/8 전체가 functional contract로 커버됨**
+      (세션 시작 시점 6/8 → 세션 종료 시 8/8, drift 완전 해소).
+
+      함께 처리된 stale: CURRENT_STATE.md "완료 조건" 섹션이 v1.21.7 이후
+      mission.yaml done_when wording과 drift 상태로 5 revision 유지되던
+      문제. v1.21.12 신규 11 entries로 업데이트.
+
+      SemVer: MDR-006 §PATCH. mission.yaml 자체 편집 + 1 신규 internal
+      script, consumer surface 불변. 369/369 tests 불변.
+    triggered_by: "사용자 요청 '남은 항목도 진행해주세요' — MDR-009 §V v1.22.x dogfooding 복원과 v1.21.6 npm gap 재publish. 전자는 실행, 후자는 NPM_TOKEN 로컬 자격증명 필요로 스킵 (follow-up 유지)."
+    issue_or_context: |
+      v1.0.0 #8 '자체 mission.yaml로 dogfooding 완료 (이 파일 자체)'은 v1.0.0
+      릴리스 시점의 원본 8개 done_when 중 유일하게 세션 종료 직전까지 복원
+      안 된 항목이었다. MDR-009 §V가 v1.22.x owner로 이월했지만, v1.21.12
+      세션 컨텍스트에서 처리하는 것이 더 일관됨:
+        - v1.21.7: index 0-4 기능 계약 복원
+        - v1.21.10: index 5 (README) 기능 계약 복원
+        - v1.21.12: index 10 (자체 dogfooding) 신규 추가 → 8/8 원본 커버
+
+      CURRENT_STATE.md "완료 조건" 섹션이 v1.21.5 이후 wording drift 상태를
+      유지하고 있었던 부수 문제도 본 §PATCH가 해결 (registry:check가 이
+      섹션의 pass/fail count만 검증하고 wording은 비교하지 않기 때문에 5
+      revision 동안 silent drift).
+
+      v1.21.6 npm gap 재publish는 실행 불가:
+        - retag 옵션: v1.21.6 tag의 commit package.json.version = 1.21.6.
+          다른 commit에 retag하려면 그 commit의 version도 1.21.6이어야
+          workflow `EXPECTED_TAG=v$PKG_VERSION` 체크 통과. 해당 commit 없음.
+        - 수동 publish 옵션: NPM_TOKEN 로컬 자격증명 필요 + CI gate 우회
+          (바람직하지 않음)
+        → 기록만 유지, 향후 adopter 요청 시 재검토 (follow-up).
+    changes:
+      added:
+        - "scripts/verify-dogfooding.js (신규 validator, 5 thresholds: done_when/timeline/related_commits coverage/MDR/snapshot)"
+        - "mission.yaml evals[]: dogfooding_active entry 추가 (`node scripts/verify-dogfooding.js`)"
+        - "mission.yaml done_when[10]: '자체 Living Asset Registry dogfooding' 신규 항목"
+        - "mission.yaml done_when_refs[10]: eval-ref → dogfooding_active"
+        - ".mission/snapshots/2026-04-24_v1.21.12_mission.yaml"
+      modified:
+        - "mission.yaml: title + version 1.21.11 → 1.21.12 + lineage.total_revisions 59 → 60 + done_when 10→11 entries"
+        - "mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.11 related_commits 백필(394cf5f)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.11 → 1.21.12"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/CURRENT_STATE.md 완료 조건 섹션: v1.21.5 이후 wording drift 해소, 11 entries로 업데이트"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.12 bullet + version range v1.14.2 ~ v1.21.12"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.12 entry (11/11 PASS, v1.0.0 8/8 커버 달성)"
+      removed: []
+    done_when_delta:
+      added:
+        - "done_when[10]: 'Living Asset Registry가 scaffolded 상태를 넘어 실사용 evidence 유지 (timeline + related_commits 커버리지 ≥ 50% + MDR + 스냅샷)' (v1.0.0 #8 복원)"
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "minimal — mission.yaml self-description 확장만. done_when 10→11 entries는 자기 자신의 완료 기준 강화, adopter의 mission.yaml엔 영향 없음. 새 scripts/verify-dogfooding.js는 internal validator, consumer-visible 아님. ms-eval 11/11 PASS 유지 (resolved_by ref 11, ref_kind eval-ref 11 — 가장 깨끗한 상태). 369/369 tests 불변, schema valid, registry green."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.12_mission.yaml"
+    follow_up:
+      - "v1.21.6 npm gap: 기록 유지, 재publish는 retag/수동 publish 방식 문제로 adopter 요청 시 재검토."
+      - "Rev.7 3-vendor synthesis baseline 후보 = v1.21.12 HEAD (v1.0.0 원본 8/8 전수 커버 시점)."
+      - "MDR-009 §V v1.22.x owner 해제 (v1.21.12 앞당김 수용 후 §V 표 업데이트 필요 — 다음 §PATCH 또는 MDR-010 amendment에서 처리)."
+
   - change_id: "MSC-2026-04-24-004"
     semantic_version: "1.21.11"
     change_sequence: 63
@@ -88,7 +199,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "minimal — mission.yaml self-description 정리만. approvals는 optional schema field이므로 제거가 schema-valid. local test suite 369/369 불변, runtime 불변, consumer surface 불변. adopter의 mission.yaml에는 영향 없음(자기 mission.yaml에만 국한). 원본 approvals[]는 v1.0.0 snapshot에 보존되므로 역사적 증거 유실 없음."
-    related_commits: []
+    related_commits: ["394cf5f"]
     related_decisions:
       [
         "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",

@@ -1,9 +1,57 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-24 | Version: 1.21.11
+# Last updated: 2026-04-24 | Version: 1.21.12
 
 entries:
+  - version: "1.21.12"
+    date: "2026-04-24"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      verify_dogfooding: "dogfooding active: 11 done_when, 59 timeline entries (98.3% related_commits coverage), 9 MDRs, 59 snapshots"
+      evaluate_mission:
+        criteria_passed: 11
+        criteria_total: 11
+        status: "mission complete"
+        resolved_by:
+          ref: 11
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 11
+          file-exists: 0
+    notes: |
+      MDR-009 §V v1.22.x owner로 이월됐던 v1.0.0 #8 (자체 dogfooding) 복원을
+      v1.21.12로 앞당겨 closure. 신규 scripts/verify-dogfooding.js (5
+      thresholds) + eval dogfooding_active + done_when[10] (신규 11번째
+      entry) 추가.
+
+      **v1.0.0 원본 8 done_when → v1.21.12: 8/8 전수 functional contract
+      커버 달성** (0-3 skill API + 4 plugin manifest + 5 README install +
+      9 cross-platform + 10 dogfooding). 세션 시작 시점 6/8 → 세션 종료
+      8/8, drift 완전 해소.
+
+      **ref_kind eval-ref 11 (file-exists 0, manual 0, inference 0)** —
+      11/11 전부 자동화된 기능 계약으로 묶임. 세션 이전 inference:10
+      (v1.21.5) → 이번 세션 ref+eval-ref:11 (v1.21.12), self-dogfooding
+      정합성 maximal.
+
+      CURRENT_STATE.md '완료 조건' 섹션이 v1.21.5 이후 mission.yaml
+      done_when wording과 drift 상태로 5 revision 유지되던 부수 문제도
+      본 §PATCH가 해소 (11 entries로 최신 wording 반영). registry:check는
+      pass/fail count만 검증해 wording drift를 silent하게 통과시켰던 점이
+      drift 원인.
+
   - version: "1.21.11"
     date: "2026-04-24"
     verified_by: "Claude Opus 4.7"
