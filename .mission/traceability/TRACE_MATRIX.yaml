@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-22 | Version: 1.21.9
+# Last updated: 2026-04-22 | Version: 1.21.10
 
 # ── done_when 기준 추적 ──
 

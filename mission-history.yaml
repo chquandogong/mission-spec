@@ -4,15 +4,119 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.9 — MDR-009 goal evolution record (§PATCH)"
+  mission_title: "Mission Spec v1.21.10 — README install guide npm primary + done_when[5] 복원 (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 57
-  latest_version: "1.21.9"
+  total_revisions: 58
+  latest_version: "1.21.10"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-003"
+    semantic_version: "1.21.10"
+    change_sequence: 62
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "self-dogfooding"
+    persistence: "permanent"
+    intent: "권장 작업 4번 구현. README 3종(EN/KO/ZH)의 설치 가이드를 npm install primary로 재구성하고, done_when[5] '`README.md 존재`'를 'README가 npm install primary 설치 가이드 + 4 skill API 사용 예시 제공' functional contract로 복원한다. MDR-009 §V에서 v1.21.10 owner로 명시된 항목의 closure."
+    decision: |
+      **README 구조 변경** (MDR-007 trilingual):
+        - 기존 Method 1: Claude Code Marketplace (권장) → Method 2로 격하
+        - 신규 Method 1: npm install mission-spec (v1.21.4 publish 이후 primary)
+          + npx CLI 예시 + 라이브러리 API import 예시 + sigstore provenance 검증 경로
+        - Method 3: Install from Source (기여자용, 라벨 명시)
+        - Method 4: Local plugin link (기존 Method 3에서 이동)
+        - 순서 재배치는 v1.21.4 npm 첫 publish + v1.21.5 "npm package vs
+          repository" 섹션 추가 이후 README Method 순서가 여전히 pre-npm 시대
+          그대로였던 drift 해소
+
+      **신규 scripts/verify-readme.js** — 10 required markers를 순차 체크:
+      5-Minute Installation Guide 헤더, `npm install mission-spec` 커맨드,
+      `npx mission-spec`, sigstore provenance 언급, Claude Code plugin 경로,
+      `## Usage` 섹션, 4 skill(ms-init/eval/status/report) 이름. 하나라도
+      누락되면 exit 1 + 라벨 출력. 영어 README.md만 검사 (KO/ZH는 MDR-007
+      locale coupling으로 구조적 동기화됨, registry:check가 content drift
+      감시).
+
+      **mission.yaml 편집 3건**:
+        - done_when[5]: 'README.md 존재' → 'README가 npm install primary
+          설치 가이드 + 4 skill API 사용 예시 제공'
+        - done_when_refs[5]: `{kind: file-exists, value: "README.md"}` →
+          `{kind: eval-ref, value: "readme_install_guide_valid"}`
+        - evals[] 신규 추가: `readme_install_guide_valid` = `node scripts/verify-readme.js`
+
+      **ms-eval 재평가 결과**: 10/10 PASS, resolved_by ref 10,
+      **ref_kind eval-ref 10 + file-exists 0**. v1.21.7 대비 eval-ref 9 → 10,
+      file-exists 1 → 0. **10 criteria 전부 기능 계약으로 묶임.** v1.0.0
+      원본 8 done_when 중 7건이 functional contract로 커버 (0-3 skill API +
+      4 plugin manifest + 5 README install + 9 cross-platform). v1.0.0 #8
+      자체 dogfooding만 이월 유지 (MDR-009 §V v1.22.x owner).
+
+      SemVer: MDR-006 §PATCH. docs/config + 1 신규 script + mission.yaml
+      self-edit, consumer surface 불변. 369/369 tests 불변.
+    triggered_by: "사용자 요청 — 2026-04-23 self-audit 권장 작업 4번 채택. MDR-009 §V에서 v1.21.10 owner로 공식 명시된 항목. 세션 내 v1.21.6→v1.21.7→v1.21.8→v1.21.9에 이은 5번째 §PATCH (내부 계약 정합성 회복 연속)."
+    issue_or_context: |
+      v1.21.4의 첫 npm publish 이후 README install guide는 여전히 Claude
+      Code Marketplace를 Method 1로 유지. adopter가 README 따라가면 npm
+      install 경로를 3번째로 발견하게 되는 UX drift. v1.21.5에서 'npm
+      package vs repository' 섹션이 추가됐지만 Method 순서 자체는 재배치
+      안 됨.
+
+      동시에 done_when[5] 'README.md 존재'는 파일 존재만 확인 — README
+      내용이 실제 install guide 역할을 하는지는 증명 안 됨. v1.21.7에서
+      권장 작업 2번(기능 계약 복원) 시 index 5는 의도적으로 본 작업(4번)
+      으로 이월됐다. 이번 v1.21.10이 그 이월의 closure.
+
+      `scripts/verify-readme.js`는 `scripts/validate-schema.js` /
+      `scripts/convert-platforms.js` / `scripts/verify-registry.js`의
+      패턴을 따름 — adopter-invisible internal validator. 새 consumer
+      API 없음, 새 CLI 없음, 새 schema field 없음.
+    changes:
+      added:
+        - "scripts/verify-readme.js (신규 validator, 10 required markers 체크)"
+        - "mission.yaml evals[]: readme_install_guide_valid entry 추가"
+        - ".mission/snapshots/2026-04-24_v1.21.10_mission.yaml"
+      modified:
+        - "README.md / README.ko.md / README.zh.md: 5-Minute Installation Guide 3 locale Method 1 → npm install primary로 재배치 (npx CLI + 라이브러리 API import + sigstore 검증 경로). 기존 Method 1(Claude Code Marketplace) → Method 2, Method 2(Source) → Method 3(기여자용 라벨), Method 3(Local plugin) → Method 4. MDR-007 trilingual 정합"
+        - "mission.yaml done_when[5]: 'README.md 존재' → 'README가 npm install primary 설치 가이드 + 4 skill API 사용 예시 제공'"
+        - "mission.yaml done_when_refs[5]: kind file-exists → eval-ref, value README.md → readme_install_guide_valid"
+        - "mission.yaml: title + version 1.21.9 → 1.21.10 + lineage.total_revisions 57 → 58"
+        - "mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.9 related_commits 백필(f929c2c)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.9 → 1.21.10"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.10 entry 추가 (ref_kind eval-ref 10 달성 기록)"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.10 bullet 추가 + version range v1.14.2 ~ v1.21.10"
+      removed: []
+    done_when_delta:
+      added: []
+      modified:
+        - "done_when[5]: 'README.md 존재' → 'README가 npm install primary 설치 가이드 + 4 skill API 사용 예시 제공' (file-exists → eval-ref readme_install_guide_valid)"
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "minimal — README 3 locale 재배치는 additive (기존 Method 1-3 모두 보존, Method 4로 하나 추가). 기존 adopter가 Marketplace 경로를 따르던 흐름 유지. 신규 scripts/verify-readme.js는 internal validator, consumer-visible 아님. mission.yaml done_when[5] 재기술은 자기 자신 mission.yaml에만 영향 (adopter mission.yaml 무관). ms-eval 10/10 PASS 유지 (eval-ref 10 달성), 369/369 tests 불변."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+        "MDR-007-playbook-language-policy-and-locale-coupling-migration-trigger",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.10_mission.yaml"
+    follow_up:
+      - "권장 작업 5번(approvals[] gates stale 정리) — 세션 내 마지막 §PATCH. v1.21.11 예정."
+      - "v1.0.0 #8 자체 dogfooding 복원 — MDR-009 §V v1.22.x owner 유지."
+
   - change_id: "MSC-2026-04-24-002"
     semantic_version: "1.21.9"
     change_sequence: 61
@@ -76,7 +180,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — 순수 MDR 문서 추가. consumer-visible runtime / CLI / API / 스키마 / 테스트 영향 없음. local test suite 369/369 불변. v1.21.4 MDR-005 / v1.16.5 MDR-007 / v1.19.1 MDR-008 추가와 동일 패턴."
-    related_commits: []
+    related_commits: ["f929c2c"]
     related_decisions:
       [
         "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",

@@ -18,7 +18,35 @@ Natural language → mission.yaml draft → eval scaffold → run report
 
 ## 5-Minute Installation Guide
 
-### Method 1: Install from Claude Code Marketplace (Recommended)
+### Method 1: Install from npm (Recommended since v1.21.4)
+
+```bash
+# As a dependency
+npm install mission-spec
+
+# As a dev-only tool
+npm install --save-dev mission-spec
+
+# Use the CLI without installing globally
+npx mission-spec validate
+npx mission-spec snapshot
+npx mission-spec backfill-commits
+```
+
+Library API:
+
+```typescript
+import {
+  generateMissionDraft,
+  evaluateMission,
+  getMissionStatus,
+  generateMissionReport,
+} from "mission-spec";
+```
+
+The package is published to npm with sigstore provenance — verify with `npm view mission-spec@<version> --json` (look for `dist.attestations`).
+
+### Method 2: Install as a Claude Code Plugin
 
 ```bash
 # Run inside Claude Code
@@ -35,7 +63,7 @@ After installation, the following skills are available:
 - `/mission-spec:ms-context` — Generate project context prompt for AI agents (v1.7.0+)
 - `/mission-spec:ms-decide` — Generate Mission Decision Record (MDR) draft from a natural-language decision description (v1.14.0+)
 
-### Method 2: Install from Source
+### Method 3: Install from Source (for contributors)
 
 ```bash
 git clone https://github.com/chquandogong/mission-spec.git
@@ -44,7 +72,7 @@ npm install
 npm run build
 ```
 
-### Method 3: Link as a Local Plugin
+### Method 4: Link as a Local Plugin
 
 ```bash
 # In your project directory

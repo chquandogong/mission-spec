@@ -1,9 +1,50 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-24 | Version: 1.21.9
+# Last updated: 2026-04-24 | Version: 1.21.10
 
 entries:
+  - version: "1.21.10"
+    date: "2026-04-24"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      verify_readme: "README install/usage surface valid: 10 markers present"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+        resolved_by:
+          ref: 10
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 10
+          file-exists: 0
+    notes: |
+      권장 작업 4번 구현, MDR-009 §V v1.21.10 owner closure. README 3종
+      5-Minute Installation Guide Method 순서 재배치 (npm install primary →
+      Method 1, Claude Code Marketplace → Method 2, Source → Method 3,
+      Local plugin → Method 4). 신규 scripts/verify-readme.js (10 markers
+      체크). mission.yaml done_when[5] 'README.md 존재' → 'README가 npm
+      install primary 설치 가이드 + 4 skill API 사용 예시 제공' 재기술 +
+      refs[5] eval-ref readme_install_guide_valid로 전환.
+
+      **ref_kind eval-ref 10 달성** (v1.21.7 9 → v1.21.10 10). v1.21.6 이래
+      유지되던 마지막 file-exists 1건 소멸. 10/10 criteria 전부 기능 계약
+      으로 묶임. v1.0.0 원본 8 done_when 중 7건이 functional contract로
+      커버됨 — 남은 1건(자체 dogfooding, v1.0.0 #8)만 MDR-009 §V v1.22.x
+      owner 상태로 이월.
+
   - version: "1.21.9"
     date: "2026-04-24"
     verified_by: "Claude Opus 4.7"

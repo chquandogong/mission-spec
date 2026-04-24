@@ -6,6 +6,27 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.10] - 2026-04-24
+_권장 작업 4번 구현. README 3종(EN/KO/ZH)의 설치 가이드를 npm install primary로 재구성하고, done_when[5] '`README.md 존재`'를 'README가 npm install primary 설치 가이드 + 4 skill API 사용 예시 제공' functional contract로 복원한다. MDR-009 §V에서 v1.21.10 owner로 명시된 항목의 closure._
+
+### Added
+
+- scripts/verify-readme.js (신규 validator, 10 required markers 체크)
+- mission.yaml evals[]: readme_install_guide_valid entry 추가
+- .mission/snapshots/2026-04-24_v1.21.10_mission.yaml
+
+### Changed
+
+- README.md / README.ko.md / README.zh.md: 5-Minute Installation Guide 3 locale Method 1 → npm install primary로 재배치 (npx CLI + 라이브러리 API import + sigstore 검증 경로). 기존 Method 1(Claude Code Marketplace) → Method 2, Method 2(Source) → Method 3(기여자용 라벨), Method 3(Local plugin) → Method 4. MDR-007 trilingual 정합
+- mission.yaml done_when[5]: 'README.md 존재' → 'README가 npm install primary 설치 가이드 + 4 skill API 사용 예시 제공'
+- mission.yaml done_when_refs[5]: kind file-exists → eval-ref, value README.md → readme_install_guide_valid
+- mission.yaml: title + version 1.21.9 → 1.21.10 + lineage.total_revisions 57 → 58
+- mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.9 related_commits 백필(f929c2c)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.9 → 1.21.10
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.10 entry 추가 (ref_kind eval-ref 10 달성 기록)
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.10 bullet 추가 + version range v1.14.2 ~ v1.21.10
+
 ## [1.21.9] - 2026-04-24
 _v1.0.0 → v1.21.8 goal 진화 과정을 governance 문서로 공식 기록한다. 2026-04-23 self-audit에서 노출된 3 drift 축(goal wording / done_when 약화→복원 / distribution axis 전환)을 MDR-009로 통합. 권장 작업 3번 구현. MDR-005~008에 이은 다섯 번째 governance MDR._
 

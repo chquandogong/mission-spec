@@ -18,7 +18,35 @@
 
 ## 5 分钟安装指南
 
-### 方式 1：从 Claude Code Marketplace 安装（推荐）
+### 方式 1：从 npm 安装（v1.21.4 起推荐）
+
+```bash
+# 作为依赖安装
+npm install mission-spec
+
+# 仅作为开发工具
+npm install --save-dev mission-spec
+
+# 无需全局安装即可使用 CLI
+npx mission-spec validate
+npx mission-spec snapshot
+npx mission-spec backfill-commits
+```
+
+库 API：
+
+```typescript
+import {
+  generateMissionDraft,
+  evaluateMission,
+  getMissionStatus,
+  generateMissionReport,
+} from "mission-spec";
+```
+
+本包已发布至 npm 并附带 sigstore provenance — 使用 `npm view mission-spec@<version> --json` 的 `dist.attestations` 字段验证。
+
+### 方式 2：作为 Claude Code 插件安装
 
 ```bash
 # 在 Claude Code 中运行
@@ -35,7 +63,7 @@
 - `/mission-spec:ms-context` — 为 AI 代理生成项目上下文提示（v1.7.0+）
 - `/mission-spec:ms-decide` — 从自然语言决策描述生成 MDR（Mission Decision Record）草稿（v1.14.0+）
 
-### 方式 2：从源码安装
+### 方式 3：从源码安装（贡献者）
 
 ```bash
 git clone https://github.com/chquandogong/mission-spec.git
@@ -44,7 +72,7 @@ npm install
 npm run build
 ```
 
-### 方式 3：作为本地插件链接
+### 方式 4：作为本地插件链接
 
 ```bash
 # 在项目目录中

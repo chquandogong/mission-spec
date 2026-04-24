@@ -18,7 +18,35 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 
 ## 5분 설치 가이드
 
-### 방법 1: Claude Code Marketplace에서 설치 (권장)
+### 방법 1: npm에서 설치 (v1.21.4부터 권장)
+
+```bash
+# 의존성으로 설치
+npm install mission-spec
+
+# dev 도구로만 설치
+npm install --save-dev mission-spec
+
+# 전역 설치 없이 CLI 사용
+npx mission-spec validate
+npx mission-spec snapshot
+npx mission-spec backfill-commits
+```
+
+라이브러리 API:
+
+```typescript
+import {
+  generateMissionDraft,
+  evaluateMission,
+  getMissionStatus,
+  generateMissionReport,
+} from "mission-spec";
+```
+
+이 패키지는 sigstore provenance와 함께 npm에 배포됩니다 — `npm view mission-spec@<version> --json`의 `dist.attestations`로 검증할 수 있습니다.
+
+### 방법 2: Claude Code 플러그인으로 설치
 
 ```bash
 # Claude Code 안에서 실행
@@ -35,7 +63,7 @@ AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration fr
 - `/mission-spec:ms-context` — AI 에이전트를 위한 프로젝트 컨텍스트 프롬프트 생성 (v1.7.0+)
 - `/mission-spec:ms-decide` — 자연어 결정 설명으로부터 MDR(Mission Decision Record) 초안 생성 (v1.14.0+)
 
-### 방법 2: 소스에서 설치
+### 방법 3: 소스에서 설치 (기여자용)
 
 ```bash
 git clone https://github.com/chquandogong/mission-spec.git
@@ -44,7 +72,7 @@ npm install
 npm run build
 ```
 
-### 방법 3: 프로젝트에 로컬 플러그인으로 연결
+### 방법 4: 프로젝트에 로컬 플러그인으로 연결
 
 ```bash
 # 프로젝트 디렉토리에서
