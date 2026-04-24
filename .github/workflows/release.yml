@@ -67,7 +67,12 @@ jobs:
             echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${PKG_VERSION}"
             exit 1
           fi
-          git fetch origin main --depth=1
+          # Refresh origin/main ref without shallow marker. Previously used --depth=1
+          # which caused merge-base --is-ancestor to fail for tags not at tip of
+          # origin/main (v1.21.6 hit this — see MSC-2026-04-24-001). Checkout step
+          # above uses fetch-depth: 0 so full history is already available; we only
+          # need to refresh the ref.
+          git fetch origin main
           if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/main"; then
             echo "::error::Release ref ${GITHUB_REF_NAME} (${GITHUB_SHA}) is not contained in origin/main"
             exit 1

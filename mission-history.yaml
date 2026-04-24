@@ -4,15 +4,93 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.7 — done_when 기능 계약 복원 (§PATCH)"
+  mission_title: "Mission Spec v1.21.8 — release workflow shallow-fetch fix (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 55
-  latest_version: "1.21.7"
+  total_revisions: 56
+  latest_version: "1.21.8"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-001"
+    semantic_version: "1.21.8"
+    change_sequence: 60
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "correctness"
+    persistence: "permanent"
+    intent: "`.github/workflows/release.yml`의 `git fetch origin main --depth=1`이 tag가 origin/main tip이 아닐 때 merge-base --is-ancestor를 실패시키는 latent bug를 수정한다. v1.21.6 publish 시 최초 발현 (c3465d8이 origin/main HEAD, 2c06941이 tag → is-ancestor fail). `--depth=1` 제거로 해결. 이후 multi-commit-ahead tag 재시도 가능해짐."
+    decision: |
+      v1.21.6 push 시나리오에서 발현된 workflow bug:
+      - origin/main = c3465d8 (v1.21.7)
+      - v1.21.6 tag = 2c06941 (c3465d8의 parent)
+      - workflow의 `git fetch origin main --depth=1`이 shallow marker를 남김
+      - `git merge-base --is-ancestor 2c06941 origin/main`이 shallow 경계를 넘지 못하고 false 반환
+      - 결과: "Release ref v1.21.6 (2c06941) is not contained in origin/main" 오류로 workflow 중단
+
+      v1.21.4/v1.21.5는 각각 push 당시 main HEAD였으므로 이 bug가 발현되지 않음.
+      v1.21.6은 최초로 "tag가 tip이 아닐 때" 조건을 만들어 bug 노출.
+
+      **수정**: line 70의 `git fetch origin main --depth=1` → `git fetch origin main`.
+      checkout step은 이미 `fetch-depth: 0`으로 전체 history를 받으므로 --depth 옵션
+      자체가 중복이자 유해. 제거 후 ancestor check가 full history에서 정상 동작.
+
+      **v1.21.6 gap 처리**: 본 §PATCH는 workflow fix만 포함. v1.21.6은 이미 tag는
+      존재하지만 npm 미발행 상태로 남긴다. 재publish하려면 v1.21.6 tag 자체의
+      workflow file이 여전히 buggy (tag의 commit = 2c06941 = fix 없는 상태)이므로
+      retag 또는 수동 publish 필요 — 그 비용 대비 adopter 영향(0건 추정)이 낮아
+      gap 허용. 향후 adopter 요청 시 재검토.
+
+      SemVer: MDR-006 §PATCH 3 (CI workflow 편집). v1.21.3 actions v5 bump와 동일 grade.
+    triggered_by: "v1.21.6 tag push 시 workflow run 24824758099 실패. 사용자 요청 옵션 (A) — v1.21.7만 publish 후 workflow bug는 별도 §PATCH로 수정."
+    issue_or_context: |
+      workflow 파일 `verify-and-publish` job의 "Verify publish ref matches
+      package.json and origin/main" step (lines 57-75). checkout은 fetch-depth: 0
+      이지만 바로 뒤 `git fetch origin main --depth=1`이 shallow marker를 씌워
+      ancestor check 실패. 의도: origin/main ref refresh (race condition 대비).
+      --depth=1이 없어도 fetch는 전체 ancestor chain을 가져오므로 ref refresh는
+      동일하게 동작한다.
+
+      이 bug가 드러나기까지 4 release 걸림 (v1.21.4~v1.21.7 중 v1.21.6만 조건 충족).
+      "tag at tip" 가정이 묵시적으로 유지된 상태에서 묵묵히 대기. 본 fix로
+      가정을 제거.
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-24_v1.21.8_mission.yaml"
+      modified:
+        - ".github/workflows/release.yml: line 70 `git fetch origin main --depth=1` → `git fetch origin main` + 설명 주석 추가 (MSC-2026-04-24-001 참조 포함)"
+        - "mission.yaml: title + version 1.21.7 → 1.21.8 + lineage.total_revisions 55 → 56"
+        - "mission-history.yaml: 본 entry prepend + meta.total_revisions 55 → 56 + latest_version 1.21.7 → 1.21.8 + mission_title sync + v1.21.7 related_commits 백필(c3465d8)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.7 → 1.21.8"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.8 entry 추가 + v1.21.6 gap 기록"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.8 bullet 추가 + version range v1.14.2 ~ v1.21.8"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: false
+      runtime: false
+    breaking: false
+    risk: "very low — 순수 CI workflow 1-line 수정. local test suite(369/369) 불변, runtime behavior 불변, consumer surface 불변. v1.21.6 gap은 이미 현실에서 고착된 상태 (npm 미발행 tag만 존재), 본 §PATCH는 미래 release만 보호. 실전 검증은 v1.21.8 자체 publish (tag = origin/main tip이므로 fix 전후 모두 pass할 조건이지만 fix 로직은 실행됨)로 수행."
+    related_commits: []
+    related_decisions:
+      ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.8_mission.yaml"
+    follow_up:
+      - "v1.21.6 gap 재publish 필요 시: retag 2c06941을 fixed workflow commit에 이동 (git tag -f) 또는 수동 `npm publish` from v1.21.6 checkout (tarball 재빌드 + provenance 재검증). adopter impact 0 상태에선 비활성."
+      - "workflow의 shallow-vs-full history 가정 전반 리뷰: line 70 외에 다른 step(verify-and-publish 이후 reconstruction:cold-build 등)에서 유사 shallow 의존성이 없는지 v1.21.9+ §PATCH 후보로 기록."
+      - "권장 작업 3/4/5 (MDR-009 goal drift + README npm primary + approvals gates stale) 미착수 상태 유지."
+
   - change_id: "MSC-2026-04-23-007"
     semantic_version: "1.21.7"
     change_sequence: 59
@@ -93,7 +171,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "minimal — self-description surface 변경만. consumer-visible runtime / CLI / API / 스키마 / 테스트 영향 없음. 5 신규 evals의 command는 모두 기존 test file 실행 (파일 자체 불변, 서브셋 호출). ms-eval latency은 각 eval당 ~3-5초 증가 (npm 서브셋 호출 오버헤드) — diagnostic 용도라 허용. 369/369 tests 불변, schema valid, registry green. v1.21.6과 동일 grade."
-    related_commits: []
+    related_commits: ["c3465d8"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-23_v1.21.7_mission.yaml"

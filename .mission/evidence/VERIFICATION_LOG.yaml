@@ -1,9 +1,45 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-23 | Version: 1.21.7
+# Last updated: 2026-04-24 | Version: 1.21.8
 
 entries:
+  - version: "1.21.8"
+    date: "2026-04-24"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+        resolved_by:
+          ref: 10
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 9
+          file-exists: 1
+    notes: |
+      `.github/workflows/release.yml` line 70의 `git fetch origin main --depth=1`
+      제거. v1.21.6 tag push (run 24824758099)에서 최초 발현된 shallow-marker
+      vs merge-base is-ancestor 호환 버그 해소. v1.21.4/v1.21.5는 각자 push
+      시점 main HEAD였기 때문에 4 release 동안 잠복.
+
+      v1.21.6 gap 상태: git tag v1.21.6 → 2c06941 존재, npm 1.21.6 미발행.
+      npm install은 latest=1.21.8 로 resolve되어 adopter 기본 설치 경로는
+      정상. 1.21.6을 명시적으로 pinning하는 adopter는 현재 0건 추정 — gap
+      허용. 향후 adopter 요청 시 재publish 검토 (retag 또는 수동 publish).
+
   - version: "1.21.7"
     date: "2026-04-23"
     verified_by: "Claude Opus 4.7"

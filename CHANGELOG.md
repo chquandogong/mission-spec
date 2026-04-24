@@ -6,6 +6,23 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.8] - 2026-04-24
+_`.github/workflows/release.yml`의 `git fetch origin main --depth=1`이 tag가 origin/main tip이 아닐 때 merge-base --is-ancestor를 실패시키는 latent bug를 수정한다. v1.21.6 publish 시 최초 발현 (c3465d8이 origin/main HEAD, 2c06941이 tag → is-ancestor fail). `--depth=1` 제거로 해결. 이후 multi-commit-ahead tag 재시도 가능해짐._
+
+### Added
+
+- .mission/snapshots/2026-04-24_v1.21.8_mission.yaml
+
+### Changed
+
+- .github/workflows/release.yml: line 70 `git fetch origin main --depth=1` → `git fetch origin main` + 설명 주석 추가 (MSC-2026-04-24-001 참조 포함)
+- mission.yaml: title + version 1.21.7 → 1.21.8 + lineage.total_revisions 55 → 56
+- mission-history.yaml: 본 entry prepend + meta.total_revisions 55 → 56 + latest_version 1.21.7 → 1.21.8 + mission_title sync + v1.21.7 related_commits 백필(c3465d8)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.7 → 1.21.8
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.8 entry 추가 + v1.21.6 gap 기록
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.8 bullet 추가 + version range v1.14.2 ~ v1.21.8
+
 ## [1.21.7] - 2026-04-23
 _v1.21.6 self-dogfooding 후속. done_when[0..4]의 약화된 '파일 존재' 문구를 '기능 동작' 계약으로 복원하고, 각 인덱스를 해당 skill의 test file을 실행하는 신규 eval에 바인딩한다. 권장 작업 2번 구현. done_when 문구가 실질적 기능 주장을 담도록 계약의 의미적 수준을 올린다._
 
