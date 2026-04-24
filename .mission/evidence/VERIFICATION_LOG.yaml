@@ -1,9 +1,41 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-24 | Version: 1.21.8
+# Last updated: 2026-04-24 | Version: 1.21.9
 
 entries:
+  - version: "1.21.9"
+    date: "2026-04-24"
+    verified_by: "Claude Opus 4.7"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 369
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 369"
+      evaluate_mission:
+        criteria_passed: 10
+        criteria_total: 10
+        status: "mission complete"
+        resolved_by:
+          ref: 10
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 9
+          file-exists: 1
+    notes: |
+      MDR-009 (goal evolution v1.0.0 → v1.21.8) 신규 추가. 권장 작업 3번 구현.
+      v1.21.4 MDR-005 / v1.16.5 MDR-007 / v1.19.1 MDR-008 추가와 동일 패턴
+      (docs only §PATCH). v1.0.0 원본 8개 done_when → v1.21.8 10개 매핑을
+      §III 표로 고정 (6/8 functional covered, 2/8 deferred to v1.21.10 /
+      v1.22.x). 향후 goal wording 변경은 MDR-010+ 후보로 precedent 설립.
+
   - version: "1.21.8"
     date: "2026-04-24"
     verified_by: "Claude Opus 4.7"

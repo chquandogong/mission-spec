@@ -6,6 +6,23 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.21.9] - 2026-04-24
+_v1.0.0 → v1.21.8 goal 진화 과정을 governance 문서로 공식 기록한다. 2026-04-23 self-audit에서 노출된 3 drift 축(goal wording / done_when 약화→복원 / distribution axis 전환)을 MDR-009로 통합. 권장 작업 3번 구현. MDR-005~008에 이은 다섯 번째 governance MDR._
+
+### Added
+
+- .mission/decisions/MDR-009-goal-evolution-v1.0.0-to-v1.21.8.md (신규 MDR, §I-§V 구조)
+- .mission/snapshots/2026-04-24_v1.21.9_mission.yaml
+
+### Changed
+
+- mission.yaml: title + version 1.21.8 → 1.21.9 + lineage.total_revisions 56 → 57
+- mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.8 related_commits 백필(ce41196)
+- package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.8 → 1.21.9
+- .mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신
+- .mission/evidence/VERIFICATION_LOG.yaml: v1.21.9 entry 추가
+- .mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.9 bullet 추가 + version range v1.14.2 ~ v1.21.9
+
 ## [1.21.8] - 2026-04-24
 _`.github/workflows/release.yml`의 `git fetch origin main --depth=1`이 tag가 origin/main tip이 아닐 때 merge-base --is-ancestor를 실패시키는 latent bug를 수정한다. v1.21.6 publish 시 최초 발현 (c3465d8이 origin/main HEAD, 2c06941이 tag → is-ancestor fail). `--depth=1` 제거로 해결. 이후 multi-commit-ahead tag 재시도 가능해짐._
 

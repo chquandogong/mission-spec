@@ -4,15 +4,91 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.8 — release workflow shallow-fetch fix (§PATCH)"
+  mission_title: "Mission Spec v1.21.9 — MDR-009 goal evolution record (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 56
-  latest_version: "1.21.8"
+  total_revisions: 57
+  latest_version: "1.21.9"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-24-002"
+    semantic_version: "1.21.9"
+    change_sequence: 61
+    date: "2026-04-24"
+    author: "Dr. QUAN"
+    contributors: ["Claude"]
+    change_type: "fix"
+    motivation_type: "governance"
+    persistence: "permanent"
+    intent: "v1.0.0 → v1.21.8 goal 진화 과정을 governance 문서로 공식 기록한다. 2026-04-23 self-audit에서 노출된 3 drift 축(goal wording / done_when 약화→복원 / distribution axis 전환)을 MDR-009로 통합. 권장 작업 3번 구현. MDR-005~008에 이은 다섯 번째 governance MDR."
+    decision: |
+      MDR-009 신규 작성 (goal evolution v1.0.0 → v1.21.8). §I v1.0.0
+      snapshot 기반 원본 목표 기록, §II v1.21.8 현재 목표 기록,
+      §III v1.0.0 8개 done_when → v1.21.8 10개 entries 명시 매핑 표
+      (6/8 covered / 2/8 deferred), §IV 배포 축 변화(plugin marketplace
+      → + npm registry, additive) 결정 기록, §V 이월 항목 명시 owner
+      (5분 설치 가이드 → v1.21.10, 자체 dogfooding → v1.22.x).
+
+      MDR-009는 retrospective 기록 — 이미 운영상 내려진 결정들을
+      (v1.21.4 npm publish, v1.21.7 done_when 복원) governance 레이어에
+      고정. 신규 정책 도입 아님, status = Active on creation.
+
+      MDR trigger category (1) goal direction changes에 해당.
+
+      SemVer: MDR-006 §PATCH (MDR 추가, v1.19.1 MDR-008 / v1.14.2 MDR-005
+      / v1.16.5 MDR-007와 동일 grade — docs only, consumer surface 불변).
+    triggered_by: "사용자 요청 — 2026-04-23 self-audit 권장 작업 3번 채택. 세션 내 v1.21.6/v1.21.7/v1.21.8 순차 릴리스 이후 governance 레이어 closure 단계."
+    issue_or_context: |
+      self-audit에서 발견된 3 drift 축이 MDR-009 없이는 개별 history entry
+      에 흩어진 상태로 유지됨. 외부 reviewer가 '왜 Claude Code plugin이
+      core library + skill bundle + npm package가 됐는가?'를 묻는다면
+      56 timeline entry를 합성해야 재구성 가능. MDR-009는 이 합성 작업을
+      한 번에 고정.
+
+      v1.0.0 done_when 중 2개(5분 설치 가이드, 자체 dogfooding)가 소실된
+      drift도 MDR-009 §III 표로 고정 — 이월 상태이되 책임자(version)를
+      명시. 향후 v1.21.10에서 5분 설치 가이드를 다룰 때 MDR-009 §V를
+      referential anchor로 사용.
+    changes:
+      added:
+        - ".mission/decisions/MDR-009-goal-evolution-v1.0.0-to-v1.21.8.md (신규 MDR, §I-§V 구조)"
+        - ".mission/snapshots/2026-04-24_v1.21.9_mission.yaml"
+      modified:
+        - "mission.yaml: title + version 1.21.8 → 1.21.9 + lineage.total_revisions 56 → 57"
+        - "mission-history.yaml: 본 entry prepend + meta 갱신 + v1.21.8 related_commits 백필(ce41196)"
+        - "package.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + package-lock.json: version 1.21.8 → 1.21.9"
+        - ".mission/ Version 헤더 + CURRENT_STATE Title + CHANGELOG.md: metadata:sync + changelog 자동 갱신"
+        - ".mission/evidence/VERIFICATION_LOG.yaml: v1.21.9 entry 추가"
+        - ".mission/CURRENT_STATE.md 최근 구현 섹션에 v1.21.9 bullet 추가 + version range v1.14.2 ~ v1.21.9"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "very low — 순수 MDR 문서 추가. consumer-visible runtime / CLI / API / 스키마 / 테스트 영향 없음. local test suite 369/369 불변. v1.21.4 MDR-005 / v1.16.5 MDR-007 / v1.19.1 MDR-008 추가와 동일 패턴."
+    related_commits: []
+    related_decisions:
+      [
+        "MDR-009-goal-evolution-v1.0.0-to-v1.21.8",
+        "MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes",
+      ]
+    snapshot_after: ".mission/snapshots/2026-04-24_v1.21.9_mission.yaml"
+    follow_up:
+      - "권장 작업 4번(README install npm primary + done_when[5] 복원) — MDR-009 §V에서 v1.21.10 owner로 명시. 다음 §PATCH."
+      - "권장 작업 5번(approvals[] gates stale 정리) — MDR-009와 무관, v1.21.11 candidate."
+      - "v1.0.0 #8 자체 dogfooding 복원 — MDR-009 §V에서 v1.22.x로 명시적 이월."
+      - "향후 goal wording change는 MDR-010 이상으로 기록 (MDR-009가 precedent 설립)."
+
   - change_id: "MSC-2026-04-24-001"
     semantic_version: "1.21.8"
     change_sequence: 60
@@ -82,7 +158,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — 순수 CI workflow 1-line 수정. local test suite(369/369) 불변, runtime behavior 불변, consumer surface 불변. v1.21.6 gap은 이미 현실에서 고착된 상태 (npm 미발행 tag만 존재), 본 §PATCH는 미래 release만 보호. 실전 검증은 v1.21.8 자체 publish (tag = origin/main tip이므로 fix 전후 모두 pass할 조건이지만 fix 로직은 실행됨)로 수행."
-    related_commits: []
+    related_commits: ["ce41196"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-24_v1.21.8_mission.yaml"
