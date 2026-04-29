@@ -1,0 +1,107 @@
+name: github-package-mirror
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to package, usually a release tag such as v1.22.1"
+        required: true
+        default: "main"
+      dry_run:
+        description: "Run npm publish --dry-run against GitHub Packages"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+concurrency:
+  group: github-package-mirror-${{ inputs.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish-mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout package source
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js for GitHub Packages
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@chquandogong"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package assets
+        run: npm run build
+
+      - name: Prepare scoped mirror package
+        id: mirror
+        run: |
+          set -euo pipefail
+
+          workdir="$(mktemp -d)"
+          npm pack --pack-destination "$workdir"
+          tarball="$(find "$workdir" -maxdepth 1 -name '*.tgz' -print -quit)"
+
+          mkdir "$workdir/unpacked"
+          tar -xzf "$tarball" -C "$workdir/unpacked"
+          package_dir="$workdir/unpacked/package"
+
+          node --input-type=module - "$package_dir" <<'NODE'
+          import { readFileSync, writeFileSync } from "node:fs";
+          import { join } from "node:path";
+
+          const packageDir = process.argv[2];
+          const packagePath = join(packageDir, "package.json");
+          const pkg = JSON.parse(readFileSync(packagePath, "utf8"));
+
+          pkg.name = "@chquandogong/mission-spec";
+          pkg.description = `${pkg.description} (GitHub Packages mirror)`;
+          pkg.repository = {
+            type: "git",
+            url: "https://github.com/chquandogong/mission-spec.git",
+          };
+          pkg.homepage = "https://github.com/chquandogong/mission-spec#readme";
+          pkg.bugs = {
+            url: "https://github.com/chquandogong/mission-spec/issues",
+          };
+          pkg.publishConfig = {
+            registry: "https://npm.pkg.github.com",
+          };
+
+          writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");
+          NODE
+
+          echo "package_dir=$package_dir" >> "$GITHUB_OUTPUT"
+          node -e "const p=require('$package_dir/package.json'); console.log('Prepared ' + p.name + '@' + p.version)"
+
+      - name: Dry-run publish mirror
+        if: inputs.dry_run == 'true'
+        run: npm publish "${{ steps.mirror.outputs.package_dir }}" --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish mirror to GitHub Packages
+        if: inputs.dry_run != 'true'
+        run: npm publish "${{ steps.mirror.outputs.package_dir }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify mirror package metadata
+        if: inputs.dry_run != 'true'
+        run: npm view @chquandogong/mission-spec@"$(node -p "require('./package.json').version")" version --registry=https://npm.pkg.github.com
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
