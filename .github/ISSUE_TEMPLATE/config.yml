@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support and triage guide
+    url: https://github.com/chquandogong/mission-spec/blob/main/SUPPORT.md
+    about: Choose the right path for bugs, feature requests, security reports, and setup questions.
+  - name: Security reporting
+    url: https://github.com/chquandogong/mission-spec/blob/main/SECURITY.md
+    about: Read this before reporting security-sensitive behavior.

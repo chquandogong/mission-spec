@@ -1,12 +1,57 @@
-[English](README.md) | [한국어](README.ko.md) | 中文
+<p align="center">
+  <a href="README.md">English</a> | <a href="README.ko.md">한국어</a> | 中文
+</p>
 
-# Mission Spec
+<p align="center">
+  <img src="https://raw.githubusercontent.com/chquandogong/mission-spec/main/.github/assets/mission-spec-banner.svg" alt="Mission Spec — 面向 AI 代理工作流的任务契约层" width="100%">
+</p>
 
-[![GitHub](https://img.shields.io/github/license/chquandogong/mission-spec)](https://github.com/chquandogong/mission-spec)
+<h1 align="center">Mission Spec</h1>
 
-面向 AI 代理工作流的 **任务契约层（Task Contract Layer）**。这不是编排框架，而是一个可移植的、运行级别的任务契约，运行在现有工具之上。提供 TypeScript 库、Claude Code 技能包，以及 **Living Asset Registry**。
+<p align="center">
+  <strong>面向 AI 代理工作流的任务契约层。</strong><br>
+  提供可移植的 mission 文件、显式完成 gate，以及可审计的变更台账。
+</p>
 
-**仓库地址：** https://github.com/chquandogong/mission-spec
+<p align="center">
+  <a href="https://www.npmjs.com/package/mission-spec"><img alt="npm version" src="https://img.shields.io/npm/v/mission-spec?color=cb3837"></a>
+  <a href="https://github.com/chquandogong/mission-spec/actions/workflows/test.yml"><img alt="test workflow" src="https://github.com/chquandogong/mission-spec/actions/workflows/test.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/chquandogong/mission-spec/actions/workflows/release.yml"><img alt="release workflow" src="https://github.com/chquandogong/mission-spec/actions/workflows/release.yml/badge.svg"></a>
+  <a href="https://github.com/chquandogong/mission-spec/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/github/license/chquandogong/mission-spec"></a>
+  <a href="#npm-包-vs-仓库v1215"><img alt="npm provenance" src="https://img.shields.io/badge/npm%20provenance-sigstore-2f7de1"></a>
+  <a href="#方式-2作为-claude-code-插件安装"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-6f42c1"></a>
+</p>
+
+<p align="center">
+  <a href="#5-分钟安装指南">安装</a> ·
+  <a href="#使用方法">使用</a> ·
+  <a href="#显式-gate-绑定v1210">Evaluation gates</a> ·
+  <a href="#living-asset-registryv150">Registry</a> ·
+  <a href="https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md">文档索引</a> ·
+  <a href="CONTRIBUTING.md">贡献指南</a>
+</p>
+
+Mission Spec 不是编排框架。它是一个可移植的、运行级别的任务契约，运行在现有工具之上。它提供 TypeScript 库、CLI、Claude Code 技能包，以及 **Living Asset Registry**。
+
+## 一览
+
+| 层 | 提供内容 |
+| --- | --- |
+| Contract | `mission.yaml` 记录目标、约束、完成条件和设计引用。 |
+| Evaluation | `evals[]` + `done_when_refs[]` 支持 automated、manual、LLM-eval、LLM-judge gate。 |
+| Reporting | CLI/API 生成 status、eval、report、context、snapshot、backfill 输出。 |
+| Governance | `mission-history.yaml`、MDR、snapshot、architecture/API registry、traceability asset 保留变更原因。 |
+| Distribution | 带 sigstore provenance 的 npm 包，以及 Claude Code plugin/skill bundle。 |
+
+## 快速链接
+
+| 需求 | 从这里开始 |
+| --- | --- |
+| 安装或运行 CLI | [5 分钟安装指南](#5-分钟安装指南) |
+| 在 TypeScript 中使用 | [使用方法](#使用方法) |
+| 理解完成 gate | [显式 gate 绑定](#显式-gate-绑定v1210) |
+| 审计项目历史 | [Living Asset Registry](#living-asset-registryv150) 和 [`mission-history.yaml`](mission-history.yaml) |
+| 浏览长文档 | [文档索引](https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md) |
 
 ## 核心流程
 
@@ -433,7 +478,7 @@ mission:
 - `mission-history.yaml` — 包含决策和相关 commit 的完整 revision timeline
 - Source TypeScript、tests、scripts
 
-若要查看 Mission Spec 自身的演进，请在**仓库中**读取 `.mission/` 和 `mission-history.yaml` (https://github.com/chquandogong/mission-spec)。仓库包含 50+ 快照(v1.0.0 → 当前)、8 个 MDR，以及完整的 architecture/API/traceability registry。
+若要查看 Mission Spec 自身的演进，请在**仓库中**读取 `.mission/` 和 `mission-history.yaml` (https://github.com/chquandogong/mission-spec)。仓库包含 63 个快照(v1.0.0 → 当前)、9 个 MDR，以及完整的 architecture/API/traceability registry。
 
 **Two-track 信任模型**：npm tarball 带有 provenance 签名（sigstore，可通过 `npm view mission-spec@<version> --json` 验证），因此你可以信任构建产物。仓库是审计契约演进的地方。两条路径在设计上是分离的。
 
@@ -458,13 +503,17 @@ node scripts/convert-platforms.js mission.yaml
 node scripts/convert-platforms.js --verify
 ```
 
-## 测试
+## 验证
 
 ```bash
-npm test
-npm run test:watch
+npm run lint
 npm run build
+npm test
+npm run registry:check
+node scripts/verify-registry.js --verify-live
 ```
+
+CI 会在 Node.js 20 和 22 上运行同一组核心 gate。release workflow 还会追加 plugin 验证、architecture 验证、reconstruction cold-build，以及带 npm provenance 的发布。
 
 ## 当前范围
 
@@ -499,6 +548,12 @@ npm run build
 3. **融入现有工作流** — 适配现有环境而非要求独立平台
 4. **最小依赖** — Node.js + Ajv + yaml
 5. **TDD 优先** — 用测试锁定当前范围
+
+## 谁在使用 Mission Spec
+
+这是一个早期工具。如果你的项目把 `mission.yaml` 当作持久任务契约使用，欢迎通过 PR 添加项目名称和一句话 use case。真实 adoption signal 会比普通 feature request 更强地影响优先级。
+
+- [qmonster](https://github.com/chquandogong/qmonster) — 用于多 CLI tmux 可观测性的 Rust TUI。它使用 `mission.yaml` 作为 phase contract，并用 `mission-history.yaml` 作为 Claude / Codex / Gemini 三方 adversarial review 的变更台账。
 
 ## 许可证
 

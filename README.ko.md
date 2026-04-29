@@ -1,12 +1,57 @@
-[English](README.md) | 한국어 | [中文](README.zh.md)
+<p align="center">
+  <a href="README.md">English</a> | 한국어 | <a href="README.zh.md">中文</a>
+</p>
 
-# Mission Spec
+<p align="center">
+  <img src="https://raw.githubusercontent.com/chquandogong/mission-spec/main/.github/assets/mission-spec-banner.svg" alt="Mission Spec — AI 에이전트 워크플로를 위한 task contract layer" width="100%">
+</p>
 
-[![GitHub](https://img.shields.io/github/license/chquandogong/mission-spec)](https://github.com/chquandogong/mission-spec)
+<h1 align="center">Mission Spec</h1>
 
-AI 에이전트 워크플로를 위한 **task contract layer**. Orchestration framework가 아닌, 기존 하네스 위에서 작동하는 portable한 run-scoped task contract입니다. TypeScript 라이브러리와 Claude Code용 skill bundle, 그리고 **Living Asset Registry**를 함께 제공합니다.
+<p align="center">
+  <strong>AI 에이전트 워크플로를 위한 task contract layer.</strong><br>
+  Portable mission 파일, 명시적 완료 gate, 감사 가능한 변경 원장을 제공합니다.
+</p>
 
-**Repository:** https://github.com/chquandogong/mission-spec
+<p align="center">
+  <a href="https://www.npmjs.com/package/mission-spec"><img alt="npm version" src="https://img.shields.io/npm/v/mission-spec?color=cb3837"></a>
+  <a href="https://github.com/chquandogong/mission-spec/actions/workflows/test.yml"><img alt="test workflow" src="https://github.com/chquandogong/mission-spec/actions/workflows/test.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/chquandogong/mission-spec/actions/workflows/release.yml"><img alt="release workflow" src="https://github.com/chquandogong/mission-spec/actions/workflows/release.yml/badge.svg"></a>
+  <a href="https://github.com/chquandogong/mission-spec/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/github/license/chquandogong/mission-spec"></a>
+  <a href="#npm-패키지-vs-저장소-v1215"><img alt="npm provenance" src="https://img.shields.io/badge/npm%20provenance-sigstore-2f7de1"></a>
+  <a href="#방법-2-claude-code-플러그인으로-설치"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-6f42c1"></a>
+</p>
+
+<p align="center">
+  <a href="#5분-설치-가이드">설치</a> ·
+  <a href="#사용법">사용법</a> ·
+  <a href="#명시적-gate-연결-v1210">Evaluation gates</a> ·
+  <a href="#living-asset-registry-v150">Registry</a> ·
+  <a href="https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md">문서 인덱스</a> ·
+  <a href="CONTRIBUTING.md">기여 가이드</a>
+</p>
+
+Mission Spec은 orchestration framework가 아닙니다. 기존 하네스 위에서 작동하는 portable한 run-scoped task contract입니다. TypeScript 라이브러리, CLI, Claude Code용 skill bundle, 그리고 **Living Asset Registry**를 함께 제공합니다.
+
+## 한눈에 보기
+
+| 계층 | 제공하는 것 |
+| --- | --- |
+| Contract | `mission.yaml`에 목표, 제약, 완료 조건, design reference를 기록합니다. |
+| Evaluation | `evals[]` + `done_when_refs[]`로 automated, manual, LLM-eval, LLM-judge gate를 지원합니다. |
+| Reporting | CLI/API가 status, eval, report, context, snapshot, backfill 출력을 생성합니다. |
+| Governance | `mission-history.yaml`, MDR, snapshot, architecture/API registry, traceability asset으로 변경 이유를 보존합니다. |
+| Distribution | sigstore provenance가 붙은 npm package와 Claude Code plugin/skill bundle을 제공합니다. |
+
+## 빠른 링크
+
+| 필요 | 시작 위치 |
+| --- | --- |
+| 설치 또는 CLI 실행 | [5분 설치 가이드](#5분-설치-가이드) |
+| TypeScript에서 사용 | [사용법](#사용법) |
+| 완료 gate 이해 | [명시적 gate 연결](#명시적-gate-연결-v1210) |
+| 프로젝트 이력 감사 | [Living Asset Registry](#living-asset-registry-v150)와 [`mission-history.yaml`](mission-history.yaml) |
+| 긴 문서 탐색 | [문서 인덱스](https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md) |
 
 ## 핵심 파이프라인
 
@@ -433,7 +478,7 @@ mission:
 - `mission-history.yaml` — 결정과 관련 commit이 포함된 전체 revision timeline
 - 소스 TypeScript, tests, scripts
 
-Mission Spec의 진화를 보려면 **저장소에서** `.mission/`과 `mission-history.yaml`을 읽으세요 (https://github.com/chquandogong/mission-spec). 저장소에는 50+ 스냅샷(v1.0.0 → 현재), 8개 MDR, 그리고 전체 architecture/API/traceability registry가 있습니다.
+Mission Spec의 진화를 보려면 **저장소에서** `.mission/`과 `mission-history.yaml`을 읽으세요 (https://github.com/chquandogong/mission-spec). 저장소에는 63개 스냅샷(v1.0.0 → 현재), 9개 MDR, 그리고 전체 architecture/API/traceability registry가 있습니다.
 
 **Two-track 신뢰 모델**: npm tarball은 provenance 서명(sigstore, `npm view mission-spec@<version> --json`으로 검증 가능)되어 있으므로 빌드를 신뢰할 수 있습니다. 저장소는 계약의 진화를 감사하는 장소입니다. 두 경로는 설계상 분리되어 있습니다.
 
@@ -458,13 +503,17 @@ node scripts/convert-platforms.js mission.yaml
 node scripts/convert-platforms.js --verify
 ```
 
-## 테스트
+## 검증
 
 ```bash
-npm test
-npm run test:watch
+npm run lint
 npm run build
+npm test
+npm run registry:check
+node scripts/verify-registry.js --verify-live
 ```
+
+CI는 Node.js 20과 22에서 같은 핵심 gate를 실행합니다. release workflow는 여기에 plugin 검증, architecture 검증, reconstruction cold-build, npm provenance publish를 추가로 수행합니다.
 
 ## 현재 범위
 
@@ -499,6 +548,12 @@ npm run build
 3. **기존 워크플로에 녹아들기** — 별도 실행 플랫폼보다 기존 환경에 맞춤
 4. **Minimal Dependencies** — Node.js + Ajv + yaml
 5. **TDD First** — 테스트로 현재 범위를 고정
+
+## Mission Spec을 사용하는 프로젝트
+
+아직 early-stage 도구입니다. 프로젝트에서 `mission.yaml`을 durable task contract로 사용한다면, 프로젝트 이름과 한 줄 use case를 PR로 추가해 주세요. 실제 adoption signal이 feature request보다 우선순위에 더 강하게 반영됩니다.
+
+- [qmonster](https://github.com/chquandogong/qmonster) — 여러 CLI를 tmux 기반으로 관찰하는 Rust TUI. `mission.yaml`을 phase contract로, `mission-history.yaml`을 Claude / Codex / Gemini 3-vendor adversarial-review ledger로 사용합니다.
 
 ## 라이선스
 

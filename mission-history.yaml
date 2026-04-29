@@ -4,15 +4,84 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.22.0 — eval/ref contract hardening (§MINOR)"
+  mission_title: "Mission Spec v1.22.1 — GitHub presentation and docs polish (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 63
-  latest_version: "1.22.0"
+  total_revisions: 64
+  latest_version: "1.22.1"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-29-002"
+    semantic_version: "1.22.1"
+    change_sequence: 68
+    date: "2026-04-29"
+    author: "Codex"
+    contributors: ["Codex"]
+    change_type: "docs"
+    motivation_type: "adoption"
+    persistence: "permanent"
+    intent: "Improve first-impression GitHub presentation and documentation navigation without changing runtime behavior."
+    decision: |
+      Treated the requested repository polish as a documentation/configuration patch:
+
+      (1) GitHub presentation:
+          - Added a repository banner asset under .github/assets/.
+          - Added npm, workflow, license, provenance, and Claude Code plugin badges to all README locales.
+          - Reworked the README first viewport around a concise value statement, at-a-glance capability table, and quick links.
+
+      (2) Documentation navigation:
+          - Added DOCUMENTATION.md to distinguish public docs, active contract assets, maintainer references, and historical review archives.
+          - Added SECURITY.md and SUPPORT.md so GitHub surfaces security and support guidance directly.
+          - Fixed stale CONTRIBUTING.md test-count claims from 119 to 378.
+          - Refreshed README repository evidence counts from 50+ snapshots / 8 MDRs to 63 snapshots / 9 MDRs.
+
+      (3) Repository operations:
+          - Added CODEOWNERS for default ownership.
+          - Added Dependabot configuration for npm and GitHub Actions.
+          - Added issue template config links for support and security triage.
+
+      SemVer: MDR-006 §PATCH because this is documentation, GitHub metadata, and repository presentation only; runtime and public API are unchanged.
+    triggered_by: "User requested GitHub polish with banner/badges, README/documentation cleanup, and professional repository suggestions."
+    issue_or_context: |
+      The project had strong internal governance assets, release provenance, and CI, but the README first screen under-signaled those strengths. The documentation tree also mixed active contract assets with historical review archives without a single navigation layer.
+    changes:
+      added:
+        - ".github/assets/mission-spec-banner.svg: README banner artwork"
+        - ".github/CODEOWNERS: default repository owner"
+        - ".github/dependabot.yml: weekly npm and GitHub Actions dependency update checks"
+        - ".github/ISSUE_TEMPLATE/config.yml: support/security contact links and blank issue policy"
+        - "DOCUMENTATION.md: public documentation index and active-vs-archive guidance"
+        - "SECURITY.md: vulnerability reporting, command-execution boundary, and provenance verification"
+        - "SUPPORT.md: issue routing and support scope"
+        - ".mission/snapshots/2026-04-29_v1.22.1_mission.yaml"
+      modified:
+        - "README.md / README.ko.md / README.zh.md: banner, badges, at-a-glance table, quick links, verification section, evidence counts, and trilingual adoption note alignment"
+        - "CONTRIBUTING.md: current test count updated to 378"
+        - "package.json + package-lock.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + mission.yaml: version 1.22.0 → 1.22.1"
+        - "mission-history.yaml: v1.22.0 related commit backfilled and v1.22.1 entry added"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — docs/config only. README install/usage verifier, schema validation, registry checks, architecture checks, plugin verification, full tests, and self-eval remain green."
+    related_commits: []
+    related_decisions: ["MDR-006", "MDR-007"]
+    snapshot_after: ".mission/snapshots/2026-04-29_v1.22.1_mission.yaml"
+    follow_up:
+      - "Set a GitHub repository social preview image in repository settings using the new banner artwork or a rasterized variant."
+      - "Enable GitHub private vulnerability reporting if it is not already enabled."
+
   - change_id: "MSC-2026-04-29-001"
     semantic_version: "1.22.0"
     change_sequence: 67
@@ -78,7 +147,7 @@ timeline:
       runtime: true
     breaking: false
     risk: "medium-low — additive/compatible runtime semantics, but command execution and generated draft behavior changed. Covered by 378/378 tests, validate, registry live check, arch check, and self-eval 11/11. SemVer: MDR-006 §MINOR."
-    related_commits: []
+    related_commits: ["6038c3e"]
     related_decisions: ["MDR-006"]
     snapshot_after: ".mission/snapshots/2026-04-29_v1.22.0_mission.yaml"
     follow_up:
@@ -160,7 +229,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "very low — Living Asset Registry 문서 내부 숫자 주장 2건 수정만. consumer surface / runtime / CLI / API / schema / test 코드 영향 없음. 369/369 tests 불변, ms-eval 11/11 PASS eval-ref 11 유지. registry:check / arch:verify / plugin:verify 전부 green 유지."
-    related_commits: []
+    related_commits: ["adfa740"]
     related_decisions:
       ["MDR-006-semver-policy-for-meta-tooling-and-scripts-only-changes"]
     snapshot_after: ".mission/snapshots/2026-04-24_v1.21.14_mission.yaml"

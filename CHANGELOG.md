@@ -6,6 +6,27 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.22.1] - 2026-04-29
+_Improve first-impression GitHub presentation and documentation navigation without changing runtime behavior._
+
+### Added
+
+- .github/assets/mission-spec-banner.svg: README banner artwork
+- .github/CODEOWNERS: default repository owner
+- .github/dependabot.yml: weekly npm and GitHub Actions dependency update checks
+- .github/ISSUE_TEMPLATE/config.yml: support/security contact links and blank issue policy
+- DOCUMENTATION.md: public documentation index and active-vs-archive guidance
+- SECURITY.md: vulnerability reporting, command-execution boundary, and provenance verification
+- SUPPORT.md: issue routing and support scope
+- .mission/snapshots/2026-04-29_v1.22.1_mission.yaml
+
+### Changed
+
+- README.md / README.ko.md / README.zh.md: banner, badges, at-a-glance table, quick links, verification section, evidence counts, and trilingual adoption note alignment
+- CONTRIBUTING.md: current test count updated to 378
+- package.json + package-lock.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + mission.yaml: version 1.22.0 → 1.22.1
+- mission-history.yaml: v1.22.0 related commit backfilled and v1.22.1 entry added
+
 ## [1.22.0] - 2026-04-29
 _Clarify and harden the eval/ref contract so done_when criteria are more consistently machine-verifiable across init, eval, status, report, and documentation surfaces._
 

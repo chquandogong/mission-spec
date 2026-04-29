@@ -9,7 +9,7 @@ git clone https://github.com/chquandogong/mission-spec.git
 cd mission-spec
 npm install
 npm run build
-npm test              # 119 tests should pass
+npm test              # 378 tests should pass
 git config core.hooksPath .githooks   # enable pre-commit validation
 ```
 
@@ -95,7 +95,7 @@ Tip: `npm run arch-diff HEAD~1` shows what changed vs. last version.
 
 ## Pull Request Checklist
 
-- [ ] Tests added/updated and `npm test` passes (all 119+ tests)
+- [ ] Tests added/updated and `npm test` passes (all 378+ tests)
 - [ ] `npm run build` and `npm run lint` clean (0 errors)
 - [ ] `npm run snapshot` and `npm run validate:history-commits` pass (pre-commit enforces)
 - [ ] `mission-history.yaml` updated if IMPACTFUL paths were touched

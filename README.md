@@ -1,12 +1,57 @@
-English | [한국어](README.ko.md) | [中文](README.zh.md)
+<p align="center">
+  English | <a href="README.ko.md">한국어</a> | <a href="README.zh.md">中文</a>
+</p>
 
-# Mission Spec
+<p align="center">
+  <img src="https://raw.githubusercontent.com/chquandogong/mission-spec/main/.github/assets/mission-spec-banner.svg" alt="Mission Spec — task contract layer for AI agent workflows" width="100%">
+</p>
 
-[![GitHub](https://img.shields.io/github/license/chquandogong/mission-spec)](https://github.com/chquandogong/mission-spec)
+<h1 align="center">Mission Spec</h1>
 
-A **task contract layer** for AI agent workflows. Not an orchestration framework — a portable, run-scoped task contract that works on top of existing harnesses. Provides a TypeScript library, a Claude Code skill bundle, and a **Living Asset Registry**.
+<p align="center">
+  <strong>A task contract layer for AI agent workflows.</strong><br>
+  Portable mission files, explicit completion gates, and an auditable change ledger for agent-assisted work.
+</p>
 
-**Repository:** https://github.com/chquandogong/mission-spec
+<p align="center">
+  <a href="https://www.npmjs.com/package/mission-spec"><img alt="npm version" src="https://img.shields.io/npm/v/mission-spec?color=cb3837"></a>
+  <a href="https://github.com/chquandogong/mission-spec/actions/workflows/test.yml"><img alt="test workflow" src="https://github.com/chquandogong/mission-spec/actions/workflows/test.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/chquandogong/mission-spec/actions/workflows/release.yml"><img alt="release workflow" src="https://github.com/chquandogong/mission-spec/actions/workflows/release.yml/badge.svg"></a>
+  <a href="https://github.com/chquandogong/mission-spec/blob/main/LICENSE"><img alt="license" src="https://img.shields.io/github/license/chquandogong/mission-spec"></a>
+  <a href="#npm-package-vs-repository-v1215"><img alt="npm provenance" src="https://img.shields.io/badge/npm%20provenance-sigstore-2f7de1"></a>
+  <a href="#method-2-install-as-a-claude-code-plugin"><img alt="Claude Code plugin" src="https://img.shields.io/badge/Claude%20Code-plugin-6f42c1"></a>
+</p>
+
+<p align="center">
+  <a href="#5-minute-installation-guide">Install</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="#explicit-gate-linkage-v1210">Evaluation gates</a> ·
+  <a href="#living-asset-registry-v150">Registry</a> ·
+  <a href="https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md">Docs index</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+Mission Spec is not an orchestration framework. It is a portable, run-scoped task contract that works on top of existing harnesses. It ships as a TypeScript library, a CLI, a Claude Code skill bundle, and a **Living Asset Registry**.
+
+## At a Glance
+
+| Layer | What it provides |
+| --- | --- |
+| Contract | `mission.yaml` captures goal, constraints, completion criteria, and design references. |
+| Evaluation | `evals[]` + `done_when_refs[]` support automated, manual, LLM-eval, and LLM-judge gates. |
+| Reporting | CLI/API commands produce status, eval, report, context, snapshot, and backfill outputs. |
+| Governance | `mission-history.yaml`, MDRs, snapshots, architecture/API registries, and traceability assets preserve why the contract changed. |
+| Distribution | npm package with sigstore provenance plus a Claude Code plugin/skill bundle. |
+
+## Quick Links
+
+| Need | Start here |
+| --- | --- |
+| Install or run the CLI | [5-Minute Installation Guide](#5-minute-installation-guide) |
+| Use from TypeScript | [Usage](#usage) |
+| Understand completion gates | [Explicit gate linkage](#explicit-gate-linkage-v1210) |
+| Audit the project history | [Living Asset Registry](#living-asset-registry-v150) and [`mission-history.yaml`](mission-history.yaml) |
+| Navigate the long-form docs | [Documentation index](https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md) |
 
 ## Core Pipeline
 
@@ -432,7 +477,7 @@ The `mission-spec` npm package ships only runtime essentials: `bin/`, `dist/`, `
 - `mission-history.yaml` — full revision timeline with decisions and related commits
 - Source TypeScript, tests, scripts
 
-To inspect the evolution of Mission Spec itself, read `.mission/` and `mission-history.yaml` **in the repository** (https://github.com/chquandogong/mission-spec). The repo holds 50+ snapshots (v1.0.0 → current), 8 MDRs, and full architecture/API/traceability registries.
+To inspect the evolution of Mission Spec itself, read `.mission/` and `mission-history.yaml` **in the repository** (https://github.com/chquandogong/mission-spec). The repo holds 63 snapshots (v1.0.0 → current), 9 MDRs, and full architecture/API/traceability registries.
 
 **Two-track trust model**: the npm tarball is provenance-signed (sigstore, verifiable with `npm view mission-spec@<version> --json`) so you can trust the build. The repository is where the contract's evolution is audited. The two are separated by design.
 
@@ -457,13 +502,17 @@ Verify-only mode:
 node scripts/convert-platforms.js --verify
 ```
 
-## Testing
+## Verification
 
 ```bash
-npm test
-npm run test:watch
+npm run lint
 npm run build
+npm test
+npm run registry:check
+node scripts/verify-registry.js --verify-live
 ```
+
+CI runs the same core gates on Node.js 20 and 22, and the release workflow adds plugin verification, architecture verification, reconstruction cold-build, and npm provenance publishing.
 
 ## Current Scope
 

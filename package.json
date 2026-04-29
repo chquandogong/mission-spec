@@ -1,6 +1,6 @@
 {
   "name": "mission-spec",
-  "version": "1.22.0",
+  "version": "1.22.1",
   "description": "Mission Spec — task contract layer for AI agent workflows",
   "type": "module",
   "main": "dist/index.js",

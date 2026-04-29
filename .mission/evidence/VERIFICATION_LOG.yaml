@@ -1,9 +1,44 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-29 | Version: 1.22.0
+# Last updated: 2026-04-29 | Version: 1.22.1
 
 entries:
+  - version: "1.22.1"
+    date: "2026-04-29"
+    verified_by: "Codex"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 378
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 378"
+      evaluate_mission:
+        criteria_passed: 11
+        criteria_total: 11
+        status: "mission complete"
+        resolved_by:
+          ref: 11
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 11
+          file-exists: 0
+    notes: |
+      GitHub presentation and documentation polish release:
+      README 3종 첫 화면에 banner/badges/quick links를 추가하고,
+      DOCUMENTATION.md / SECURITY.md / SUPPORT.md / CODEOWNERS /
+      Dependabot / issue template config를 추가.
+
+      Runtime/API/schema behavior unchanged. README verifier, schema validation,
+      registry check, live evaluator, architecture check, plugin verify, and full
+      tests remain green.
+
   - version: "1.22.0"
     date: "2026-04-29"
     verified_by: "Codex"
