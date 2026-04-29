@@ -128,6 +128,25 @@ describe("evaluateMission", () => {
     expect(result.criteria[0].reason).toContain("Automated command failed");
   });
 
+  it("includes stderr detail when automated eval command fails", () => {
+    writeMission(tempDir, {
+      title: "Automated Eval Failure Detail",
+      goal: "Run command",
+      done_when: ["command_test"],
+      evals: [
+        {
+          name: "command_test",
+          type: "automated",
+          command: 'node -e "console.error(\\"boom detail\\"); process.exit(1)"',
+          pass_criteria: "command exits 0",
+        },
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toContain("boom detail");
+  });
+
   it("throws on schema-invalid mission.yaml", () => {
     // mission with no done_when → schema invalid
     writeFileSync(
@@ -175,6 +194,80 @@ describe("evaluateMission", () => {
     const result = evaluateMission(tempDir);
     expect(result.criteria[0].passed).toBe(false);
     expect(result.criteria[0].reason).toContain("Awaiting LLM evaluation");
+  });
+
+  it("marks manual eval criterion as pending when no override file exists", () => {
+    writeMission(tempDir, {
+      title: "Manual Eval",
+      goal: "Human check",
+      done_when: ["human_review"],
+      evals: [
+        {
+          name: "human_review",
+          type: "manual",
+          description: "maintainer signs off",
+        },
+      ],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toContain("Awaiting manual evaluation");
+    expect(result.criteria[0].reason).toContain("maintainer signs off");
+    expect(result.criteria[0].resolved_by).toBe("inference");
+  });
+
+  it("uses override file to mark manual eval criterion as passed", () => {
+    writeMission(tempDir, {
+      title: "Manual Eval Override",
+      goal: "Human check",
+      done_when: ["human_review"],
+      evals: [
+        {
+          name: "human_review",
+          type: "manual",
+          description: "maintainer signs off",
+        },
+      ],
+    });
+    mkdirSync(join(tempDir, ".mission", "evals"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "evals", "human_review.result.yaml"),
+      stringify({
+        passed: true,
+        reason: "approved",
+        evaluated_by: "maintainer",
+        evaluated_at: "2026-04-29",
+      }),
+    );
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].reason).toContain("PASS");
+    expect(result.criteria[0].reason).toContain("maintainer");
+    expect(result.criteria[0].reason).toContain("approved");
+  });
+
+  it("uses override file to mark manual eval criterion as failed", () => {
+    writeMission(tempDir, {
+      title: "Manual Eval Override Fail",
+      goal: "Human check",
+      done_when: ["human_review"],
+      evals: [
+        {
+          name: "human_review",
+          type: "manual",
+          description: "maintainer signs off",
+        },
+      ],
+    });
+    mkdirSync(join(tempDir, ".mission", "evals"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "evals", "human_review.result.yaml"),
+      stringify({ passed: false, reason: "needs changes" }),
+    );
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toContain("FAIL");
+    expect(result.criteria[0].reason).toContain("needs changes");
   });
 
   it("uses override file to mark llm-eval criterion as passed", () => {
@@ -571,6 +664,26 @@ describe("done_when_refs — eval-ref kind", () => {
     expect(result.criteria[0].ref_kind).toBe("eval-ref");
   });
 
+  it("includes stderr detail when eval-ref automated command fails", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["tests pass"],
+      evals: [
+        {
+          name: "unit_tests",
+          type: "automated",
+          command: 'node -e "console.error(\\"ref boom\\"); process.exit(1)"',
+          pass_criteria: "exit 0",
+        },
+      ],
+      done_when_refs: [{ index: 0, kind: "eval-ref", value: "unit_tests" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(false);
+    expect(result.criteria[0].reason).toContain("ref boom");
+  });
+
   it("delegates to llm-eval entry with override file", () => {
     mkdirSync(join(tempDir, ".mission", "evals"), { recursive: true });
     writeFileSync(
@@ -595,17 +708,62 @@ describe("done_when_refs — eval-ref kind", () => {
     expect(result.criteria[0].ref_kind).toBe("eval-ref");
   });
 
-  it("fails when eval-ref value has no matching evals[] entry (orphan at runtime)", () => {
+  it("delegates to manual entry with override file", () => {
+    mkdirSync(join(tempDir, ".mission", "evals"), { recursive: true });
+    writeFileSync(
+      join(tempDir, ".mission", "evals", "human_review.result.yaml"),
+      "passed: true\nreason: approved\n",
+    );
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["human ok"],
+      evals: [
+        {
+          name: "human_review",
+          type: "manual",
+          description: "maintainer signs off",
+        },
+      ],
+      done_when_refs: [{ index: 0, kind: "eval-ref", value: "human_review" }],
+    });
+    const result = evaluateMission(tempDir);
+    expect(result.criteria[0].passed).toBe(true);
+    expect(result.criteria[0].resolved_by).toBe("ref");
+    expect(result.criteria[0].ref_kind).toBe("eval-ref");
+  });
+
+  it("throws when eval-ref value has no matching evals[] entry", () => {
     writeMission(tempDir, {
       title: "T",
       goal: "G",
       done_when: ["tests pass"],
       done_when_refs: [{ index: 0, kind: "eval-ref", value: "nonexistent" }],
     });
-    const result = evaluateMission(tempDir);
-    expect(result.criteria[0].passed).toBe(false);
-    expect(result.criteria[0].ref_kind).toBe("eval-ref");
-    expect(result.criteria[0].reason).toMatch(/nonexistent/);
+    expect(() => evaluateMission(tempDir)).toThrow(/nonexistent/);
+  });
+
+  it("throws when done_when_refs index is out of range at runtime", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["one"],
+      done_when_refs: [{ index: 5, kind: "command", value: "true" }],
+    });
+    expect(() => evaluateMission(tempDir)).toThrow(/out of range/);
+  });
+
+  it("throws when done_when_refs contains duplicate index at runtime", () => {
+    writeMission(tempDir, {
+      title: "T",
+      goal: "G",
+      done_when: ["one"],
+      done_when_refs: [
+        { index: 0, kind: "command", value: "true" },
+        { index: 0, kind: "command", value: "false" },
+      ],
+    });
+    expect(() => evaluateMission(tempDir)).toThrow(/duplicate index/);
   });
 });
 

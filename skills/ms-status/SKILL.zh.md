@@ -20,7 +20,7 @@ allowed-tools:
 
 1. 读取 `mission.yaml` 并验证 Schema。
 2. 提取任务元数据（title、goal、constraints）。
-3. 评估每个 done_when 条件以计算进度。
+3. 评估每个 done_when 条件以计算进度。如果存在 `done_when_refs[]`，被绑定的条目会以 `resolved_by: "ref"` 和 `ref_kind` 报告。
 4. 以 Markdown 格式输出摘要。
 
 ## 运行方法
@@ -88,7 +88,7 @@ console.log(s.markdown);
 
 ## done_when drift 部分（v1.16.18+）
 
-当前 evaluator 无法自动评估的 `done_when` 条目（`TEST_PATTERN` 命中但缺少对应 `evals[]` 的路径 + 最终 fallback 路径，两者的 reason 都包含 "manual verification required"）一旦出现，就会附加 `## done_when drift` 部分列出这些条目。
+当前 evaluator 无法自动评估的 `done_when` 条目（`resolved_by === "manual"`）一旦出现，就会附加 `## done_when drift` 部分列出这些条目。
 
 **Layout — drift 1–3 条（inline colon）：**
 
@@ -120,9 +120,21 @@ Sample:
 Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (`X 存在` / `X exists`).
 ```
 
-背景：2026-04-21 qmonster 二次审计中反复确认的模式——采用者将 `done_when` 写成叙述性文本（"Phase 3B: advisory rules carry suggested_command..."）后，任何 evaluator heuristic 都无法匹配，导致 `ms-eval` 报告 0/N，verification contract 仅在形式上存在。在 `ms-status` 输出中立即 surface，采用者能直接得到"添加 `evals[]`" 或"改写为文件存在模式"两种选择的信号。
+背景：2026-04-21 qmonster 二次审计中反复确认的模式——采用者将 `done_when` 写成叙述性文本（"Phase 3B: advisory rules carry suggested_command..."）后，任何 evaluator heuristic 都无法匹配，导致 `ms-eval` 报告 0/N，verification contract 仅在形式上存在。在 `ms-status` 输出中立即 surface，采用者能直接得到"添加 `done_when_refs[]` / `evals[]`" 或"改写为文件存在模式"的信号。
 
 超过 80 字符的 Sample 条目为可读性截断为 77 字符 + `…`。原文通过返回值的 `doneWhenDrift: string[]` 字段完整提供。
+
+## refs coverage 部分（v1.21.0+）
+
+当至少一个 criterion 通过 `done_when_refs[]` resolve 时，`ms-status` 会附加 `## refs coverage` 部分。它会报告有多少 `done_when` 条目被显式绑定、各 `ref_kind` 的数量，以及仍依赖 inference fallback 的 index。
+
+```markdown
+## refs coverage
+
+done_when 3/5 bound via done_when_refs (eval-ref 2, file-contains 1). 2개는 inference fallback 중: [index 3], [index 4]
+```
+
+此部分是 contract-quality 信号。通常 `eval-ref` 绑定最易维护：`done_when` 保持可读 prose，具体校验放在 `evals[]` 中。
 
 ## meta staleness 部分（v1.16.19+）
 

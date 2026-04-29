@@ -23,8 +23,9 @@ allowed-tools:
 1. Ask the user for a **mission goal** in natural language (skip if already provided).
 2. The current implementation checks for `package.json` and `README.md`, and reads project name and description from `package.json`.
 3. Heuristically derives **title** and **done_when** criteria from the goal.
-4. Includes user-provided constraints in **constraints** if any.
-5. Generates a `mission.yaml` draft and performs schema validation.
+4. If `package.json` has a `scripts.test` command, scaffolds an `evals[]` automated `npm_test` entry and a matching `done_when_refs[]` `eval-ref` binding for the generated test criterion.
+5. Includes user-provided constraints in **constraints** if any.
+6. Generates a `mission.yaml` draft and performs schema validation.
 
 ## mission.yaml Schema (Required Fields)
 

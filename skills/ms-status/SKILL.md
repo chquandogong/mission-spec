@@ -20,7 +20,7 @@ allowed-tools:
 
 1. Reads `mission.yaml` and validates the schema.
 2. Extracts mission metadata (title, goal, constraints).
-3. Evaluates each done_when condition to calculate progress.
+3. Evaluates each done_when condition to calculate progress. If `done_when_refs[]` is present, bound entries are reported as `resolved_by: "ref"` with a `ref_kind`.
 4. Outputs a summary in Markdown format.
 
 ## How to Run
@@ -88,7 +88,7 @@ Rationale: the qmonster adoption audit (2026-04-21) surfaced a recurring pattern
 
 ## done_when drift Section (v1.16.18+)
 
-If any `done_when` entry cannot be auto-evaluated by the current evaluator (the `TEST_PATTERN`-without-evals path or the catch-all fallback path — both emit a reason containing "manual verification required"), a `## done_when drift` section is appended listing the unevaluable entries.
+If any `done_when` entry cannot be auto-evaluated by the current evaluator (`resolved_by === "manual"`), a `## done_when drift` section is appended listing the unevaluable entries.
 
 **Layout — drift 1 to 3 entries (inline colon):**
 
@@ -120,9 +120,21 @@ Sample:
 Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (`X 존재` / `X exists`).
 ```
 
-Rationale: the 2026-04-21 qmonster audit (2nd pass) surfaced a recurring pattern — adopters write `done_when` as narrative prose ("Phase 3B: advisory rules carry suggested_command...") that no evaluator heuristic can score, so `ms-eval` reports 0/N despite the verification contract being syntactically present. Surfacing the drift at `ms-status` gives the adopter a direct signal to either add `evals[]` entries or rewrite conditions as file-existence patterns.
+Rationale: the 2026-04-21 qmonster audit (2nd pass) surfaced a recurring pattern — adopters write `done_when` as narrative prose ("Phase 3B: advisory rules carry suggested_command...") that no evaluator heuristic can score, so `ms-eval` reports 0/N despite the verification contract being syntactically present. Surfacing the drift at `ms-status` gives the adopter a direct signal to either add `done_when_refs[]` / `evals[]` entries or rewrite conditions as file-existence patterns.
 
 Sample entries longer than 80 characters are truncated to 77 + `…` for readability. The return value exposes the full, untruncated list via `doneWhenDrift: string[]`.
+
+## refs coverage Section (v1.21.0+)
+
+When at least one criterion is resolved through `done_when_refs[]`, `ms-status` appends a `## refs coverage` section. It reports how many `done_when` entries are explicitly bound, summarizes `ref_kind` counts, and lists unbound indices that still rely on inference fallback.
+
+```markdown
+## refs coverage
+
+done_when 3/5 bound via done_when_refs (eval-ref 2, file-contains 1). 2개는 inference fallback 중: [index 3], [index 4]
+```
+
+Use this section as a contract-quality signal: `eval-ref` bindings are usually the most maintainable because prose remains in `done_when` while concrete validation stays in `evals[]`.
 
 ## meta staleness Section (v1.16.19+)
 

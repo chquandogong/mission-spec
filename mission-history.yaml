@@ -4,15 +4,86 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.21.14 — consistency audit test-count drift fix (§PATCH)"
+  mission_title: "Mission Spec v1.22.0 — eval/ref contract hardening (§MINOR)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 62
-  latest_version: "1.21.14"
+  total_revisions: 63
+  latest_version: "1.22.0"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-29-001"
+    semantic_version: "1.22.0"
+    change_sequence: 67
+    date: "2026-04-29"
+    author: "Codex"
+    contributors: ["Codex"]
+    change_type: "enhancement"
+    motivation_type: "correctness"
+    persistence: "permanent"
+    intent: "Clarify and harden the eval/ref contract so done_when criteria are more consistently machine-verifiable across init, eval, status, report, and documentation surfaces."
+    decision: |
+      Implemented the user-requested eval/ref update plan in one minor release:
+
+      (1) Documentation and state consistency:
+          - README and ms-eval/ms-status/ms-init skills now explain evals[], done_when_refs[], ref priority, refs coverage, command-execution trust boundaries, and ms-init scaffold behavior.
+          - docs/internal/ARCHITECTURE.md refreshed from v1.20.0 to v1.21.14/v1.22.0-era evaluator semantics.
+          - mission-history.yaml evolution_summary now includes the adopter-facing distribution phase so ms-status and CURRENT_STATE agree.
+          - architecture_doc_freshness verdict refreshed to 2026-04-29.
+
+      (2) Runtime hardening:
+          - Automated command execution now uses a shared timeout/detail path across inferred commands, direct command refs, eval-ref automated entries, and name-matched automated evals.
+          - done_when_refs invariants moved to parser-level validation, so eval/status/report fail consistently with validate on duplicate index, out-of-range index, and orphan eval-ref.
+
+      (3) Eval semantics:
+          - manual evals now use the same .mission/evals/<name>.result.yaml verdict contract as llm-eval/llm-judge.
+          - ms-init now scaffolds an automated npm_test eval plus done_when_refs eval-ref binding when package.json has scripts.test.
+
+      SemVer: MDR-006 §MINOR because runtime behavior and generated mission draft structure changed, even though the public package shape remains compatible.
+    triggered_by: "User requested sequential execution of the eval/ref update plan, then commit/push/tag/publish."
+    issue_or_context: |
+      Prior review found that evals[] and done_when_refs[] were central to the project but under-explained, and that several runtime semantics were uneven:
+      command timeout differed by path, done_when_refs invariants were validate-only, manual eval was schema-valid but not runtime-verdict-backed, and ms-init generated prose-heavy criteria without refs scaffold.
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-29_v1.22.0_mission.yaml"
+      modified:
+        - "src/core/evaluator.ts: shared command timeout/detail handling; manual eval verdict support"
+        - "src/core/parser.ts: done_when_refs invariant validation moved into mission loading"
+        - "src/commands/validate.ts: reuse parser-level done_when_refs invariant validation"
+        - "src/commands/init.ts: scaffold npm_test automated eval + eval-ref when package.json has scripts.test"
+        - "tests/commands/eval.test.ts: manual eval, command detail, and runtime invariant coverage"
+        - "tests/commands/init.test.ts: npm_test eval-ref scaffold coverage"
+        - "tests/commands/status.test.ts: manual eval excluded from drift"
+        - "README.md / README.ko.md / README.zh.md: explicit eval/ref semantics and trust boundary notes"
+        - "skills/ms-eval/*, skills/ms-status/*, skills/ms-init/*: eval/ref behavior documentation"
+        - "docs/internal/ARCHITECTURE.md: current evaluator/ref architecture description"
+        - "mission-history.yaml: adopter-facing distribution phase added to evolution_summary"
+        - ".mission/evals/architecture_doc_freshness.result.yaml: refreshed verdict"
+        - ".mission/architecture/ARCHITECTURE_COMPUTED.yaml: regenerated after source changes"
+        - ".mission/reconstruction/REBUILD_PLAYBOOK.md, .mission/traceability/TRACE_MATRIX.yaml, .mission/evidence/VERIFICATION_LOG.yaml: test count and verification evidence updated to 378 tests"
+        - "package.json + package-lock.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + mission.yaml: version 1.21.14 → 1.22.0"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: true
+      api: true
+      tests: true
+      docs: true
+      runtime: true
+    breaking: false
+    risk: "medium-low — additive/compatible runtime semantics, but command execution and generated draft behavior changed. Covered by 378/378 tests, validate, registry live check, arch check, and self-eval 11/11. SemVer: MDR-006 §MINOR."
+    related_commits: []
+    related_decisions: ["MDR-006"]
+    snapshot_after: ".mission/snapshots/2026-04-29_v1.22.0_mission.yaml"
+    follow_up:
+      - "Consider npm fresh-install smoke/provenance consumer-side CI as Rev.7 follow-up."
+
   - change_id: "MSC-2026-04-24-007"
     semantic_version: "1.21.14"
     change_sequence: 66
@@ -3905,6 +3976,11 @@ evolution_summary:
       date_range: "2026-04-14"
       theme: "아키텍처 지식의 자산화"
       description: "3-모델 교차 검증 합의 기반. design_refs + architecture_delta 스키마 확장, Architecture/Dependency/API/Traceability registry, ms-context, Rebuild Playbook, Verification Evidence Ledger까지 포함해 구조 정보의 capture와 consumption을 함께 자산화"
+    - name: "adopter-facing distribution"
+      versions: ["1.21.5+"]
+      date_range: "2026-04-23 ~ present"
+      theme: "외부 adopter 설치/검증/지원성"
+      description: "MDR-008 v1.21.5 amendment에서 선언된 phase. npm package vs repository two-track trust model, explicit done_when_refs self-dogfooding, README npm-primary install path, dogfooding evidence, consumer-side validation gaps를 다루는 배포/채택 중심 phase"
 
   identity_evolution:
     - version: "1.0.0"

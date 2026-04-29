@@ -14,6 +14,7 @@ export interface InitOptions {
 export interface ProjectContext {
   hasPackageJson: boolean;
   hasReadme: boolean;
+  hasNpmTestScript: boolean;
   projectName?: string;
   projectDescription?: string;
 }
@@ -31,6 +32,17 @@ interface MissionData {
   goal: string;
   done_when: string[];
   constraints?: string[];
+  evals?: Array<{
+    name: string;
+    type: "automated";
+    command: string;
+    pass_criteria: string;
+  }>;
+  done_when_refs?: Array<{
+    index: number;
+    kind: "eval-ref";
+    value: string;
+  }>;
   version?: string;
   lineage?: {
     initial_version: string;
@@ -44,6 +56,7 @@ function detectProjectContext(projectDir: string): ProjectContext {
   const ctx: ProjectContext = {
     hasPackageJson: false,
     hasReadme: false,
+    hasNpmTestScript: false,
   };
 
   const pkgPath = join(projectDir, "package.json");
@@ -53,6 +66,7 @@ function detectProjectContext(projectDir: string): ProjectContext {
       const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
       ctx.projectName = pkg.name;
       ctx.projectDescription = pkg.description;
+      ctx.hasNpmTestScript = typeof pkg.scripts?.test === "string";
     } catch {
       // malformed package.json — ignore
     }
@@ -174,6 +188,32 @@ function deriveDoneWhenFromGoal(goal: string): string[] {
   return criteria;
 }
 
+function addEvalScaffold(missionData: MissionData, context: ProjectContext) {
+  if (!context.hasNpmTestScript) return;
+  const testIndex = missionData.done_when.findIndex(
+    (criterion) =>
+      criterion === "All unit tests passing" ||
+      criterion === "npm test or core logic verification complete",
+  );
+  if (testIndex < 0) return;
+
+  missionData.evals = [
+    {
+      name: "npm_test",
+      type: "automated",
+      command: "npm test",
+      pass_criteria: "npm test exits with status 0",
+    },
+  ];
+  missionData.done_when_refs = [
+    {
+      index: testIndex,
+      kind: "eval-ref",
+      value: "npm_test",
+    },
+  ];
+}
+
 export function generateMissionDraft(options: InitOptions): InitResult {
   if (!options.goal || options.goal.trim() === "") {
     throw new Error("goal is required");
@@ -189,6 +229,8 @@ export function generateMissionDraft(options: InitOptions): InitResult {
     goal: options.goal.trim(),
     done_when: doneWhen,
   };
+
+  addEvalScaffold(missionData, context);
 
   if (options.constraints && options.constraints.length > 0) {
     missionData.constraints = options.constraints;

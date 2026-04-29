@@ -23,8 +23,9 @@ allowed-tools:
 1. 사용자에게 자연어로 **미션 목표**를 물어봅니다 (이미 제공된 경우 생략).
 2. 현재 구현은 `package.json`과 `README.md`의 존재 여부를 확인하고, `package.json`에서 프로젝트 이름과 설명을 읽습니다.
 3. 목표에서 **title**, **done_when** 조건을 휴리스틱으로 도출합니다.
-4. 사용자가 제공한 제약 조건이 있으면 **constraints**에 포함합니다.
-5. `mission.yaml` 초안을 생성하고, 스키마 검증을 수행합니다.
+4. `package.json`에 `scripts.test`가 있으면 생성된 테스트 criterion에 대해 `evals[]` automated `npm_test` 항목과 `done_when_refs[]` `eval-ref` 바인딩을 함께 scaffold합니다.
+5. 사용자가 제공한 제약 조건이 있으면 **constraints**에 포함합니다.
+6. `mission.yaml` 초안을 생성하고, 스키마 검증을 수행합니다.
 
 ## mission.yaml 스키마 (필수 필드)
 

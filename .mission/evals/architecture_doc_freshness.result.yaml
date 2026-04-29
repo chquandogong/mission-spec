@@ -1,4 +1,4 @@
 passed: true
-reason: "2026-04-21 기준 docs/internal/ARCHITECTURE.md 와 docs/internal/CLAUDE.md를 v1.20.0 surface(21 modules, 25 public API functions + exported option/result types, 7 CLI commands with shared-mode eval/status, 6 skills) 및 현재 registry 설명과 맞게 동기화함"
+reason: "2026-04-29 기준 docs/internal/ARCHITECTURE.md를 v1.21.14 surface(21 modules, 25 public API functions + exported option/result types, 7 CLI commands with shared-mode eval/status, done_when_refs refs coverage, 6 skills) 및 현재 registry 설명과 맞게 동기화함"
 evaluated_by: "codex"
-evaluated_at: "2026-04-21"
+evaluated_at: "2026-04-29"

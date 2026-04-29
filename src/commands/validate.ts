@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { validateMission, validateHistory } from "../schema/validator.js";
+import { checkDoneWhenRefsInvariants } from "../core/parser.js";
 
 export interface ValidateResult {
   missionValid: boolean;
@@ -50,7 +51,7 @@ export function validateProject(projectDir: string): ValidateResult {
     missionValid = r.valid;
     missionErrors = [...r.errors];
     if (r.valid) {
-      const refErrors = checkRefsInvariants(missionParse.value);
+      const refErrors = checkDoneWhenRefsInvariants(missionParse.value);
       if (refErrors.length > 0) {
         missionValid = false;
         missionErrors.push(...refErrors);
@@ -83,55 +84,4 @@ export function validateProject(projectDir: string): ValidateResult {
     historyErrors,
     allValid,
   };
-}
-
-function checkRefsInvariants(missionData: unknown): string[] {
-  const errors: string[] = [];
-  const obj = missionData as {
-    mission?: {
-      done_when?: unknown;
-      evals?: unknown;
-      done_when_refs?: unknown;
-    };
-  };
-  const mission = obj?.mission;
-  if (!mission) return errors;
-  const refs = mission.done_when_refs;
-  if (!Array.isArray(refs) || refs.length === 0) return errors;
-
-  const doneWhen = Array.isArray(mission.done_when) ? mission.done_when : [];
-  const evalsArr = Array.isArray(mission.evals) ? mission.evals : [];
-  const evalNames = new Set(
-    evalsArr
-      .map((e) =>
-        e && typeof e === "object" ? (e as { name?: unknown }).name : undefined,
-      )
-      .filter((n): n is string => typeof n === "string"),
-  );
-
-  const seen = new Set<number>();
-  for (const raw of refs) {
-    if (!raw || typeof raw !== "object") continue;
-    const r = raw as { index?: unknown; kind?: unknown; value?: unknown };
-    if (typeof r.index !== "number") continue;
-    if (r.index >= doneWhen.length) {
-      errors.push(
-        `/mission/done_when_refs: index ${r.index} out of range (done_when.length = ${doneWhen.length})`,
-      );
-    }
-    if (seen.has(r.index)) {
-      errors.push(`/mission/done_when_refs: duplicate index ${r.index}`);
-    }
-    seen.add(r.index);
-    if (
-      r.kind === "eval-ref" &&
-      typeof r.value === "string" &&
-      !evalNames.has(r.value)
-    ) {
-      errors.push(
-        `/mission/done_when_refs: eval-ref value '${r.value}' not found in mission.evals[].name`,
-      );
-    }
-  }
-  return errors;
 }

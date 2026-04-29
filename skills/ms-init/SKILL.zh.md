@@ -23,8 +23,9 @@ allowed-tools:
 1. 向用户询问自然语言的**任务目标**（如已提供则跳过）。
 2. 当前实现会检查 `package.json` 和 `README.md` 是否存在，并从 `package.json` 中读取项目名称和描述。
 3. 通过启发式方法从目标中推导 **title** 和 **done_when** 条件。
-4. 如果用户提供了约束条件，将其包含在 **constraints** 中。
-5. 生成 `mission.yaml` 草案并执行 Schema 验证。
+4. 如果 `package.json` 包含 `scripts.test`，则为生成的测试 criterion scaffold 一个 `evals[]` automated `npm_test` 条目，并添加对应的 `done_when_refs[]` `eval-ref` 绑定。
+5. 如果用户提供了约束条件，将其包含在 **constraints** 中。
+6. 生成 `mission.yaml` 草案并执行 Schema 验证。
 
 ## mission.yaml Schema（必填字段）
 

@@ -41,6 +41,40 @@ describe("generateMissionDraft", () => {
     });
     expect(result.yaml).toContain("goal:");
     expect(result.context.hasPackageJson).toBe(true);
+    expect(result.context.hasNpmTestScript).toBe(false);
+  });
+
+  it("scaffolds an automated npm_test eval-ref when package.json has a test script", () => {
+    writeFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify({
+        name: "my-app",
+        scripts: { test: "vitest run" },
+      }),
+    );
+    const result = generateMissionDraft({
+      goal: "verify that the payment flow works end to end",
+      projectDir: tempDir,
+    });
+    expect(result.valid).toBe(true);
+    expect(result.context.hasNpmTestScript).toBe(true);
+    expect(result.parsed.mission.evals).toEqual([
+      {
+        name: "npm_test",
+        type: "automated",
+        command: "npm test",
+        pass_criteria: "npm test exits with status 0",
+      },
+    ]);
+    expect(result.parsed.mission.done_when_refs).toEqual([
+      {
+        index: result.parsed.mission.done_when.findIndex(
+          (criterion) => criterion === "All unit tests passing",
+        ),
+        kind: "eval-ref",
+        value: "npm_test",
+      },
+    ]);
   });
 
   it("includes project context from README if available", () => {

@@ -405,6 +405,8 @@ git add .mission/snapshots/
 
 `mission.yaml`은 optional `done_when_refs` sibling 필드를 지원합니다. 각 prose `done_when` 조건을 explicit validator에 바인딩할 수 있습니다. 4가지 `kind` 지원: `command` (POSIX shell, exit 0), `file-exists` (파일 경로), `file-contains` (`path::substring` 형식), `eval-ref` (`mission.evals[].name`으로 위임). 각 ref는 `index`로 대상 `done_when` 엔트리에 연결됩니다.
 
+지속 가능한 패턴은 `eval-ref`입니다. `done_when` 문구는 사람이 읽기 좋게 유지하고, 실제 검증은 `evals[]`에 둡니다. `evals[].type`은 `automated`(command 실행), `manual`(외부 verdict 파일이 있는 사람 gate), `llm-eval`, `llm-judge`(`.mission/evals/` 아래 외부 verdict 파일)를 지원합니다. 현재 runtime scoring은 네 타입 모두를 처리합니다.
+
 ```yaml
 mission:
   done_when:
@@ -419,7 +421,7 @@ mission:
       value: "README.md::## Installation"
 ```
 
-바인딩된 index는 해당 validator를 직접 실행(`resolved_by: "ref"`)하고, 바인딩 없는 index는 v1.20.0 inference chain으로 fallback 합니다. `ms-status`는 refs가 있을 때 `## refs coverage` 섹션을 추가하고 drift 판정을 `resolved_by === "manual"` 기준으로 재분류하며, `validateProject`는 3가지 invariant(index 범위, 중복, `eval-ref` orphan)를 강제합니다. 릴리스 등급: MDR-006 §MINOR.
+바인딩된 index는 해당 validator를 직접 실행(`resolved_by: "ref"`)하고, 바인딩 없는 index는 v1.20.0 inference chain으로 fallback 합니다. `ms-status`는 refs가 있을 때 `## refs coverage` 섹션을 추가하고 drift 판정을 `resolved_by === "manual"` 기준으로 재분류하며, `validateProject`는 3가지 invariant(index 범위, 중복, `eval-ref` orphan)를 강제합니다. `eval`, `status`, `report`는 `mission.yaml`에 선언된 command를 실행할 수 있으므로 신뢰한 저장소에서만 사용하고, schema-only 확인은 `mission-spec validate`를 사용하세요. 릴리스 등급: MDR-006 §MINOR.
 
 ## npm 패키지 vs 저장소 (v1.21.5+)
 

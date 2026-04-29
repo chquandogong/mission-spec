@@ -6,6 +6,31 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.22.0] - 2026-04-29
+_Clarify and harden the eval/ref contract so done_when criteria are more consistently machine-verifiable across init, eval, status, report, and documentation surfaces._
+
+### Added
+
+- .mission/snapshots/2026-04-29_v1.22.0_mission.yaml
+
+### Changed
+
+- src/core/evaluator.ts: shared command timeout/detail handling; manual eval verdict support
+- src/core/parser.ts: done_when_refs invariant validation moved into mission loading
+- src/commands/validate.ts: reuse parser-level done_when_refs invariant validation
+- src/commands/init.ts: scaffold npm_test automated eval + eval-ref when package.json has scripts.test
+- tests/commands/eval.test.ts: manual eval, command detail, and runtime invariant coverage
+- tests/commands/init.test.ts: npm_test eval-ref scaffold coverage
+- tests/commands/status.test.ts: manual eval excluded from drift
+- README.md / README.ko.md / README.zh.md: explicit eval/ref semantics and trust boundary notes
+- skills/ms-eval/*, skills/ms-status/*, skills/ms-init/*: eval/ref behavior documentation
+- docs/internal/ARCHITECTURE.md: current evaluator/ref architecture description
+- mission-history.yaml: adopter-facing distribution phase added to evolution_summary
+- .mission/evals/architecture_doc_freshness.result.yaml: refreshed verdict
+- .mission/architecture/ARCHITECTURE_COMPUTED.yaml: regenerated after source changes
+- .mission/reconstruction/REBUILD_PLAYBOOK.md, .mission/traceability/TRACE_MATRIX.yaml, .mission/evidence/VERIFICATION_LOG.yaml: test count and verification evidence updated to 378 tests
+- package.json + package-lock.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + mission.yaml: version 1.21.14 → 1.22.0
+
 ## [1.21.14] - 2026-04-24
 _사용자 요청 '깃을 확인하여, 문서를 검토하고, 일관성을 정리해줘' 수행 중 발견된 Living Asset Registry 내부 test count drift 수정. REBUILD_PLAYBOOK line 51과 TRACE_MATRIX line 72가 `tests/schema.test.ts`의 count를 '42 tests (v1.21.1 기준)'으로 claiming하지만 실제 현재는 47 tests (v1.21.2 Rev.5 Q2에서 normalizeHistoryData warnings layer 5 test 추가됨)._
 

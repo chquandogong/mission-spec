@@ -404,6 +404,8 @@ Existing v1.17.0 adopters: edit your installed `.git/hooks/pre-commit` to add th
 
 `mission.yaml` supports an optional `done_when_refs` sibling field that binds each prose `done_when` criterion to an explicit validator. Four `kind`s are supported: `command` (POSIX shell, exit 0), `file-exists` (path), `file-contains` (`path::substring` format), and `eval-ref` (delegates to a `mission.evals[].name` entry). Each ref maps via `index` to the target `done_when` entry.
 
+`eval-ref` is the recommended durable pattern: keep the `done_when` text human-readable, then put the concrete check in `evals[]`. `evals[].type` supports `automated` (run a command), `manual` (human-described gate with an external verdict file), `llm-eval`, and `llm-judge` (external verdict file under `.mission/evals/`). Current runtime scoring supports all four types.
+
 ```yaml
 mission:
   done_when:
@@ -418,7 +420,7 @@ mission:
       value: "README.md::## Installation"
 ```
 
-Bound indices run their validator directly (`resolved_by: "ref"`); unbound indices fall back to the v1.20.0 inference chain. `ms-status` surfaces a `## refs coverage` section when refs are present and reclassifies drift via `resolved_by === "manual"`, and `validateProject` enforces three invariants (index range, uniqueness, `eval-ref` orphan). Release grade: §MINOR per MDR-006.
+Bound indices run their validator directly (`resolved_by: "ref"`); unbound indices fall back to the v1.20.0 inference chain. `ms-status` surfaces a `## refs coverage` section when refs are present and reclassifies drift via `resolved_by === "manual"`, and `validateProject` enforces three invariants (index range, uniqueness, `eval-ref` orphan). Because `eval`, `status`, and `report` may execute commands declared in `mission.yaml`, use them only on trusted repositories; use `mission-spec validate` for schema-only checks. Release grade: §MINOR per MDR-006.
 
 ## npm package vs repository (v1.21.5+)
 

@@ -69,6 +69,8 @@ const SAFE_COMMAND_SUCCESS_HINT =
 const BACKTICK_COMMAND_RE = /`([^`]+)`/g;
 const PATH_TOKEN_RE =
   /(?:\.[\w-]+\/|[\w-]+\/|)(?:[\w.-]+\/)*[\w.-]+\.(?:md|ya?ml|json|toml|rs|ts|js|sh|txt|conf|sql|sqlite|db|lock)/gi;
+const COMMAND_TIMEOUT_MS = 180000;
+const COMMAND_DETAIL_LIMIT = 512;
 
 function unique(items: string[]): string[] {
   return [...new Set(items)];
@@ -122,6 +124,39 @@ function inferCommandClauses(criterion: string): string[] {
   return unique(inferred);
 }
 
+function bufferText(value: unknown): string {
+  if (Buffer.isBuffer(value)) return value.toString();
+  return typeof value === "string" ? value : "";
+}
+
+function commandErrorDetail(error: unknown): string {
+  const e = error as {
+    stderr?: unknown;
+    stdout?: unknown;
+    signal?: unknown;
+    message?: unknown;
+  };
+  const parts = [bufferText(e.stderr), bufferText(e.stdout)]
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (typeof e.signal === "string" && e.signal) {
+    parts.push(`signal: ${e.signal}`);
+  }
+  if (typeof e.message === "string" && e.message) {
+    parts.push(e.message);
+  }
+  const detail = parts.join("\n").trim();
+  return (detail || "no command output").slice(0, COMMAND_DETAIL_LIMIT);
+}
+
+function runCommand(command: string, projectDir: string): void {
+  execSync(command, {
+    cwd: projectDir,
+    timeout: COMMAND_TIMEOUT_MS,
+    stdio: "pipe",
+  });
+}
+
 function runInferredCommands(
   criterion: string,
   commands: string[],
@@ -129,7 +164,7 @@ function runInferredCommands(
 ): CriterionResult {
   try {
     for (const command of commands) {
-      execSync(command, { cwd: projectDir, stdio: "ignore" });
+      runCommand(command, projectDir);
     }
     return {
       criterion,
@@ -141,7 +176,7 @@ function runInferredCommands(
     return {
       criterion,
       passed: false,
-      reason: `Inferred command clause failed (${(error as Error).message}): ${commands.join("; ")}`,
+      reason: `Inferred command clause failed (${commandErrorDetail(error)}): ${commands.join("; ")}`,
       resolved_by: "inference",
     };
   }
@@ -156,6 +191,7 @@ function runRef(
     type: string;
     command?: string;
     pass_criteria?: string;
+    description?: string;
   }>,
 ): CriterionResult {
   switch (ref.kind) {
@@ -184,11 +220,7 @@ function runRefCommand(
   projectDir: string,
 ): CriterionResult {
   try {
-    execSync(ref.value, {
-      cwd: projectDir,
-      timeout: 180000,
-      stdio: "pipe",
-    });
+    runCommand(ref.value, projectDir);
     return {
       criterion,
       passed: true,
@@ -197,15 +229,10 @@ function runRefCommand(
       ref_kind: "command",
     };
   } catch (error) {
-    const detail = (
-      (error as { stderr?: Buffer; stdout?: Buffer }).stderr
-        ? (error as { stderr: Buffer }).stderr.toString()
-        : (error as Error).message
-    ).slice(0, 256);
     return {
       criterion,
       passed: false,
-      reason: `Ref command failed (${detail.trim()}): ${ref.value}`,
+      reason: `Ref command failed (${commandErrorDetail(error)}): ${ref.value}`,
       resolved_by: "ref",
       ref_kind: "command",
     };
@@ -279,6 +306,7 @@ function runRefEvalRef(
     type: string;
     command?: string;
     pass_criteria?: string;
+    description?: string;
   }>,
 ): CriterionResult {
   const entry = evals?.find((e) => e.name === ref.value);
@@ -291,8 +319,12 @@ function runRefEvalRef(
       ref_kind: "eval-ref",
     };
   }
-  if (entry.type === "llm-eval" || entry.type === "llm-judge") {
-    const override = loadLlmEvalOverride(projectDir, ref.value);
+  if (
+    entry.type === "manual" ||
+    entry.type === "llm-eval" ||
+    entry.type === "llm-judge"
+  ) {
+    const override = loadEvalOverride(projectDir, ref.value);
     if (override) {
       return {
         criterion,
@@ -302,17 +334,18 @@ function runRefEvalRef(
         ref_kind: "eval-ref",
       };
     }
+    const label = entry.type === "manual" ? "manual" : "LLM";
     return {
       criterion,
       passed: false,
-      reason: `Ref eval-ref ${ref.value}: awaiting LLM verdict — record in .mission/evals/${ref.value}.result.yaml`,
+      reason: `Ref eval-ref ${ref.value}: awaiting ${label} verdict — record in .mission/evals/${ref.value}.result.yaml`,
       resolved_by: "ref",
       ref_kind: "eval-ref",
     };
   }
   if (entry.type === "automated" && entry.command) {
     try {
-      execSync(entry.command, { cwd: projectDir, stdio: "ignore" });
+      runCommand(entry.command, projectDir);
       return {
         criterion,
         passed: true,
@@ -324,7 +357,7 @@ function runRefEvalRef(
       return {
         criterion,
         passed: false,
-        reason: `Ref eval-ref ${ref.value}: command failed (${(error as Error).message})`,
+        reason: `Ref eval-ref ${ref.value}: command failed (${commandErrorDetail(error)})`,
         resolved_by: "ref",
         ref_kind: "eval-ref",
       };
@@ -333,16 +366,16 @@ function runRefEvalRef(
   return {
     criterion,
     passed: false,
-    reason: `Ref eval-ref ${ref.value}: unsupported eval type '${entry.type}' (requires automated/llm-eval/llm-judge)`,
+    reason: `Ref eval-ref ${ref.value}: unsupported eval type '${entry.type}' (requires automated/manual/llm-eval/llm-judge)`,
     resolved_by: "ref",
     ref_kind: "eval-ref",
   };
 }
 
-// Load external override for LLM/subjective evaluations.
+// Load external override for manual/LLM/subjective evaluations.
 // If `.mission/evals/<name>.result.yaml` exists, use that result.
 // Format: { passed: bool, reason?: string, evaluated_by?: string, evaluated_at?: string }
-function loadLlmEvalOverride(
+function loadEvalOverride(
   projectDir: string,
   evalName: string,
 ): { passed: boolean; reason: string } | null {
@@ -389,6 +422,7 @@ export function evaluateCriterion(
     type: string;
     command?: string;
     pass_criteria?: string;
+    description?: string;
   }>,
   options: EvaluateOptions = {},
   ref?: DoneWhenRef,
@@ -414,13 +448,15 @@ export function evaluateCriterion(
 
   // 0. Check if evals array has an explicit automated command or LLM evaluation
   if (evals) {
-    const llmEval = evals.find(
+    const subjectiveEval = evals.find(
       (e) =>
         e.name === criterion &&
-        (e.type === "llm-eval" || e.type === "llm-judge"),
+        (e.type === "manual" ||
+          e.type === "llm-eval" ||
+          e.type === "llm-judge"),
     );
-    if (llmEval) {
-      const override = loadLlmEvalOverride(projectDir, criterion);
+    if (subjectiveEval) {
+      const override = loadEvalOverride(projectDir, criterion);
       if (override) {
         return {
           criterion,
@@ -429,10 +465,13 @@ export function evaluateCriterion(
           resolved_by: "inference",
         };
       }
+      const label = subjectiveEval.type === "manual" ? "manual" : "LLM";
+      const criteria =
+        subjectiveEval.pass_criteria ?? subjectiveEval.description ?? "recorded verdict";
       return {
         criterion,
         passed: false,
-        reason: `Awaiting LLM evaluation (pass_criteria: ${llmEval.pass_criteria}) — record verdict in .mission/evals/${criterion}.result.yaml`,
+        reason: `Awaiting ${label} evaluation (${criteria}) — record verdict in .mission/evals/${criterion}.result.yaml`,
         resolved_by: "inference",
       };
     }
@@ -442,7 +481,7 @@ export function evaluateCriterion(
     );
     if (matchingEval && matchingEval.command) {
       try {
-        execSync(matchingEval.command, { cwd: projectDir, stdio: "ignore" });
+        runCommand(matchingEval.command, projectDir);
         return {
           criterion,
           passed: true,
@@ -453,7 +492,7 @@ export function evaluateCriterion(
         return {
           criterion,
           passed: false,
-          reason: `Automated command failed (${(error as Error).message}): ${matchingEval.command}`,
+          reason: `Automated command failed (${commandErrorDetail(error)}): ${matchingEval.command}`,
           resolved_by: "inference",
         };
       }
@@ -510,6 +549,7 @@ export function evaluateAllCriteria(
     type: string;
     command?: string;
     pass_criteria?: string;
+    description?: string;
   }>,
   options: EvaluateOptions = {},
   refs?: DoneWhenRef[],

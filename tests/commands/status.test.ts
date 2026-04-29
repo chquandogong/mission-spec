@@ -399,12 +399,17 @@ describe("getMissionStatus", () => {
     );
   });
 
-  it("excludes llm-eval and automated evals[] matches from doneWhenDrift", () => {
+  it("excludes manual, llm-eval, and automated evals[] matches from doneWhenDrift", () => {
     writeMission(tempDir, {
       title: "Evals exclusion",
       goal: "Verify eval-backed entries are not flagged",
-      done_when: ["verdict_from_llm", "build_passes"],
+      done_when: ["human_review", "verdict_from_llm", "build_passes"],
       evals: [
+        {
+          name: "human_review",
+          type: "manual",
+          description: "maintainer signs off",
+        },
         {
           name: "verdict_from_llm",
           type: "llm-eval",

@@ -1,6 +1,6 @@
 # Mission Spec — Traceability Matrix
 # requirement(done_when) → eval → code(module) → test(file) 매핑
-# Last updated: 2026-04-22 | Version: 1.21.14
+# Last updated: 2026-04-22 | Version: 1.22.0
 
 # ── done_when 기준 추적 ──
 
@@ -82,7 +82,7 @@ requirements:
       - "src/schema/validator.ts"
       - "src/adapters/platforms.ts"
     tests:
-      - "tests/ (총 369 tests across 25 files)"
+      - "tests/ (총 378 tests across 25 files)"
 
   - criterion: "cross_platform_verifies"
     eval_type: "automated"
@@ -151,7 +151,7 @@ decision_trace:
       - "mission.yaml: constraints[0] unchanged (MDR-001 + MDR-005 consistent)"
     related_history: ["MSC-2026-04-17-009"]
 
-# ── 테스트 파일 → 모듈 매핑 (v1.21.13 기준, 25 files / 369 tests) ──
+# ── 테스트 파일 → 모듈 매핑 (v1.21.14 working tree 기준, 25 files / 378 tests) ──
 
 test_coverage:
   - test_file: "tests/schema.test.ts"
@@ -171,7 +171,7 @@ test_coverage:
       ]
 
   - test_file: "tests/commands/init.test.ts"
-    cases: 15
+    cases: 16
     covers: [init]
     categories:
       [
@@ -179,15 +179,18 @@ test_coverage:
         "context detection",
         "constraint handling",
         "English verb heuristic (v1.12)",
+        "npm test eval-ref scaffold when package.json has scripts.test",
       ]
 
   - test_file: "tests/commands/eval.test.ts"
-    cases: 42
+    cases: 50
     covers: [eval, evaluator]
     categories:
       [
         "file-existence",
         "automated eval",
+        "automated eval stderr detail",
+        "manual eval override",
         "llm-eval override",
         "schema error",
         "marker-contract invariant (v1.16.18)",
@@ -197,6 +200,7 @@ test_coverage:
         "done_when_refs file-exists kind (v1.21.0)",
         "done_when_refs file-contains kind (v1.21.0)",
         "done_when_refs eval-ref kind (v1.21.0)",
+        "done_when_refs runtime invariant failure",
         "done_when_refs partial + override + shared-scope (v1.21.0)",
         "ref wins over shared-scope skip regression (v1.21.1 §PATCH)",
         "phrase-level allowlist parity pnpm/yarn/bun/pytest/go/cargo fmt (v1.21.2 Rev.5 Q1)",

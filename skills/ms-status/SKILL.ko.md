@@ -20,7 +20,7 @@ allowed-tools:
 
 1. `mission.yaml`을 읽고 스키마 검증합니다.
 2. 미션 메타데이터 (title, goal, constraints)를 추출합니다.
-3. done_when 각 조건을 평가하여 진행률을 계산합니다.
+3. done_when 각 조건을 평가하여 진행률을 계산합니다. `done_when_refs[]`가 있으면 바인딩된 엔트리는 `resolved_by: "ref"`와 `ref_kind`로 보고됩니다.
 4. Markdown 형식으로 요약을 출력합니다.
 
 ## 실행 방법
@@ -88,7 +88,7 @@ console.log(s.markdown);
 
 ## done_when drift 섹션 (v1.16.18+)
 
-현재 evaluator가 auto-evaluate할 수 없는 `done_when` 엔트리(`TEST_PATTERN`에 걸리지만 대응 `evals[]`가 없는 경로 + 최종 fallback 경로, 둘 다 reason에 "manual verification required"를 포함)가 하나라도 있으면 `## done_when drift` 섹션이 추가되어 해당 엔트리를 나열합니다.
+현재 evaluator가 auto-evaluate할 수 없는 `done_when` 엔트리(`resolved_by === "manual"`)가 하나라도 있으면 `## done_when drift` 섹션이 추가되어 해당 엔트리를 나열합니다.
 
 **Layout — drift 1–3개 (inline colon):**
 
@@ -120,9 +120,21 @@ Sample:
 Fix: add a matching entry to `evals[]`, or rewrite as a file-existence pattern (`X 존재` / `X exists`).
 ```
 
-배경: 2026-04-21 qmonster 2차 감사에서 반복 확인된 패턴 — adopter가 `done_when`을 산문체("Phase 3B: advisory rules carry suggested_command...")로 작성하면 evaluator heuristic이 매칭하지 못해 `ms-eval`이 0/N을 보고하고, verification contract는 형식적으로만 존재하게 됩니다. `ms-status` 출력에서 즉시 surface하면 adopter는 `evals[]`를 추가하거나 파일 존재 패턴으로 재작성하는 두 선택을 바로 인지합니다.
+배경: 2026-04-21 qmonster 2차 감사에서 반복 확인된 패턴 — adopter가 `done_when`을 산문체("Phase 3B: advisory rules carry suggested_command...")로 작성하면 evaluator heuristic이 매칭하지 못해 `ms-eval`이 0/N을 보고하고, verification contract는 형식적으로만 존재하게 됩니다. `ms-status` 출력에서 즉시 surface하면 adopter는 `done_when_refs[]` / `evals[]`를 추가하거나 파일 존재 패턴으로 재작성하는 선택을 바로 인지합니다.
 
 80자를 초과하는 Sample 엔트리는 가독성을 위해 77자 + `…`로 잘라 표시합니다. 원문 전체는 반환값 `doneWhenDrift: string[]` 필드로 제공됩니다.
+
+## refs coverage 섹션 (v1.21.0+)
+
+하나 이상의 criterion이 `done_when_refs[]`로 resolve되면 `ms-status`는 `## refs coverage` 섹션을 추가합니다. 몇 개의 `done_when`이 명시적으로 바인딩되었는지, `ref_kind`별 개수가 얼마인지, 아직 inference fallback에 의존하는 index가 무엇인지 보여줍니다.
+
+```markdown
+## refs coverage
+
+done_when 3/5 bound via done_when_refs (eval-ref 2, file-contains 1). 2개는 inference fallback 중: [index 3], [index 4]
+```
+
+이 섹션은 계약 품질 신호입니다. 보통 `eval-ref` 바인딩이 가장 유지보수하기 좋습니다. `done_when`은 사람이 읽기 좋은 문장으로 유지하고, 구체 검증은 `evals[]`에 둘 수 있기 때문입니다.
 
 ## meta staleness 섹션 (v1.16.19+)
 

@@ -405,6 +405,8 @@ git add .mission/snapshots/
 
 `mission.yaml` 支持可选的 `done_when_refs` 同级字段，将每条 prose `done_when` 条件绑定到显式校验器。支持四种 `kind`：`command`（POSIX shell，退出码 0）、`file-exists`（文件路径）、`file-contains`（`path::substring` 格式）、`eval-ref`（委托到 `mission.evals[].name`）。每条 ref 通过 `index` 映射到目标 `done_when` 条目。
 
+推荐的长期模式是 `eval-ref`：让 `done_when` 文本保持人类可读，把具体检查放入 `evals[]`。`evals[].type` 支持 `automated`（运行命令）、`manual`（带外部 verdict 文件的人工 gate）、`llm-eval` 与 `llm-judge`（`.mission/evals/` 下的外部 verdict 文件）。当前 runtime scoring 支持全部四种类型。
+
 ```yaml
 mission:
   done_when:
@@ -419,7 +421,7 @@ mission:
       value: "README.md::## Installation"
 ```
 
-绑定的 index 会直接运行对应校验器（`resolved_by: "ref"`）；未绑定的 index 回退到 v1.20.0 推理链。存在 refs 时 `ms-status` 会追加 `## refs coverage` 段落，并以 `resolved_by === "manual"` 作为 drift 判定标准；`validateProject` 强制三项不变式（index 范围、唯一性、`eval-ref` 孤立）。发布等级：MDR-006 §MINOR。
+绑定的 index 会直接运行对应校验器（`resolved_by: "ref"`）；未绑定的 index 回退到 v1.20.0 推理链。存在 refs 时 `ms-status` 会追加 `## refs coverage` 段落，并以 `resolved_by === "manual"` 作为 drift 判定标准；`validateProject` 强制三项不变式（index 范围、唯一性、`eval-ref` 孤立）。`eval`、`status`、`report` 可能执行 `mission.yaml` 中声明的 command，因此只应在受信任仓库中使用；schema-only 检查请使用 `mission-spec validate`。发布等级：MDR-006 §MINOR。
 
 ## npm 包 vs 仓库（v1.21.5+）
 
