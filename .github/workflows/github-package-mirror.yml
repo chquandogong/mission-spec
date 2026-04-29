@@ -61,7 +61,7 @@ jobs:
           package_dir="$workdir/unpacked/package"
 
           node --input-type=module - "$package_dir" <<'NODE'
-          import { readFileSync, writeFileSync } from "node:fs";
+          import { readFileSync, rmSync, writeFileSync } from "node:fs";
           import { join } from "node:path";
 
           const packageDir = process.argv[2];
@@ -81,8 +81,25 @@ jobs:
           pkg.publishConfig = {
             registry: "https://npm.pkg.github.com",
           };
+          pkg.files = (pkg.files ?? []).filter(
+            (file) => !["README.ko.md", "README.zh.md"].includes(file),
+          );
 
           writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");
+
+          const readmePath = join(packageDir, "README.md");
+          const readme = readFileSync(readmePath, "utf8")
+            .replaceAll('href="README.ko.md"', 'href="https://github.com/chquandogong/mission-spec/blob/main/README.ko.md"')
+            .replaceAll('href="README.zh.md"', 'href="https://github.com/chquandogong/mission-spec/blob/main/README.zh.md"')
+            .replaceAll("[Documentation index](DOCUMENTATION.md)", "[Documentation index](https://github.com/chquandogong/mission-spec/blob/main/DOCUMENTATION.md)");
+          writeFileSync(readmePath, readme);
+
+          // GitHub Packages has picked localized README files as the package
+          // default in practice. Keep the mirror package single-README so the
+          // package page always renders the English README.md.
+          for (const localizedReadme of ["README.ko.md", "README.zh.md"]) {
+            rmSync(join(packageDir, localizedReadme), { force: true });
+          }
           NODE
 
           echo "package_dir=$package_dir" >> "$GITHUB_OUTPUT"

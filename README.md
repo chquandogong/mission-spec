@@ -1,5 +1,5 @@
 <p align="center">
-  English | <a href="README.ko.md">한국어</a> | <a href="README.zh.md">中文</a>
+  English | <a href="https://github.com/chquandogong/mission-spec/blob/main/README.ko.md">한국어</a> | <a href="https://github.com/chquandogong/mission-spec/blob/main/README.zh.md">中文</a>
 </p>
 
 <p align="center">

@@ -1,9 +1,44 @@
 # Mission Spec — Verification Evidence Ledger
 # 검증 시점, 환경, 결과를 기록하여 "그때 실제로 통과했다"는 증거를 보존합니다.
 # CI/CD 연동 시 자동 갱신 가능. 수동 기록도 허용.
-# Last updated: 2026-04-29 | Version: 1.22.1
+# Last updated: 2026-04-29 | Version: 1.22.2
 
 entries:
+  - version: "1.22.2"
+    date: "2026-04-29"
+    verified_by: "Codex"
+    environment:
+      node: "20+"
+      os: "Linux"
+      runtime: "ESM"
+    results:
+      npm_test:
+        passed: 378
+        failed: 0
+        files: 25
+      validate_schema: "mission-spec validate → schema valid (mission.yaml + mission-history.yaml)"
+      registry_check: "modules 21, public API 25 + 3 types, skills 6, platforms 6, test files 25, tests 378"
+      evaluate_mission:
+        criteria_passed: 11
+        criteria_total: 11
+        status: "mission complete"
+        resolved_by:
+          ref: 11
+          inference: 0
+          manual: 0
+        ref_kind:
+          eval-ref: 11
+          file-exists: 0
+    notes: |
+      GitHub Packages mirror README default fix:
+      locale switch links now use absolute GitHub repository URLs, and the
+      GitHub Packages mirror payload strips localized README files so package
+      page rendering defaults to English README.md.
+
+      Runtime/API/schema behavior unchanged. README verifier, schema validation,
+      metadata check, plugin verify, registry check, live evaluator, full tests,
+      npm dry-run, npm publish, and GitHub Packages mirror publish all passed.
+
   - version: "1.22.1"
     date: "2026-04-29"
     verified_by: "Codex"

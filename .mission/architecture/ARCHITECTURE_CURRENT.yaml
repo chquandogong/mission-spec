@@ -3,7 +3,7 @@
 # mission-history.yaml의 architecture_delta와 연동: delta는 변경 추적, 이 파일은 현재 상태.
 # 자동 검증: `npm run arch:verify` 로 src/ 와 이 파일의 모듈 목록 + depends_on 동기 확인.
 # 파생 파일: .mission/architecture/ARCHITECTURE_COMPUTED.yaml (src/ 에서 자동 추출).
-# Last updated: 2026-04-29 | Version: 1.22.1
+# Last updated: 2026-04-29 | Version: 1.22.2
 
 system:
   name: "mission-spec"

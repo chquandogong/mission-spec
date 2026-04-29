@@ -4,15 +4,74 @@
 
 meta:
   mission_id: "mission-spec"
-  mission_title: "Mission Spec v1.22.1 — GitHub presentation and docs polish (§PATCH)"
+  mission_title: "Mission Spec v1.22.2 — GitHub Packages README default fix (§PATCH)"
   tracking_since: "2026-04-02"
   tracking_mode: "semantic-version + commit-backed"
-  total_revisions: 64
-  latest_version: "1.22.1"
+  total_revisions: 65
+  latest_version: "1.22.2"
 
 # ─── 변경 이력 (최신 → 과거 순) ───
 
 timeline:
+  - change_id: "MSC-2026-04-29-003"
+    semantic_version: "1.22.2"
+    change_sequence: 69
+    date: "2026-04-29"
+    author: "Codex"
+    contributors: ["Codex"]
+    change_type: "fix"
+    motivation_type: "adoption"
+    persistence: "permanent"
+    intent: "Make the GitHub Packages mirror render the English README by default and prevent locale switch links from resolving to package-page 404s."
+    decision: |
+      Fixed the GitHub Packages mirror packaging path instead of changing the
+      primary npm package shape:
+
+      - README locale switch links now use absolute GitHub repository URLs, so
+        they work from GitHub, npmjs.com, and GitHub Packages renderers.
+      - The GitHub Packages mirror workflow rewrites the scoped mirror package
+        README links to absolute GitHub URLs and removes localized README files
+        from the mirror package payload. This forces the package page to render
+        English README.md as the default instead of selecting README.zh.md.
+      - The primary npm package continues to ship the trilingual README files.
+
+      SemVer: MDR-006 §PATCH because this changes packaging/docs behavior only;
+      runtime, public API, schema, and CLI behavior are unchanged.
+    triggered_by: "User reported that the GitHub package page showed the Chinese README by default and English/Korean README links returned 404."
+    issue_or_context: |
+      Repository README URLs were healthy (README.md / README.ko.md / README.zh.md
+      all returned 200), so the failure was isolated to package-page rendering:
+      relative README links were being resolved against the GitHub Packages URL,
+      and multiple README locales in the mirror payload allowed the package
+      renderer to select a non-English default.
+    changes:
+      added:
+        - ".mission/snapshots/2026-04-29_v1.22.2_mission.yaml"
+      modified:
+        - "README.md / README.ko.md / README.zh.md: locale switch links changed from relative files to absolute GitHub repository URLs"
+        - ".github/workflows/github-package-mirror.yml: scoped mirror now publishes only English README.md and strips localized README files from the mirror payload"
+        - "package.json + package-lock.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + mission.yaml: version 1.22.1 → 1.22.2"
+        - "mission-history.yaml: v1.22.1 related commit backfilled and v1.22.2 entry added"
+      removed: []
+    done_when_delta:
+      added: []
+      modified: []
+      removed: []
+    impact_scope:
+      schema: false
+      skills: false
+      api: false
+      tests: false
+      docs: true
+      runtime: false
+    breaking: false
+    risk: "low — docs/package-mirror only. Local README verifier, schema validation, metadata check, plugin verify, registry checks, tests, and package dry-run remain green."
+    related_commits: ["a077f6f"]
+    related_decisions: ["MDR-006", "MDR-007"]
+    snapshot_after: ".mission/snapshots/2026-04-29_v1.22.2_mission.yaml"
+    follow_up:
+      - "If GitHub exposes a package README selection API in the future, replace payload pruning with explicit package-page README selection."
+
   - change_id: "MSC-2026-04-29-002"
     semantic_version: "1.22.1"
     change_sequence: 68
@@ -75,7 +134,7 @@ timeline:
       runtime: false
     breaking: false
     risk: "low — docs/config only. README install/usage verifier, schema validation, registry checks, architecture checks, plugin verification, full tests, and self-eval remain green."
-    related_commits: []
+    related_commits: ["aa8df73"]
     related_decisions: ["MDR-006", "MDR-007"]
     snapshot_after: ".mission/snapshots/2026-04-29_v1.22.1_mission.yaml"
     follow_up:

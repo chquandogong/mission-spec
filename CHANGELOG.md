@@ -6,6 +6,20 @@ Run `npm run changelog` to regenerate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.22.2] - 2026-04-29
+_Make the GitHub Packages mirror render the English README by default and prevent locale switch links from resolving to package-page 404s._
+
+### Added
+
+- .mission/snapshots/2026-04-29_v1.22.2_mission.yaml
+
+### Changed
+
+- README.md / README.ko.md / README.zh.md: locale switch links changed from relative files to absolute GitHub repository URLs
+- .github/workflows/github-package-mirror.yml: scoped mirror now publishes only English README.md and strips localized README files from the mirror payload
+- package.json + package-lock.json + .claude-plugin/plugin.json + .claude-plugin/marketplace.json + mission.yaml: version 1.22.1 → 1.22.2
+- mission-history.yaml: v1.22.1 related commit backfilled and v1.22.2 entry added
+
 ## [1.22.1] - 2026-04-29
 _Improve first-impression GitHub presentation and documentation navigation without changing runtime behavior._
 
